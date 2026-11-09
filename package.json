@@ -4,6 +4,14 @@
   "description": "A knowledge-graph engine for showroom sites: related items with reasons, what-next predictions from a visitor's trail, and typo-tolerant matching. Portfolios first.",
   "license": "MIT",
   "author": "Tharindu Athapaththu",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tharindu127/pubba.git"
+  },
+  "homepage": "https://github.com/Tharindu127/pubba#readme",
+  "bugs": {
+    "url": "https://github.com/Tharindu127/pubba/issues"
+  },
   "type": "module",
   "sideEffects": false,
   "engines": {
@@ -33,6 +41,7 @@
   },
   "files": [
     "dist",
+    "src",
     "README.md",
     "LICENSE"
   ],
