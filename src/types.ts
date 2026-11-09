@@ -91,6 +91,8 @@ export interface KindConfig {
 export interface SharedRule {
   type: "shared";
   id?: string;
+  /** In `extraRules`: run before the rule with this id (a rule's id defaults to its kind), so it wins the pair. */
+  before?: string;
   kind: string;
   /** The entity type compared, pairwise. */
   among: string;
@@ -108,6 +110,8 @@ export interface SharedRule {
 export interface CoOccurRule {
   type: "co-occur";
   id?: string;
+  /** In `extraRules`: run before the rule with this id (a rule's id defaults to its kind), so it wins the pair. */
+  before?: string;
   kind: string;
   /** The entity type of the targets that get linked. */
   among: string;
@@ -124,15 +128,21 @@ export interface CoOccurRule {
 export interface LabelPrefixRule {
   type: "label-prefix";
   id?: string;
+  /** In `extraRules`: run before the rule with this id (a rule's id defaults to its kind), so it wins the pair. */
+  before?: string;
   kind: string;
   among: string;
   weight?: number;
+  /** Also link labels equal once their (parenthesised) parts are dropped: "Student rePo (Android)" and "Student rePo (Web)". */
+  stems?: boolean;
 }
 
 /** An entity's text names another entity. */
 export interface NamedInRule {
   type: "named-in";
   id?: string;
+  /** In `extraRules`: run before the rule with this id (a rule's id defaults to its kind), so it wins the pair. */
+  before?: string;
   kind: string;
   /** Types whose names are looked for. */
   named: string[];
@@ -158,6 +168,8 @@ export interface Topic {
 export interface TopicsRule {
   type: "topics";
   id?: string;
+  /** In `extraRules`: run before the rule with this id (a rule's id defaults to its kind), so it wins the pair. */
+  before?: string;
   kind: string;
   topics: Topic[];
   /** The type of the topic entities created. Default `topic`. */
@@ -188,6 +200,12 @@ export interface MatchConfig {
   ignore?: string[];
   /** A query asking for things like the one named. Regular expression source, tested on the normalised query. */
   similarPattern?: string;
+  /** Words shorter than this must be spelled right ("hire" is not "Hive"). Default 4, as the portfolio site; 5 is stricter. */
+  typoMinLength?: number;
+  /** A word of 5+ letters found in only one name is enough on its own ("ragnarok"). Default false. */
+  distinctWords?: boolean;
+  /** A name of 3+ significant words matches with all but one of them ("red dead"). Default false. */
+  partialWords?: boolean;
 }
 
 /** One case of a template, chosen when everything it names fits. */
@@ -221,6 +239,8 @@ export interface PubbaConfig {
   types?: Record<string, TypeConfig>;
   kinds?: Record<string, KindConfig>;
   rules?: Rule[];
+  /** Rules applied after `rules`. Unlike `rules`, these add up when configs are merged, so a site can extend a preset. */
+  extraRules?: Rule[];
   next?: NextConfig;
   match?: MatchConfig;
   /** Keyed by reason kind: a link kind, `section`, `typed` or `match`. */
@@ -240,7 +260,7 @@ export interface Reason {
   /** The trail step this came from, when it took two steps to get here. */
   seed?: string;
   /** For `typed` and `match`: how the text matched. */
-  by?: "name" | "alias" | "words" | "first-word" | "phrase" | "prefix" | "word-prefix" | "contains";
+  by?: "name" | "alias" | "words" | "first-word" | "distinct-word" | "phrase" | "prefix" | "word-prefix" | "contains";
   /** For `match`: the name or alias that matched. */
   name?: string;
 }

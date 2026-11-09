@@ -22,7 +22,9 @@ A query passes when it resolves to `expect` (or to nothing for `null`) and, when
 ```
 
 A trail scores the share of `expect` found in the top `top` (default 3)
-suggestions. Suggestion score = the average.
+suggestions. Use `expectAny` when any one of several items is a fair next step
+(a role → any of its projects); the group counts as one part. Suggestion score =
+the average.
 
 `eval/baseline.json`: `{ "matching": 0.95, "suggestions": 0.9 }`. `eval` exits 1
 when a score falls below it.
@@ -38,6 +40,9 @@ when a score falls below it.
 | "anything like X" reads as plain `entity` | `related` with the type's `similar` kinds | No links of those kinds: lower the `shared` rule's `min`, or add the kinds to `similar` |
 | Trail misses an obvious next item | `pubba.sh related pubba.json <id>` then `next` | Missing link (add content or a rule); kind `pull` too low; a common tool's `weight` too high, so it floods; a hub type should be `destination: false` |
 | Trail is all one type | `next` | The mixer caps one type at `limit - 1`; if it's still flooded, lower that kind's `pull` |
+| A distinctive later word finds nothing ("ragnarok", "red dead") | `match` | Turn on `match.distinctWords` and `match.partialWords`, or add an alias |
+| A short word near-misses a short name ("hire" → Hive) | `match` shows `by: phrase` on a 4-letter name | `match.typoMinLength: 5` |
+| Two editions of one thing don't lead to each other | `related` shows a weak `mentions` link or none | `extraRules: [{ "type": "label-prefix", "kind": "same-series", "among": "project", "stems": true, "before": "mentions" }]` |
 | Sentence reads badly | `related` | Override the template for that kind, or `<kind>.<type>` |
 
 Change one thing at a time and rerun; a fix for one query can break another.

@@ -22,8 +22,10 @@ export interface QueryCase {
 export interface TrailCase {
   name?: string;
   trail: string[];
-  /** Ids expected among the top suggestions. */
-  expect: string[];
+  /** Ids expected among the top suggestions, all of them. */
+  expect?: string[];
+  /** Ids of which any one among the top suggestions is enough. */
+  expectAny?: string[];
   /** How many suggestions count. Default 3. */
   top?: number;
 }
@@ -75,8 +77,15 @@ export function evaluateQueries(pubba: Pubba, cases: QueryCase[]): EvalReport["m
 export function evaluateTrails(pubba: Pubba, cases: TrailCase[]): EvalReport["suggestions"] {
   const outcomes: TrailOutcome[] = cases.map((c) => {
     const got = pubba.next(c.trail, { limit: c.top ?? 3 }).map((s) => s.entity.id);
-    const found = c.expect.filter((id) => got.includes(id));
-    return { case: c, got, found, missing: c.expect.filter((id) => !got.includes(id)), score: c.expect.length ? found.length / c.expect.length : 1 };
+    const all = c.expect ?? [];
+    const any = c.expectAny ?? [];
+    const found = [...all, ...any].filter((id) => got.includes(id));
+    const anyHit = !any.length || any.some((id) => got.includes(id));
+    // Each "all" id is one part; the "any" group is one more.
+    const parts = all.length + (any.length ? 1 : 0);
+    const hits = all.filter((id) => got.includes(id)).length + (any.length && anyHit ? 1 : 0);
+    const missing = [...all.filter((id) => !got.includes(id)), ...(anyHit ? [] : [`any of ${any.join(" | ")}`])];
+    return { case: c, got, found, missing, score: parts ? hits / parts : 1 };
   });
   const passed = outcomes.filter((o) => o.missing.length === 0).length;
   return {

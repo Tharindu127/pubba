@@ -51,8 +51,9 @@ Entities with no links are dropped.
     "built-with": { "label": "built with", "pull": 0.9, "weight": 0.7, "weightFrom": "to" }
   },
   "rules": [ /* see below, applied in order */ ],
+  "extraRules": [ /* added after the preset's rules; "before": "<rule id>" runs one earlier */ ],
   "next": { "recency": 0.6, "secondStep": 0.4, "hubDamping": 3, "sectionBoost": 0.08, "sections": { "projects": "project" } },
-  "match": { "stopWords": ["the", "app"], "ignore": ["Nimali"], "similarPattern": "\\b(like|similar)\\b" },
+  "match": { "stopWords": ["the", "app"], "ignore": ["Nimali"], "similarPattern": "\\b(like|similar)\\b", "typoMinLength": 5, "distinctWords": true, "partialWords": true },
   "templates": { "built-with": { "out": "{item} is built with {other}.", "in": "{item} is part of {other}'s stack." } }
 }
 ```
@@ -70,15 +71,28 @@ tier the highest score wins.
 - Typos: plurals, prefixes and one edit (two for words of 7+ letters) count.
   Words under 4 letters and names with symbols (`c#`, `next.js`) must be exact.
 
+Three options, off by default (the defaults match the portfolio site), and
+recommended for new sites:
+
+| `match` option | Effect | Fixes |
+| --- | --- | --- |
+| `typoMinLength: 5` | Words under 5 letters must be spelled right | "hire" matching the skill Hive |
+| `distinctWords: true` | A 5+ letter word found in only one name is enough (score 25) | "ragnarok", "music channel" |
+| `partialWords: true` | A name of 3+ significant words matches with all but one (40 + hits) | "red dead" |
+
 ### Rules
 
 | `type` | Fields | Makes |
 | --- | --- | --- |
 | `shared` | `kind, among, through[], minWeight?, min? (2), base? (0.5)` | Links two `among` items that share `min`+ targets through `through` kinds. Weight `base + (1-base)·shared/union`; `via` = shared labels |
 | `co-occur` | `kind, among, through[], minWeight?, min? (2), saturate? (4)` | Links two targets used together by `min`+ items. Weight `min(n/saturate, 1)`; `via` = the items |
-| `label-prefix` | `kind, among, weight?` | "Dune" → "Dune Messiah" |
+| `label-prefix` | `kind, among, weight?, stems?` | "Dune" → "Dune Messiah"; with `stems`, also labels equal without their (parentheses): "Student rePo (Android)" ↔ "(Web)" |
 | `named-in` | `kind, named[], in?[], direction?, weight?, weightFrom?, minNameLength?` | An entity's `text` names another (`mentionAs` or label), as a whole word |
 | `topics` | `kind, topics[{key,label,pattern}], topicType? ("topic"), in?[], weight?` | `topic:<key>` entities from regex matches on `text` |
+
+Every rule takes an `id` (default: its kind). A rule in `extraRules` can take
+`"before": "<id>"` to run before that rule: a pair keeps its first link, so this
+is how a site's rule wins over a preset's weaker one.
 
 ### Templates
 
@@ -112,7 +126,7 @@ first-word, phrase; `name`: what matched).
 {
   "person": { "name": "", "short": "", "url": "", "jobTitle": "", "email": "", "sameAs": [], "description": "" },
   "roles": [{ "title": "Software Engineer II — Mobile", "company": "", "location": "", "start": "", "end": "Present", "points": [""], "aliases": [] }],
-  "projects": [{ "slug": "", "title": "", "subtitle": "", "description": "", "fullDescription": "", "category": "Mobile, Web", "tags": ["founded"], "technologies": [""], "url": "", "image": "", "date": "", "aliases": [] }],
+  "projects": [{ "slug": "", "title": "", "subtitle": "", "description": "", "fullDescription": "", "category": "Mobile, Web", "tags": ["founded"], "technologies": [""], "url": "", "image": "", "date": "", "aliases": [], "markets": ["KW"] }],
   "skills": [{ "name": "", "category": "Languages | Frameworks | Platforms | Design | Tools", "aliases": [] }],
   "markets": [{ "code": "LK", "name": "Sri Lanka", "aliases": [] }],
   "games": [{ "id": "", "title": "", "platform": "PS5", "genre": "", "note": "", "aliases": [] }],
@@ -121,7 +135,8 @@ first-word, phrase; `name`: what matched).
 }
 ```
 
-A project ships in a market when its category, subtitle or descriptions name
-the market or an alias. A project is `made-at` a role when the role's title or
+A project ships in a market when its `markets` lists the code, or its category,
+subtitle or descriptions name the market or an alias (add demonyms like
+"Algerian" as aliases: names match as whole words). A project is `made-at` a role when the role's title or
 points name the project's first distinctive word ("Kiri" for "Kiri Wallet").
 Roles get their company and short title as aliases.

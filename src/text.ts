@@ -34,24 +34,29 @@ export function editDistance(a: string, b: string): number {
 }
 
 /** Does a typed word mean this word? Exact, plural, prefix, or a near miss. */
-export function closeTo(token: string | undefined, word: string): boolean {
+export function closeTo(token: string | undefined, word: string, typoMinLength = 4): boolean {
   if (!token) return false;
   if (token === word || token === `${word}s`) return true;
   // Short words and names with symbols (go, js, c#, next.js) must match exactly.
   if (word.length < 4 || /[^a-z]/.test(word)) return false;
   if (token.startsWith(word)) return true;
-  if (token.length < 3) return false;
+  if (token.length < 3 || word.length < typoMinLength) return false;
   const max = word.length >= 7 ? 2 : 1;
   return editDistance(token, word) <= max || (token.length > word.length && editDistance(token.slice(0, word.length), word) <= max);
 }
 
 /** Does a normalised query contain any of these phrases, word by word, typos allowed? */
 export function hasPhrase(query: string, ...phrases: string[]): boolean {
+  return hasPhraseWith(query, phrases, 4);
+}
+
+/** `hasPhrase` with the shortest word that may carry a typo. */
+export function hasPhraseWith(query: string, phrases: string[], typoMinLength: number): boolean {
   const tokens = query.split(" ");
   return phrases.some((phrase) => {
     const words = phrase.split(" ");
     for (let i = 0; i + words.length <= tokens.length; i++) {
-      if (words.every((w, j) => closeTo(tokens[i + j], w))) return true;
+      if (words.every((w, j) => closeTo(tokens[i + j], w, typoMinLength))) return true;
     }
     return false;
   });

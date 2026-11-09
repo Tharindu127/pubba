@@ -210,7 +210,15 @@ Matching     100.0%  (38/38 queries)
 Suggestions  100.0%  (12/12 trails fully right, 100.0% with at least one)
 ```
 
-It earns its keep: on the first run the example scored 97.4%, because "field
+**On real data.** Run against the live content of the portfolio it was extracted
+from (160 entities, 327 links; 49 queries and 16 trails written from the content),
+the preset alone scored 87.8% matching and 93.8% suggestions. The failures
+pointed at three opt-in matching options (`typoMinLength`, `distinctWords`,
+`partialWords`) and an `editions` rule for "Student rePo (Android)" ↔ "(Web)";
+with them on, it scores 98.0% and 100%. The options are off by default so the
+preset behaves exactly like the site; turn them on for new sites.
+
+On the fictional example, the first run scored 97.4%, because "field
 notes" (the start of an article's title) matched Node.js, whose alias "node" is
 a near miss of "notes". An alias on the article fixed it, and the test suite
 keeps a case proving the harness catches it.
@@ -260,6 +268,8 @@ Copy or link the folder into `~/.claude/skills/pubba` (or a project's
   in its config.
 - Matching names use whole words (`"oman"` no longer matches inside `"woman"`);
   the site's matcher used substrings.
+- Known limit: a query naming something not in the graph that contains a name
+  that is ("react native" when only React is listed) resolves to that name.
 
 ## Roadmap
 

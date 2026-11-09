@@ -92,16 +92,21 @@ function applyCoOccur(b: Builder, r: CoOccurRule) {
   }
 }
 
+const stem = (label: string) => lowerKey(label.replace(/\([^)]*\)/g, " ").replace(/\s+/g, " "));
+
 function applyLabelPrefix(b: Builder, r: LabelPrefixRule) {
   const items = b.ofType(r.among);
-  for (const a of items) {
+  items.forEach((a, i) => {
     for (const o of items) {
       const ka = lowerKey(a.label);
       const ko = lowerKey(o.label);
       if (o.id !== a.id && ko.length > ka.length && ko.startsWith(`${ka} `)) b.link({ from: a.id, kind: r.kind, to: o.id, weight: r.weight ?? 1, rule: r.id ?? r.kind });
     }
-  }
+    if (!r.stems || !a.label.includes("(")) return;
+    for (const o of items.slice(i + 1)) if (stem(o.label) === stem(a.label)) b.link({ from: a.id, kind: r.kind, to: o.id, weight: r.weight ?? 1, rule: r.id ?? r.kind });
+  });
 }
+
 
 function applyNamedIn(b: Builder, r: NamedInRule) {
   const minLen = (type: string) => (typeof r.minNameLength === "number" ? r.minNameLength : (r.minNameLength?.[type] ?? 0));
@@ -152,6 +157,17 @@ function applyRule(b: Builder, r: Rule) {
   }
 }
 
+/** `rules`, then `extraRules`, each extra placed before the rule it names. */
+export function ruleOrder(config: PubbaConfig): Rule[] {
+  const out = [...(config.rules ?? [])];
+  for (const r of config.extraRules ?? []) {
+    const at = r.before ? out.findIndex((x) => (x.id ?? x.kind) === r.before) : -1;
+    if (at < 0) out.push(r);
+    else out.splice(at, 0, r);
+  }
+  return out;
+}
+
 /**
  * The graph for a dataset: its entities, its links with weights resolved,
  * then the derived links from the config's rules, in order. A pair of
@@ -162,7 +178,7 @@ export function buildGraph(data: Dataset, config: PubbaConfig = {}): Graph {
   const b = new Builder(config);
   for (const e of data.entities) b.add(e);
   for (const l of data.links ?? []) b.link(l);
-  for (const r of config.rules ?? []) applyRule(b, r);
+  for (const r of ruleOrder(config)) applyRule(b, r);
 
   const adjacent = new Map<string, GraphLink[]>();
   for (const l of b.links) {

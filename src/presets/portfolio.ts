@@ -167,6 +167,8 @@ export interface PortfolioInput {
     image?: string;
     date?: string;
     aliases?: string[];
+    /** Market codes it shipped in, on top of the ones its text names. */
+    markets?: string[];
   }[];
   skills: { name: string; category?: string; aliases?: string[] }[];
   markets?: { code: string; name: string; aliases?: string[] }[];
@@ -260,7 +262,9 @@ export function fromPortfolio(input: PortfolioInput): Dataset {
       links.push({ from: pid, kind: "built-with", to: t.id });
     }
     const haystack = `${pr.category ?? ""} ${pr.subtitle ?? ""} ${pr.description ?? ""} ${pr.fullDescription ?? ""}`;
-    for (const m of input.markets ?? []) if (marketNames(m).some((n) => mentions(haystack, n))) links.push({ from: pid, kind: "shipped-in", to: market(m) });
+    for (const m of input.markets ?? []) {
+      if ((pr.markets ?? []).includes(m.code) || marketNames(m).some((n) => mentions(haystack, n))) links.push({ from: pid, kind: "shipped-in", to: market(m) });
+    }
     for (const c of (pr.category ?? "").split(",").map((s) => s.trim()).filter(Boolean)) links.push({ from: pid, kind: "runs-on", to: area(c, c) });
     for (const t of pr.tags ?? []) links.push({ from: pid, kind: "runs-on", to: area(t) });
   }

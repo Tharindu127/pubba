@@ -1,5 +1,5 @@
 import { neighbours, isDestination } from "./graph.ts";
-import { containsName, hasPhrase, normalize } from "./text.ts";
+import { containsName, hasPhraseWith, normalize } from "./text.ts";
 import { reasonFromLink, renderReason } from "./reasons.ts";
 import type { Graph, Match, MatchResult, Reason, Related, Template, TypeMatchConfig } from "./types.ts";
 
@@ -12,19 +12,51 @@ interface Scored {
   name: string;
 }
 
+interface Settings {
+  stop: Set<string>;
+  typo: number;
+  partial: boolean;
+  /** Words that appear in only one entity's names, when distinct words count. */
+  distinct: Set<string> | null;
+}
+
+const significant = (name: string, stop: Set<string>) => name.split(" ").filter((w) => w.length > 2 && !stop.has(w));
+
 /** How well one name of an entity fits the query, by the type's match settings. */
-function scoreName(q: string, name: string, isAlias: boolean, m: TypeMatchConfig, stop: Set<string>): Scored | null {
+function scoreName(q: string, name: string, isAlias: boolean, m: TypeMatchConfig, st: Settings): Scored | null {
   if (!name || name.length < (m.minLength ?? 0)) return null;
+  const has = (w: string) => hasPhraseWith(q, [w], st.typo);
   if ((m.mode ?? "title") === "phrase") {
-    return name.length > 1 && hasPhrase(q, name) ? { score: 100 + name.length, by: isAlias ? "alias" : "phrase", name } : null;
+    return name.length > 1 && has(name) ? { score: 100 + name.length, by: isAlias ? "alias" : "phrase", name } : null;
   }
   if (containsName(q, name)) return { score: 100 + name.length, by: isAlias ? "alias" : "name", name };
-  const words = name.split(" ").filter((w) => w.length > 2 && !stop.has(w));
-  const hits = words.filter((w) => hasPhrase(q, w)).length;
+  const words = significant(name, st.stop);
+  const hits = words.filter(has).length;
   if (hits && hits === words.length && words.join("").length > (m.minWordsLength ?? 0)) return { score: 50 + hits, by: "words", name };
+  if (st.partial && words.length >= 3 && hits >= 2 && hits === words.length - 1) return { score: 40 + hits, by: "words", name };
+  const distinct = st.distinct && words.find((w) => w.length >= 5 && st.distinct!.has(w) && has(w));
+  if (distinct) return { score: 25, by: "distinct-word", name: distinct };
   const first = words[0];
-  if (m.firstWord && first && first.length > 3 && hasPhrase(q, first)) return { score: 20, by: "first-word", name: first };
+  if (m.firstWord && first && first.length > 3 && has(first)) return { score: 20, by: "first-word", name: first };
   return null;
+}
+
+const distinctCache = new WeakMap<Graph, Set<string>>();
+
+/** Significant words that occur in the names of exactly one matchable entity. */
+function distinctWords(g: Graph, stop: Set<string>): Set<string> {
+  let out = distinctCache.get(g);
+  if (out) return out;
+  const owners = new Map<string, Set<string>>();
+  for (const e of g.entities.values()) {
+    if (g.config.types?.[e.type]?.match?.skip) continue;
+    for (const raw of [e.label, ...(e.aliases ?? [])]) {
+      for (const w of significant(normalize(raw), stop)) owners.set(w, (owners.get(w) ?? new Set()).add(e.id));
+    }
+  }
+  out = new Set([...owners].filter(([, ids]) => ids.size === 1).map(([w]) => w));
+  distinctCache.set(g, out);
+  return out;
 }
 
 export interface SearchOptions {
@@ -43,6 +75,7 @@ export function search(g: Graph, query: string, { limit = 10, types, templates }
   if (!q) return [];
   const mc = g.config.match ?? {};
   const stop = new Set(mc.stopWords ?? DEFAULT_STOP_WORDS);
+  const st: Settings = { stop, typo: mc.typoMinLength ?? 4, partial: mc.partialWords ?? false, distinct: mc.distinctWords ? distinctWords(g, stop) : null };
   const ignore = (mc.ignore ?? []).map(normalize).filter(Boolean);
   const out: Match[] = [];
   for (const entity of g.entities.values()) {
@@ -54,7 +87,7 @@ export function search(g: Graph, query: string, { limit = 10, types, templates }
     for (const [raw, isAlias] of names) {
       const name = normalize(raw);
       if (ignore.some((w) => name.includes(w))) continue;
-      const s = scoreName(q, name, isAlias, m, stop);
+      const s = scoreName(q, name, isAlias, m, st);
       if (s && (!best || s.score > best.score)) best = s;
     }
     if (!best) continue;

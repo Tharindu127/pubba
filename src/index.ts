@@ -13,11 +13,12 @@ export type { MatchOptions, SearchOptions } from "./match.ts";
 export { renderReason, reasonFromLink, shortLabel, DEFAULT_TEMPLATES } from "./reasons.ts";
 export { createTrail, sectionStep } from "./trail.ts";
 export type { Trail, TrailOptions, TrailStorage } from "./trail.ts";
-export { normalize, editDistance, closeTo, hasPhrase, mentions } from "./text.ts";
+export { normalize, editDistance, closeTo, hasPhrase, hasPhraseWith, mentions } from "./text.ts";
 
 /**
  * Layers configs: types, kinds, templates and the `next` and `match` settings
- * merge key by key; `rules` from a later config replace earlier ones whole.
+ * merge key by key; `rules` from a later config replace earlier ones whole,
+ * while `extraRules` add up.
  */
 export function mergeConfig(...configs: (PubbaConfig | undefined)[]): PubbaConfig {
   const out: PubbaConfig = {};
@@ -32,6 +33,7 @@ export function mergeConfig(...configs: (PubbaConfig | undefined)[]): PubbaConfi
       for (const [k, v] of Object.entries(c.kinds)) out.kinds[k] = { ...out.kinds[k], ...v };
     }
     if (c.rules) out.rules = [...c.rules];
+    if (c.extraRules) out.extraRules = [...(out.extraRules ?? []), ...c.extraRules];
     if (c.next) out.next = { ...out.next, ...c.next, ...(c.next.sections ? { sections: { ...out.next?.sections, ...c.next.sections } } : {}) };
     if (c.match) out.match = { ...out.match, ...c.match };
     if (c.templates) out.templates = { ...out.templates, ...c.templates };
