@@ -1,0 +1,14 @@
+[
+  { "name": "after a payments app, its sibling", "trail": ["project:kiri-wallet"], "expect": ["project:kiri-merchant", "role:0"] },
+  { "name": "after a framework, the projects built with it", "trail": ["tech:React"], "expect": ["project:tidepool", "project:ferrylink"] },
+  { "name": "after two web projects, their shared stack", "trail": ["project:tidepool", "project:ferrylink"], "expect": ["tech:TypeScript", "tech:React"] },
+  { "name": "after a country, what shipped there", "trail": ["market:KE"], "expect": ["project:kiri-wallet", "project:kiri-merchant"] },
+  { "name": "after a role, what was built in it", "trail": ["role:0"], "expect": ["project:kiri-wallet", "project:kiri-merchant"] },
+  { "name": "after a game, its sequel", "trail": ["game:skyforge-saga"], "expect": ["game:skyforge-saga-2"] },
+  { "name": "after a delivery app, the same-stack dashboard", "trail": ["project:parcelo"], "expect": ["project:tidepool"] },
+  { "name": "after the synth, the music made with it", "trail": ["project:synthpad"], "expect": ["creative:night-synth"] },
+  { "name": "the games section opens on its games", "trail": ["section:games"], "expect": ["game:skyforge-saga", "game:pixel-rally"] },
+  { "name": "a planner app leads to its Apple stack", "trail": ["project:studybuddy"], "expect": ["tech:SwiftUI"] },
+  { "name": "recent steps count most", "trail": ["project:routewise", "project:kiri-wallet"], "expect": ["project:kiri-merchant"] },
+  { "name": "a skill then a country narrows to the project in both", "trail": ["tech:Flutter", "market:GH"], "expect": ["project:kiri-wallet"] }
+]

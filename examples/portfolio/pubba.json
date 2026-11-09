@@ -1,0 +1,5 @@
+{
+  "preset": "portfolio",
+  "presetOptions": { "pronoun": "she", "owner": "Nimali" },
+  "portfolio": "./portfolio.json"
+}

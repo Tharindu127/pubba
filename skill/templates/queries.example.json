@@ -1,0 +1,46 @@
+[
+  { "query": "flutr", "expect": "tech:Flutter", "tags": ["typo", "one-word"] },
+  { "query": "typscript", "expect": "tech:TypeScript", "tags": ["typo", "one-word"] },
+  { "query": "kiri walet", "expect": "project:kiri-wallet", "tags": ["typo"] },
+  { "query": "parcleo", "expect": "project:parcelo", "tags": ["typo", "one-word"] },
+  { "query": "sri lankan", "expect": "market:LK", "tags": ["typo", "place"] },
+  { "query": "apps in kenia", "expect": "market:KE", "tags": ["typo", "place"] },
+  { "query": "swfitui", "expect": "tech:SwiftUI", "tags": ["typo", "one-word"] },
+  { "query": "skyforge sagas", "expect": "game:skyforge-saga", "tags": ["typo"] },
+
+  { "query": "Flutter", "expect": "tech:Flutter", "tags": ["one-word"] },
+  { "query": "UAE", "expect": "market:AE", "tags": ["one-word", "place"] },
+  { "query": "Tidepool", "expect": "project:tidepool", "tags": ["one-word"] },
+  { "query": "Lumen", "expect": "role:0", "tags": ["one-word", "role"] },
+  { "query": "Synthpad", "expect": "project:synthpad", "tags": ["one-word"] },
+  { "query": "postgres", "expect": "tech:PostgreSQL", "tags": ["one-word"] },
+
+  { "query": "anything like Kiri Wallet?", "expect": "project:kiri-wallet", "intent": "similar", "tags": ["similar"] },
+  { "query": "projects similar to Tidepool", "expect": "project:tidepool", "intent": "similar", "tags": ["similar"] },
+  { "query": "something like Parcelo", "expect": "project:parcelo", "intent": "similar", "tags": ["similar"] },
+  { "query": "more like Skyforge Saga", "expect": "game:skyforge-saga", "intent": "similar", "tags": ["similar"] },
+
+  { "query": "what did she build in Kenya?", "expect": "market:KE", "tags": ["place"] },
+  { "query": "has she shipped anything in Singapore", "expect": "market:SG", "tags": ["place"] },
+  { "query": "work in the United Arab Emirates", "expect": "market:AE", "tags": ["place"] },
+  { "query": "projects for Ghana", "expect": "market:GH", "tags": ["place"] },
+
+  { "query": "what does she do at Lumen Labs?", "expect": "role:0", "tags": ["role"] },
+  { "query": "her time at Harbor Studio", "expect": "role:1", "tags": ["role"] },
+  { "query": "was she a research intern?", "expect": "role:2", "tags": ["role"] },
+  { "query": "senior mobile engineer", "expect": "role:0", "tags": ["role"] },
+
+  { "query": "does she know ts?", "expect": "tech:TypeScript", "tags": ["alias"] },
+  { "query": "node experience", "expect": "tech:Node.js", "tags": ["alias"] },
+  { "query": "her youtube channel", "expect": "creative:youtube", "tags": ["alias"] },
+  { "query": "field notes", "expect": "creative:offline-first", "tags": ["alias"], "note": "\"notes\" is a near miss of the alias \"node\"" },
+
+  { "query": "what's the weather in Paris", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "tell me a joke", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "best pizza near me", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "how do I reset my password", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "who won the football world cup", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "recipe for banana bread", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "what is the capital of France", "expect": null, "intent": "none", "tags": ["off-topic"] },
+  { "query": "is it going to rain tomorrow", "expect": null, "intent": "none", "tags": ["off-topic"] }
+]

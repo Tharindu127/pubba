@@ -1,0 +1,34 @@
+{
+  "preset": "none",
+  "config": {
+    "types": {
+      "product": { "label": "Product", "plural": "Products", "match": { "tier": 1, "firstWord": true }, "similar": ["goes-with"] },
+      "brand": { "label": "Brand", "plural": "Brands", "match": { "tier": 2, "minLength": 3 } },
+      "material": { "label": "Material", "plural": "Materials", "destination": false, "match": { "tier": 3, "mode": "phrase" } },
+      "topic": { "destination": false, "match": { "skip": true } }
+    },
+    "kinds": {
+      "made-by": { "label": "made by", "pull": 0.8, "weight": 1 },
+      "made-of": { "label": "made of", "pull": 0.6, "weightFrom": "to", "weight": 0.7 },
+      "goes-with": { "label": "goes with", "pull": 1 }
+    },
+    "rules": [
+      { "type": "shared", "kind": "goes-with", "among": "product", "through": ["made-of"], "minWeight": 1, "min": 2 },
+      { "type": "topics", "kind": "about", "weight": 0.7, "topics": [{ "key": "outdoor", "label": "Outdoor", "pattern": "\\b(garden|patio|outdoor)\\b" }] }
+    ],
+    "templates": {
+      "made-by": { "out": "{item} is made by {other}.", "in": "{item} makes {other}." },
+      "made-of": { "out": "{item} is made of {otherLower}.", "in": "{item} goes into {other}." },
+      "goes-with": "{item} goes with {other}[ (both {via})]."
+    }
+  },
+  "entities": [
+    { "id": "product:oak-desk", "type": "product", "label": "Oak Desk", "url": "/desk", "text": "A solid oak desk for small rooms." },
+    { "id": "brand:north", "type": "brand", "label": "North & Co" },
+    { "id": "material:oak", "type": "material", "label": "Oak", "weight": 1 }
+  ],
+  "links": [
+    { "from": "product:oak-desk", "kind": "made-by", "to": "brand:north" },
+    { "from": "product:oak-desk", "kind": "made-of", "to": "material:oak" }
+  ]
+}
