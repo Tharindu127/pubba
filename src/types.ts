@@ -278,6 +278,8 @@ export interface Reason {
 
 export interface Graph {
   entities: Map<string, Entity>;
+  /** Entities with no links: never suggested, but still found by a query ("Postman", a market nothing shipped to). */
+  unlinked: Map<string, Entity>;
   links: GraphLink[];
   /** Every link touching an entity. */
   adjacent: Map<string, GraphLink[]>;

@@ -56,7 +56,7 @@ on errors:
 | `short-name-typos` | warning | With typos on 4-letter words, everyday words reach short names |
 | `heavy-core` | warning | Most of what a `shared` rule compares counts as core, so unrelated items look alike |
 | `dead-end` | warning | Nothing is suggested after this item |
-| `dropped` | info | Entities with no links, left out of the graph |
+| `dropped` | info | Entities with no links: never suggested, though queries still find them |
 | `no-url` | info | No url where others of its type have one |
 
 ## Diagnosing failures

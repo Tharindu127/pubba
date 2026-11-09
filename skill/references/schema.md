@@ -33,7 +33,8 @@
 Weight, when missing: the kind's `weightFrom` end entity's `weight`, else the
 kind's `weight`, else 1. A pair of entities keeps only its **first** link:
 content links come first, then rules in order, so put the most specific first.
-Entities with no links are dropped.
+Entities with no links are never suggested, but queries still find them
+(`graph.unlinked`).
 
 ## Config
 

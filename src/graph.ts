@@ -172,7 +172,8 @@ export function ruleOrder(config: PubbaConfig): Rule[] {
  * The graph for a dataset: its entities, its links with weights resolved,
  * then the derived links from the config's rules, in order. A pair of
  * entities keeps only its first link, so the most specific relation wins.
- * Entities with no link at all are dropped: they have nothing to suggest.
+ * Entities with no link at all have nothing to suggest: they move to
+ * `graph.unlinked`, where matching still finds them.
  */
 export function buildGraph(data: Dataset, config: PubbaConfig = {}): Graph {
   const b = new Builder(config);
@@ -185,8 +186,13 @@ export function buildGraph(data: Dataset, config: PubbaConfig = {}): Graph {
     adjacent.set(l.from, [...(adjacent.get(l.from) ?? []), l]);
     adjacent.set(l.to, [...(adjacent.get(l.to) ?? []), l]);
   }
-  for (const id of [...b.entities.keys()]) if (!adjacent.has(id)) b.entities.delete(id);
-  return { entities: b.entities, links: b.links, adjacent, config };
+  const unlinked = new Map<string, Entity>();
+  for (const [id, e] of [...b.entities]) {
+    if (adjacent.has(id)) continue;
+    b.entities.delete(id);
+    unlinked.set(id, e);
+  }
+  return { entities: b.entities, unlinked, links: b.links, adjacent, config };
 }
 
 export const degree = (g: Graph, id: string): number => g.adjacent.get(id)?.length ?? 0;
@@ -205,3 +211,6 @@ export function neighbours(g: Graph, id: string, kinds?: string[]): { entity: En
 }
 
 export const isDestination = (g: Graph, e: Entity): boolean => g.config.types?.[e.type]?.destination ?? true;
+
+/** Every entity a query could mean: linked or not. */
+export const allEntities = (g: Graph): Entity[] => [...g.entities.values(), ...(g.unlinked?.values() ?? [])];

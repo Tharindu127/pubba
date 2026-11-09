@@ -69,7 +69,7 @@ function main(argv: string[]): number {
       for (const l of g.links) lines.push(`| ${cell(l.from)} | ${l.kind} | ${cell(l.to)} | ${l.weight.toFixed(2)} | ${cell(l.via?.join(", ") ?? "")} | ${l.rule ? `rule ${l.rule}` : "content"} |`);
       const kept = new Set(g.entities.keys());
       const dropped = documentDatasetFor(file).entities.filter((e) => !kept.has(e.id));
-      if (dropped.length) lines.push("", `Dropped (no links): ${dropped.map((e) => e.id).join(", ")}`);
+      if (dropped.length) lines.push("", `No links, so never suggested (queries still find them): ${dropped.map((e) => e.id).join(", ")}`);
       console.log(lines.join("\n"));
       return 0;
     }

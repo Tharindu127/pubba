@@ -93,7 +93,7 @@ export function lint(pubba: Pubba, dataset?: Dataset): LintIssue[] {
   if (dataset) {
     const dropped = dataset.entities.filter((e) => !g.entities.has(e.id));
     if (dropped.length) {
-      issues.push({ level: "info", code: "dropped", message: `Dropped for having no links: ${list(dropped.map((e) => e.label))}.`, ids: dropped.map((e) => e.id) });
+      issues.push({ level: "info", code: "dropped", message: `No links, so never suggested (queries still find them): ${list(dropped.map((e) => e.label))}.`, ids: dropped.map((e) => e.id) });
     }
   }
 

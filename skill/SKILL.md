@@ -54,7 +54,8 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
    - weights: which skills or materials count as "core" (1) and which are common
      tools (0.4), since common ones must never make two items look alike;
    - the derived-link rules and what they produced (the `source` column);
-   - anything dropped for having no links, and content you left out.
+   - anything with no links (never suggested, only found by name), and content
+     you left out.
 
    Ask for changes. **Write `pubba.json` (and the content file) into the project
    only after the user agrees.**

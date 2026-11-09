@@ -1,4 +1,4 @@
-import { isDestination, neighbours } from "../graph.ts";
+import { allEntities, isDestination, neighbours } from "../graph.ts";
 import type { Pubba } from "../index.ts";
 import { normalize } from "../text.ts";
 import type { Entity, Graph } from "../types.ts";
@@ -26,7 +26,7 @@ const matchable = (g: Graph, e: Entity) => isDestination(g, e) && !g.config.type
 /** Every normalised name, with the entities that carry it. */
 export function nameOwners(g: Graph): Map<string, Set<string>> {
   const owners = new Map<string, Set<string>>();
-  for (const e of g.entities.values()) {
+  for (const e of allEntities(g)) {
     if (g.config.types?.[e.type]?.match?.skip) continue;
     for (const raw of [e.label, ...(e.aliases ?? [])]) {
       const n = normalize(raw);
@@ -59,7 +59,7 @@ export function generateCases(pubba: Pubba, o: GenerateOptions = {}): { queries:
   const pulls = Object.values(g.config.kinds ?? {}).map((k) => k.pull ?? 0.5);
   const topPull = pulls.length ? Math.max(...pulls) : 0.5;
 
-  for (const e of g.entities.values()) {
+  for (const e of allEntities(g)) {
     if (!matchable(g, e) || (o.types && !o.types.includes(e.type))) continue;
     const label = normalize(e.label);
     const ignored = (n: string) => ignore.some((w) => n.includes(w));
@@ -80,11 +80,14 @@ export function generateCases(pubba: Pubba, o: GenerateOptions = {}): { queries:
       queries.push({ query: `anything like ${e.label}?`, expect: e.id, intent: "similar", tags: ["generated", "similar", e.type] });
     }
 
-    if (o.trails === false) continue;
+    if (o.trails === false || !g.entities.has(e.id)) continue;
     // One of its three closest siblings (the kinds that pull hardest), else of its three strongest relations.
     const related = pubba.related(e.id);
     const siblings = related.filter((r) => (g.config.kinds?.[r.link.kind]?.pull ?? 0.5) >= topPull);
-    const best = (siblings.length ? siblings : related).slice(0, 3);
+    // The three strongest, and anything tied with the third: among equals the order is arbitrary.
+    const pool = siblings.length ? siblings : related;
+    const third = pool[Math.min(2, pool.length - 1)]?.weight ?? 0;
+    const best = pool.filter((r, i) => i < 3 || r.weight >= third);
     if (best.length) {
       trails.push({
         name: `${e.label} → ${siblings.length ? "a close sibling" : "a close relation"}`,

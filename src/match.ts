@@ -1,4 +1,4 @@
-import { neighbours, isDestination } from "./graph.ts";
+import { allEntities, neighbours, isDestination } from "./graph.ts";
 import { containsName, hasPhraseWith, normalize } from "./text.ts";
 import { reasonFromLink, renderReason } from "./reasons.ts";
 import type { Graph, Match, MatchResult, Reason, Related, Template, TypeMatchConfig } from "./types.ts";
@@ -42,7 +42,8 @@ function scoreName(q: string, name: string, isAlias: boolean, m: TypeMatchConfig
     return { score: 50 + hits + (st.precise ? coverage(q, name, st.typo) : 0), by: "words", name };
   }
   if (st.partial && words.length >= 3 && hits >= 2 && hits === words.length - 1) return { score: 40 + hits, by: "words", name };
-  const distinct = st.distinct && words.find((w) => w.length >= 5 && st.distinct!.has(w) && has(w));
+  // Spelled right (plurals and longer forms allowed): one word alone is too little to forgive a typo ("change" isn't "channel").
+  const distinct = st.distinct && words.find((w) => w.length >= 5 && st.distinct!.has(w) && hasPhraseWith(q, [w], Infinity));
   if (distinct) return { score: 25, by: "distinct-word", name: distinct };
   const first = words[0];
   if (m.firstWord && first && first.length > 3 && has(first)) return { score: 20, by: "first-word", name: first };
@@ -68,7 +69,7 @@ function distinctWords(g: Graph, stop: Set<string>): Set<string> {
   let out = distinctCache.get(g);
   if (out) return out;
   const owners = new Map<string, Set<string>>();
-  for (const e of g.entities.values()) {
+  for (const e of allEntities(g)) {
     if (g.config.types?.[e.type]?.match?.skip) continue;
     for (const raw of [e.label, ...(e.aliases ?? [])]) {
       for (const w of significant(normalize(raw), stop)) owners.set(w, (owners.get(w) ?? new Set()).add(e.id));
@@ -98,7 +99,7 @@ export function search(g: Graph, query: string, { limit = 10, types, templates }
   const st: Settings = { stop, typo: mc.typoMinLength ?? 4, partial: mc.partialWords ?? false, distinct: mc.distinctWords ? distinctWords(g, stop) : null, precise: mc.precise ?? false };
   const ignore = (mc.ignore ?? []).map(normalize).filter(Boolean);
   const out: Match[] = [];
-  for (const entity of g.entities.values()) {
+  for (const entity of allEntities(g)) {
     if (types && !types.includes(entity.type)) continue;
     const m = g.config.types?.[entity.type]?.match ?? {};
     if (m.skip) continue;
