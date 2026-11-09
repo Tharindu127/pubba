@@ -18,6 +18,7 @@ interface Settings {
   partial: boolean;
   /** Words that appear in only one entity's names, when distinct words count. */
   distinct: Set<string> | null;
+  precise: boolean;
 }
 
 const significant = (name: string, stop: Set<string>) => name.split(" ").filter((w) => w.length > 2 && !stop.has(w));
@@ -27,12 +28,19 @@ function scoreName(q: string, name: string, isAlias: boolean, m: TypeMatchConfig
   if (!name || name.length < (m.minLength ?? 0)) return null;
   const has = (w: string) => hasPhraseWith(q, [w], st.typo);
   if ((m.mode ?? "title") === "phrase") {
-    return name.length > 1 && has(name) ? { score: 100 + name.length, by: isAlias ? "alias" : "phrase", name } : null;
+    if (name.length < 2 || !has(name)) return null;
+    // Precise: spelled right beats a typo of a longer name ("swift" is Swift, not SwiftUI).
+    const exact = !st.precise || containsName(q, name);
+    return { score: (exact ? 100 : 95) + name.length, by: isAlias ? "alias" : "phrase", name };
   }
   if (containsName(q, name)) return { score: 100 + name.length, by: isAlias ? "alias" : "name", name };
+  // Precise: the whole name with a typo still counts as the whole name ("god of war ragnraok").
+  if (st.precise && name.includes(" ") && has(name)) return { score: 95 + name.length, by: isAlias ? "alias" : "name", name };
   const words = significant(name, st.stop);
   const hits = words.filter(has).length;
-  if (hits && hits === words.length && words.join("").length > (m.minWordsLength ?? 0)) return { score: 50 + hits, by: "words", name };
+  if (hits && hits === words.length && words.join("").length > (m.minWordsLength ?? 0)) {
+    return { score: 50 + hits + (st.precise ? coverage(q, name, st.typo) : 0), by: "words", name };
+  }
   if (st.partial && words.length >= 3 && hits >= 2 && hits === words.length - 1) return { score: 40 + hits, by: "words", name };
   const distinct = st.distinct && words.find((w) => w.length >= 5 && st.distinct!.has(w) && has(w));
   if (distinct) return { score: 25, by: "distinct-word", name: distinct };
@@ -40,6 +48,18 @@ function scoreName(q: string, name: string, isAlias: boolean, m: TypeMatchConfig
   if (m.firstWord && first && first.length > 3 && has(first)) return { score: 20, by: "first-word", name: first };
   return null;
 }
+
+/** Under 1: how much of the name the query has, and of the query the name explains. Breaks ties like "Saga" versus "Saga II". */
+function coverage(q: string, name: string, typo: number): number {
+  const nameTokens = name.split(" ");
+  const queryTokens = q.split(" ");
+  const inQuery = nameTokens.filter((w) => hasPhraseWith(q, [w], typo)).length / nameTokens.length;
+  const explained = queryTokens.filter((t) => nameTokens.some((w) => t === w || hasPhraseWith(t, [w], typo))).length / queryTokens.length;
+  return 0.5 * inQuery + 0.4 * explained;
+}
+
+/** 50 and up: the query has the whole name, or all its words. Below: one word of it. */
+const STRONG = 50;
 
 const distinctCache = new WeakMap<Graph, Set<string>>();
 
@@ -75,7 +95,7 @@ export function search(g: Graph, query: string, { limit = 10, types, templates }
   if (!q) return [];
   const mc = g.config.match ?? {};
   const stop = new Set(mc.stopWords ?? DEFAULT_STOP_WORDS);
-  const st: Settings = { stop, typo: mc.typoMinLength ?? 4, partial: mc.partialWords ?? false, distinct: mc.distinctWords ? distinctWords(g, stop) : null };
+  const st: Settings = { stop, typo: mc.typoMinLength ?? 4, partial: mc.partialWords ?? false, distinct: mc.distinctWords ? distinctWords(g, stop) : null, precise: mc.precise ?? false };
   const ignore = (mc.ignore ?? []).map(normalize).filter(Boolean);
   const out: Match[] = [];
   for (const entity of g.entities.values()) {
@@ -95,7 +115,9 @@ export function search(g: Graph, query: string, { limit = 10, types, templates }
     out.push({ entity, score: best.score, tier: m.tier ?? 1, reason, text: renderReason(g, reason, entity, templates) });
   }
   // Stable: equal scores keep the dataset's order.
-  return out.sort((a, b) => a.tier - b.tier || b.score - a.score).slice(0, limit);
+  // Precise: a whole name in a later tier beats one word of a name in an earlier tier ("Odoo REST API").
+  const strength = (m: Match) => (st.precise && m.score < STRONG ? 1 : 0);
+  return out.sort((a, b) => strength(a) - strength(b) || a.tier - b.tier || b.score - a.score).slice(0, limit);
 }
 
 export interface MatchOptions {
@@ -110,8 +132,17 @@ export interface MatchOptions {
  */
 export function match(g: Graph, query: string, { similarLimit = 3, templates }: MatchOptions = {}): MatchResult {
   const best = search(g, query, { limit: 1, ...(templates ? { templates } : {}) })[0] ?? null;
-  if (!best) return { query, intent: "none", entity: null, match: null, similar: [] };
   const q = normalize(query);
+  const typo = g.config.match?.typoMinLength ?? 4;
+  // A name the site doesn't have, longer than what matched inside it, wins: "react native" isn't React.
+  const missing = (g.config.match?.notHere ?? [])
+    .map((n) => ({ raw: n, name: normalize(n) }))
+    .filter((n) => n.name && hasPhraseWith(q, [n.name], typo))
+    .sort((a, b) => b.name.length - a.name.length)[0];
+  if (missing && (!best || missing.name.length > (best.reason.name ?? normalize(best.entity.label)).length)) {
+    return { query, intent: "none", entity: null, match: null, similar: [], notHere: missing.raw };
+  }
+  if (!best) return { query, intent: "none", entity: null, match: null, similar: [] };
   const similarRe = new RegExp(g.config.match?.similarPattern ?? DEFAULT_SIMILAR);
   if (similarRe.test(q)) {
     const kinds = g.config.types?.[best.entity.type]?.similar;

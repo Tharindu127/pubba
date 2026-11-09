@@ -2,7 +2,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { documentDataset, fromDocument, type PubbaDocument } from "./document.ts";
-import { evaluate, formatReport, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
+import { evaluate, formatLint, formatReport, generateCases, lint, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
 import { toJsonLd, toLlmsTxt, validateJsonLd } from "./exports/index.ts";
 
 const HELP = `pubba: a knowledge graph for showroom sites
@@ -13,7 +13,10 @@ Usage:
   pubba match    <pubba.json> "<query>"          what a typed query means
   pubba related  <pubba.json> <id>               related items, with reasons
   pubba next     <pubba.json> <id> [<id>...]     what next after a trail
-  pubba eval     <pubba.json> --queries <file> --trails <file> [--baseline <file>] [--update-baseline] [--json]
+  pubba eval     <pubba.json> [--queries <file>] [--trails <file>] [--generated] [--baseline <file>] [--update-baseline] [--json]
+                 --generated adds cases derived from the content itself, so the set grows with it
+  pubba generate <pubba.json> [--out-dir <dir>]  write the generated cases, to read or to keep
+  pubba lint     <pubba.json>                    content problems that cost accuracy; exits 1 on errors
   pubba jsonld   <pubba.json> [--base-url <url>] [--out <file>]
   pubba llms     <pubba.json> [--base-url <url>] [--out <file>]
 
@@ -90,7 +93,12 @@ function main(argv: string[]): number {
       const qPath = flag(rest, "--queries");
       const tPath = flag(rest, "--trails");
       const bPath = flag(rest, "--baseline");
-      const report = evaluate(pubba, { queries: qPath ? readJson<QueryCase[]>(qPath) : [], trails: tPath ? readJson<TrailCase[]>(tPath) : [] });
+      const generated = rest.includes("--generated") ? generateCases(pubba) : { queries: [], trails: [] };
+      const report = evaluate(pubba, {
+        queries: [...(qPath ? readJson<QueryCase[]>(qPath) : []), ...generated.queries],
+        trails: [...(tPath ? readJson<TrailCase[]>(tPath) : []), ...generated.trails],
+      });
+      if (generated.queries.length) console.error(`(+ ${generated.queries.length} generated queries and ${generated.trails.length} generated trails)`);
       if (rest.includes("--json")) console.log(JSON.stringify(report, null, 2));
       else console.log(formatReport(report));
       if (!bPath) return 0;
@@ -107,6 +115,23 @@ function main(argv: string[]): number {
       }
       console.log("\nAt or above the baseline.");
       return 0;
+    }
+    case "generate": {
+      const { queries, trails } = generateCases(pubba);
+      const dir = flag(rest, "--out-dir");
+      if (!dir) {
+        console.log(JSON.stringify({ queries, trails }, null, 2));
+        return 0;
+      }
+      writeFileSync(resolve(dir, "queries.generated.json"), `${JSON.stringify(queries, null, 2)}\n`);
+      writeFileSync(resolve(dir, "trails.generated.json"), `${JSON.stringify(trails, null, 2)}\n`);
+      console.log(`${queries.length} queries and ${trails.length} trails written to ${dir}.`);
+      return 0;
+    }
+    case "lint": {
+      const issues = lint(pubba, documentDatasetFor(file));
+      console.log(formatLint(issues));
+      return issues.some((i) => i.level === "error") ? 1 : 0;
     }
     case "jsonld": {
       const baseUrl = flag(rest, "--base-url");

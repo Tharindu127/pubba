@@ -154,7 +154,7 @@
     { "id": "pixel-rally", "title": "Pixel Rally", "platform": "Mobile", "genre": "Racing" }
   ],
   "creative": [
-    { "id": "youtube", "title": "Nimali on YouTube", "platform": "YouTube", "kind": "channel", "description": "Short videos on building apps." },
+    { "id": "youtube", "title": "Nimali on YouTube", "platform": "YouTube", "kind": "channel", "description": "Short videos on building Flutter apps." },
     { "id": "offline-first", "title": "Field notes on offline-first apps", "platform": "Medium", "kind": "writing", "description": "What building payment apps for patchy networks taught me.", "aliases": ["Field notes"] },
     { "id": "night-synth", "title": "Night synth sessions", "platform": "Instagram", "kind": "art", "description": "Short clips of synth music made in Synthpad." }
   ]

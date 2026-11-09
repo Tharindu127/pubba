@@ -184,46 +184,50 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
 | `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `skillWeight`, `callName` |
-| `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `regressions`, `formatReport` |
+| `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
 | `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt` |
 
 ## The evaluation harness
 
-A sample query set with expected results (typos, one-word input, "anything
-like X", place and role questions, off-topic queries that must match nothing)
-and sample trails with expected top-3 suggestions. The script scores both and
-fails on a drop:
+Accuracy should stay near 100% as the content grows, so the test set grows with
+it. Three parts:
+
+- **Generated cases** (`--generated`), derived from the graph on every run: for
+  every item a visitor can be sent to, its name, a typo of it, each alias and
+  "anything like it?", plus a trail from it that must reach one of its closest
+  siblings. Add a project and its cases appear on the next build.
+- **Hand-written cases** for what generation can't know: off-topic questions
+  that must match nothing, commands the site handles itself, real visitor
+  phrasing, and the trails a person would expect.
+- **Lint** (`pubba lint`): content problems that cost accuracy, caught before a
+  visitor does. Two items sharing a name fail the build; heavy "core" weights,
+  shared first words and dead ends are warnings.
 
 ```bash
-npx pubba eval pubba.json --queries eval/queries.json --trails eval/trails.json --baseline eval/baseline.json
+npx pubba lint pubba.json
+npx pubba eval pubba.json --queries eval/queries.json --trails eval/trails.json --generated --baseline eval/baseline.json
 ```
 
-```
-Matching     100.0%  (38/38 queries)
-  alias        4/4
-  off-topic    8/8
-  one-word     10/10
-  place        7/7
-  role         5/5
-  similar      4/4
-  typo         8/8
-Suggestions  100.0%  (12/12 trails fully right, 100.0% with at least one)
-```
+A drop below the baseline exits 1, so CI fails.
 
 **On real data.** Run against the live content of the portfolio it was extracted
-from (160 entities, 327 links; 49 queries and 16 trails written from the content),
-the preset alone scored 87.8% matching and 93.8% suggestions. The failures
-pointed at three opt-in matching options (`typoMinLength`, `distinctWords`,
-`partialWords`) and an `editions` rule for "Student rePo (Android)" ↔ "(Web)";
-with them on, it scores 98.0% and 100%. The options are off by default so the
-preset behaves exactly like the site; turn them on for new sites.
+from (160 entities, 327 links):
 
-On the fictional example, the first run scored 97.4%, because "field
-notes" (the start of an article's title) matched Node.js, whose alias "node" is
-a near miss of "notes". An alias on the article fixed it, and the test suite
-keeps a case proving the harness catches it.
+| | Matching | Suggestions |
+| --- | --- | --- |
+| Site's original matching (`legacyMatching: true`), 49 hand-written queries, 16 trails | 87.8% | 93.8% |
+| The same, with the 243 generated queries and 114 generated trails added | 96.2% | 98.5% |
+| Preset defaults + an editions rule + `notHere: ["React Native"]`, hand-written + 243 generated queries, 114 generated trails | **100%** (292/292) | **100%** (130/130) |
 
-`npm run eval` runs it on the example, and CI runs it on every push.
+Each failure along the way pointed at a fix that is now a matching option
+(`typoMinLength`, `distinctWords`, `partialWords`, `precise`, `notHere`) or a rule
+option (`stems`, `before`), all covered by tests. Generated cases found four
+matcher weaknesses that the hand-written set never hit: "Swift" landing on
+SwiftUI, "Saga II" on "Saga", a typo'd whole name losing to a shorter exact one,
+and "Odoo REST API" losing to a project's first word.
+
+`npm run eval` runs it on the fictional example (38 hand-written + 83 generated
+queries, 12 + 35 trails, all passing), and CI runs it with lint on every push.
 
 ## CLI
 
@@ -233,7 +237,9 @@ pubba preview  <pubba.json>                  the mapping as Markdown tables
 pubba match    <pubba.json> "<query>"
 pubba related  <pubba.json> <id>
 pubba next     <pubba.json> <id> [<id>…]
-pubba eval     <pubba.json> --queries <f> --trails <f> [--baseline <f>] [--update-baseline] [--json]
+pubba lint     <pubba.json>                  name collisions, heavy weights, dead ends; exits 1 on errors
+pubba eval     <pubba.json> [--queries <f>] [--trails <f>] [--generated] [--baseline <f>] [--update-baseline] [--json]
+pubba generate <pubba.json> [--out-dir <dir>]  the generated cases, to read
 pubba jsonld   <pubba.json> [--base-url <url>] [--out <f>]
 pubba llms     <pubba.json> [--base-url <url>] [--out <f>]
 ```
@@ -266,10 +272,15 @@ Copy or link the folder into `~/.claude/skills/pubba` (or a project's
 - The preset's Telecom topic leaves out the portfolio site's own operator names
   (Ooredoo, Vodafone, Batelco, YOOZ); a site adds its own with a `topics` rule
   in its config.
+- **Matching is stricter and wider than the site's by default.** The portfolio
+  preset turns on `typoMinLength: 5`, `distinctWords`, `partialWords` and
+  `precise`, which took real-data matching from 87.8% to 98%+.
+  `portfolioConfig({ legacyMatching: true })` matches exactly as the site did.
 - Matching names use whole words (`"oman"` no longer matches inside `"woman"`);
   the site's matcher used substrings.
-- Known limit: a query naming something not in the graph that contains a name
-  that is ("react native" when only React is listed) resolves to that name.
+- A query naming something the graph doesn't have but that contains a name it
+  does ("react native" with only React) resolves to that name, unless the site
+  lists it in `match.notHere`.
 
 ## Roadmap
 

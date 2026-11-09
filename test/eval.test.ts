@@ -9,6 +9,12 @@ const queries = read<QueryCase[]>("../eval/queries.json");
 const trails = read<TrailCase[]>("../eval/trails.json");
 const baseline = read<{ matching: number; suggestions: number }>("../eval/baseline.json");
 
+test("stricter default matching finds the article without the alias", () => {
+  const pubba = examplePubba();
+  pubba.get("creative:offline-first")!.aliases = [];
+  assert.equal(pubba.match("field notes").entity?.id, "creative:offline-first");
+});
+
 test("the example dataset meets its eval baseline", () => {
   const report = evaluate(examplePubba(), { queries, trails });
   assert.deepEqual(regressions(report, baseline), [], formatReport(report));
@@ -20,7 +26,8 @@ test("the sample set covers every case the harness promises", () => {
 });
 
 test("a broken alias shows up as a failure and a regression", () => {
-  const pubba = examplePubba();
+  // The site's original matching, where "notes" is a near miss of the alias "node".
+  const pubba = examplePubba({ pronoun: "she", owner: "Nimali", legacyMatching: true });
   pubba.get("creative:offline-first")!.aliases = [];
   const report = evaluate(pubba, { queries, trails });
   assert.deepEqual(report.matching.failures.map((f) => f.case.query), ["field notes"]);

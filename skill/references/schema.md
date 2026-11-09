@@ -53,7 +53,7 @@ Entities with no links are dropped.
   "rules": [ /* see below, applied in order */ ],
   "extraRules": [ /* added after the preset's rules; "before": "<rule id>" runs one earlier */ ],
   "next": { "recency": 0.6, "secondStep": 0.4, "hubDamping": 3, "sectionBoost": 0.08, "sections": { "projects": "project" } },
-  "match": { "stopWords": ["the", "app"], "ignore": ["Nimali"], "similarPattern": "\\b(like|similar)\\b", "typoMinLength": 5, "distinctWords": true, "partialWords": true },
+  "match": { "stopWords": ["the", "app"], "ignore": ["Nimali"], "similarPattern": "\\b(like|similar)\\b", "typoMinLength": 5, "distinctWords": true, "partialWords": true, "precise": true, "notHere": ["React Native"] },
   "templates": { "built-with": { "out": "{item} is built with {other}.", "in": "{item} is part of {other}'s stack." } }
 }
 ```
@@ -71,14 +71,20 @@ tier the highest score wins.
 - Typos: plurals, prefixes and one edit (two for words of 7+ letters) count.
   Words under 4 letters and names with symbols (`c#`, `next.js`) must be exact.
 
-Three options, off by default (the defaults match the portfolio site), and
-recommended for new sites:
+Four options, off in the core by default and **on in the portfolio preset**
+(`presetOptions.legacyMatching: true` turns them off, matching the original
+site exactly):
 
 | `match` option | Effect | Fixes |
 | --- | --- | --- |
 | `typoMinLength: 5` | Words under 5 letters must be spelled right | "hire" matching the skill Hive |
 | `distinctWords: true` | A 5+ letter word found in only one name is enough (score 25) | "ragnarok", "music channel" |
 | `partialWords: true` | A name of 3+ significant words matches with all but one (40 + hits) | "red dead" |
+| `precise: true` | Spelled right beats a typo of a longer name; a typo'd whole name counts as the whole name (95 + length); ties go to the name covering more of the query; a whole name in a later tier beats one word of a name in an earlier tier | "Swift" → SwiftUI, "skyfroge saga ii" → Saga, "Odoo REST API" → Odoo Merchant |
+
+`notHere: ["React Native"]` lists names the site knows it doesn't have: a query
+naming one returns `intent: "none"` with `notHere` set, instead of the shorter
+name inside it (React). Use it to answer "he hasn't used React Native" honestly.
 
 ### Rules
 
@@ -139,4 +145,6 @@ A project ships in a market when its `markets` lists the code, or its category,
 subtitle or descriptions name the market or an alias (add demonyms like
 "Algerian" as aliases: names match as whole words). A project is `made-at` a role when the role's title or
 points name the project's first distinctive word ("Kiri" for "Kiri Wallet").
-Roles get their company and short title as aliases.
+Roles come newest first. Each gets its short title as an alias, and the newest
+role at a company also gets the company name, so a promotion doesn't make the
+company ambiguous.

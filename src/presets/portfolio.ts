@@ -32,6 +32,12 @@ export interface PortfolioOptions {
   pronoun?: Pronoun;
   /** Names containing this never match a query (the person's own pages carry it). Usually their first name. */
   owner?: string;
+  /**
+   * Match exactly as the original portfolio site did: typos on 4-letter words,
+   * no distinct-word, partial-name or precise matching. Default false (stricter and wider,
+   * and measurably more accurate).
+   */
+  legacyMatching?: boolean;
 }
 
 /** How much a skill says by its category: languages and frameworks define a stack, tools are on everything. */
@@ -103,7 +109,7 @@ export function portfolioTemplates(pronoun: Pronoun = "they"): NonNullable<Pubba
 }
 
 /** The whole portfolio config. Layer site changes over it with `mergeConfig`. */
-export function portfolioConfig({ pronoun = "they", owner }: PortfolioOptions = {}): PubbaConfig {
+export function portfolioConfig({ pronoun = "they", owner, legacyMatching = false }: PortfolioOptions = {}): PubbaConfig {
   const item = { tier: 2, minLength: 3, minWordsLength: 4 };
   return {
     types: {
@@ -145,7 +151,10 @@ export function portfolioConfig({ pronoun = "they", owner }: PortfolioOptions = 
       secondStep: 0.4,
       sections: { projects: "project", skills: "tech", reach: "market", experience: "role", games: "game", creative: "creative" },
     },
-    match: owner ? { ignore: [owner] } : {},
+    match: {
+      ...(owner ? { ignore: [owner] } : {}),
+      ...(legacyMatching ? {} : { typoMinLength: 5, distinctWords: true, partialWords: true, precise: true }),
+    },
     templates: portfolioTemplates(pronoun),
   };
 }
@@ -215,7 +224,8 @@ export function fromPortfolio(input: PortfolioInput): Dataset {
       type: "role",
       label: `${r.title}, ${r.company}`,
       short: roleShort(r.title),
-      aliases: [r.company, roleShort(r.title), ...(r.aliases ?? [])],
+      // The company names only its latest role (roles come newest first), so a promotion doesn't make it ambiguous.
+      aliases: [...(input.roles.findIndex((x) => x.company === r.company) === i ? [r.company] : []), roleShort(r.title), ...(r.aliases ?? [])],
       text: `${r.title} ${r.points.join(" ")}`,
       ...(r.url ? { url: r.url } : {}),
       data: { title: r.title, company: r.company, location: r.location, start: r.start, end: r.end },

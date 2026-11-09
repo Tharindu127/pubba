@@ -206,6 +206,17 @@ export interface MatchConfig {
   distinctWords?: boolean;
   /** A name of 3+ significant words matches with all but one of them ("red dead"). Default false. */
   partialWords?: boolean;
+  /**
+   * Spelled right beats a typo of a longer name, a typo'd whole name counts as
+   * the whole name, ties go to the name covering more of the query, and a whole
+   * name in a later tier beats one word of a name in an earlier tier. Default false.
+   */
+  precise?: boolean;
+  /**
+   * Names the site knows it doesn't have ("React Native" next to React). A query
+   * naming one matches nothing, rather than the shorter name inside it.
+   */
+  notHere?: string[];
 }
 
 /** One case of a template, chosen when everything it names fits. */
@@ -302,4 +313,6 @@ export interface MatchResult {
   match: Match | null;
   /** For `similar`: the things like it, with reasons. */
   similar: Related[];
+  /** For `none`: the `notHere` name the query asked about. */
+  notHere?: string;
 }

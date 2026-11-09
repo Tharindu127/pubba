@@ -29,6 +29,36 @@ the average.
 `eval/baseline.json`: `{ "matching": 0.95, "suggestions": 0.9 }`. `eval` exits 1
 when a score falls below it.
 
+## Generated cases: a test set that grows with the content
+
+`--generated` adds cases derived from the graph on every run: for every entity a
+visitor can be sent to, its name, a typo of it (two neighbouring letters
+swapped in its longest word), each alias, and "anything like it?" where it has
+similar items; and a trail from it that must reach one of its three closest
+siblings (or relations). A new project gets its cases on the next build. Names
+shared by two entities are skipped, not faked: `lint` reports them instead.
+
+Hand-written cases still matter for what generation can't know: off-topic
+questions, commands the site handles itself ("how do I hire him"), phrasing
+visitors really use, and trails a person would expect.
+
+`pubba generate pubba.json --out-dir eval/` writes the generated set to read.
+
+## Lint
+
+`pubba lint pubba.json` lists content problems that cost accuracy, and exits 1
+on errors:
+
+| Code | Level | Meaning |
+| --- | --- | --- |
+| `duplicate-name` | error | Two entities share a name or alias; a query can only find one |
+| `shared-first-word` | warning | Typed alone, a shared first word ("Odoo") finds only the first |
+| `short-name-typos` | warning | With typos on 4-letter words, everyday words reach short names |
+| `heavy-core` | warning | Most of what a `shared` rule compares counts as core, so unrelated items look alike |
+| `dead-end` | warning | Nothing is suggested after this item |
+| `dropped` | info | Entities with no links, left out of the graph |
+| `no-url` | info | No url where others of its type have one |
+
 ## Diagnosing failures
 
 | Symptom | Look with | Usual fix |
@@ -42,6 +72,8 @@ when a score falls below it.
 | Trail is all one type | `next` | The mixer caps one type at `limit - 1`; if it's still flooded, lower that kind's `pull` |
 | A distinctive later word finds nothing ("ragnarok", "red dead") | `match` | Turn on `match.distinctWords` and `match.partialWords`, or add an alias |
 | A short word near-misses a short name ("hire" → Hive) | `match` shows `by: phrase` on a 4-letter name | `match.typoMinLength: 5` |
+| A typo or shorter name steals the match ("Swift" → SwiftUI, "Saga II" → Saga) | `match` | `match.precise: true` |
+| A name the site doesn't have resolves to one inside it ("react native" → React) | `match` | `match.notHere: ["React Native"]` |
 | Two editions of one thing don't lead to each other | `related` shows a weak `mentions` link or none | `extraRules: [{ "type": "label-prefix", "kind": "same-series", "among": "project", "stems": true, "before": "mentions" }]` |
 | Sentence reads badly | `related` | Override the template for that kind, or `<kind>.<type>` |
 
@@ -62,7 +94,8 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
       - run: npm ci
-      - run: npx pubba eval pubba.json --queries eval/queries.json --trails eval/trails.json --baseline eval/baseline.json
+      - run: npx pubba lint pubba.json
+      - run: npx pubba eval pubba.json --queries eval/queries.json --trails eval/trails.json --generated --baseline eval/baseline.json
 ```
 
 Raise the baseline (`--update-baseline`) only when scores went up on purpose.

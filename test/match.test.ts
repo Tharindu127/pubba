@@ -8,10 +8,10 @@ const pubba = examplePubba();
 test("match: typos, one word, aliases, places and roles", () => {
   const cases: [string, string, string][] = [
     ["flutr", "tech:Flutter", "phrase"],
-    ["kiri walet", "project:kiri-wallet", "words"],
-    ["sri lankan", "market:LK", "words"],
+    ["kiri walet", "project:kiri-wallet", "name"],
+    ["sri lankan", "market:LK", "name"],
     ["UAE", "market:AE", "alias"],
-    ["Lumen", "role:0", "first-word"],
+    ["Lumen", "role:0", "distinct-word"],
     ["what did she build in Kenya?", "market:KE", "name"],
   ];
   for (const [q, id, by] of cases) {
@@ -48,7 +48,26 @@ test("match: earlier tiers win; the owner's name never matches", () => {
   // "Kiri" could be the role's text, but projects are tier 1.
   assert.equal(pubba.match("kiri").entity?.id, "project:kiri-wallet");
   assert.equal(pubba.match("nimali").intent, "none");
-  assert.equal(pubba.search("nimali youtube")[0]?.entity.id, undefined);
+  assert.deepEqual(pubba.search("nimali"), []);
+  assert.equal(pubba.match("nimali youtube").entity?.id, "creative:youtube", "her channel is named by its platform");
+});
+
+test("notHere: a longer name the site doesn't have beats the shorter one inside it", () => {
+  const p = examplePubba();
+  p.graph.config.match = { ...p.graph.config.match, notHere: ["React Native Web", "Kotlin"] };
+  assert.equal(p.match("react native web apps").intent, "none");
+  assert.equal(p.match("react native web apps").notHere, "React Native Web");
+  assert.equal(p.match("react native apps").entity?.id, "tech:React Native", "the longer real name still wins");
+  assert.equal(p.match("does she know kotlin").notHere, "Kotlin");
+  assert.equal(p.match("flutter").entity?.id, "tech:Flutter");
+});
+
+test("precise matching: spelled right wins, typo'd whole names count, coverage breaks ties, whole names beat earlier-tier fragments", () => {
+  const loose = examplePubba({ pronoun: "she", owner: "Nimali", legacyMatching: true });
+  assert.equal(pubba.match("Swift").entity?.id, "tech:Swift");
+  assert.equal(pubba.match("skyfroge saga ii").entity?.id, "game:skyforge-saga-2");
+  assert.equal(loose.match("skyfroge saga ii").entity?.id, "game:skyforge-saga");
+  assert.equal(pubba.match("swfitui").entity?.id, "tech:SwiftUI");
 });
 
 test("search lists every candidate, best first, filterable by type", () => {

@@ -128,3 +128,6 @@ export function formatReport(r: EvalReport): string {
   }
   return lines.join("\n");
 }
+
+export { generateCases, nameOwners, type GenerateOptions } from "./generate.ts";
+export { lint, formatLint, type LintIssue } from "./lint.ts";

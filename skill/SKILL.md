@@ -25,7 +25,9 @@ skill folder): it uses the project's installed `pubba`, else a checkout named by
 | `pubba.sh match <pubba.json> "<query>"` | What a query resolves to, and why |
 | `pubba.sh related <pubba.json> <id>` | Related items with reasons |
 | `pubba.sh next <pubba.json> <id> [<id>…]` | Predictions after a trail |
-| `pubba.sh eval <pubba.json> --queries q.json --trails t.json --baseline b.json` | Scores matching and suggestions; exits 1 on a drop |
+| `pubba.sh lint <pubba.json>` | Content problems that cost accuracy (name collisions, heavy weights, dead ends); exits 1 on errors |
+| `pubba.sh eval <pubba.json> --queries q.json --trails t.json --generated --baseline b.json` | Scores matching and suggestions, with cases generated from the content added; exits 1 on a drop |
+| `pubba.sh generate <pubba.json> --out-dir eval/` | Writes the generated cases, to read |
 | `pubba.sh jsonld <pubba.json> --base-url <url> [--out file]` | schema.org JSON-LD, validated; exits 1 on problems |
 | `pubba.sh llms <pubba.json> --base-url <url> [--out file]` | An llms.txt |
 
@@ -79,7 +81,12 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
 
 ## 3. Run the evaluation harness and suggest fixes
 
-1. **Build the sample set from the site's own content**, starting from
+The goal is 100% on generated cases and close to it on hand-written ones, kept
+there as the content grows.
+
+1. **Lint first:** `pubba.sh lint pubba.json`. Fix errors (duplicate names) before
+   anything else; explain each warning to the user and let them choose.
+2. **Build the hand-written set from the site's own content**, starting from
    `templates/queries.example.json` and `templates/trails.example.json`. Cover
    every tag:
    - `typo`: real misspellings of the site's names ("flutr", "sri lankan")
@@ -91,8 +98,12 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
    - trails: 8 to 12 realistic visits with the 1 to 3 items a person would expect
      next. Write the expectations from what makes sense for a visitor, not from
      what pubba currently outputs.
-2. Run `pubba.sh eval pubba.json --queries eval/queries.json --trails eval/trails.json`.
-3. For each failure, find the cause with `pubba.sh match` / `next` / `related`,
+   Generated cases (`--generated`) already cover every name, a typo of it,
+   aliases, "anything like it" and each item's closest relation, so spend the
+   hand-written set on what generation can't know: off-topic questions, commands
+   the site handles itself, and real visitor phrasing.
+3. Run `pubba.sh eval pubba.json --queries eval/queries.json --trails eval/trails.json --generated`.
+4. For each failure, find the cause with `pubba.sh match` / `next` / `related`,
    then suggest the smallest fix. See `references/evaluation.md` for the
    catalogue. In short:
    - wrong entity for a query: add an alias, or add a stop word, or move a type to
@@ -103,10 +114,12 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
      the kind's `pull`, then whether a common tool's weight is too high and
      floods the results;
    - a sentence reads badly: override its template.
-4. Show the fixes as a diff, apply them once the user agrees, and rerun.
-5. When the scores are where the user wants them, write the baseline with
+5. Show the fixes as a diff, apply them once the user agrees, and rerun.
+6. When the scores are where the user wants them, write the baseline with
    `--baseline eval/baseline.json --update-baseline`, and add the eval command to
-   CI so a drop fails the build (example in `references/evaluation.md`).
+   CI with `lint`, so a drop or a name collision fails the build (example in
+   `references/evaluation.md`). Every content publish then re-runs it, and the
+   generated cases grow with the content.
 
 ## Rules
 
