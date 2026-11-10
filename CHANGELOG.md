@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.6 (10 Nov 2026)
+
+- `package.json`: the `bin` path as npm writes it (no publish warning).
+- README: the matching, rule and JSON-LD options added in 0.1.1 to 0.1.5.
+
 ## 0.1.5 (10 Nov 2026)
 
 Found by Google's Rich Results Test on the live portfolio, which marked every

@@ -1,6 +1,6 @@
 {
   "name": "pubba",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A knowledge-graph engine for showroom sites: related items with reasons, what-next predictions from a visitor's trail, and typo-tolerant matching. Portfolios first.",
   "license": "MIT",
   "author": "Tharindu Athapaththu",
@@ -37,7 +37,7 @@
     "./package.json": "./package.json"
   },
   "bin": {
-    "pubba": "./dist/cli.js"
+    "pubba": "dist/cli.js"
   },
   "files": [
     "dist",

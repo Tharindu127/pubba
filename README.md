@@ -183,9 +183,46 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `createTrail({ max?, storage?, key? })` | `record`, `get`, `clear`, `subscribe` |
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
-| `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `skillWeight`, `callName` |
+| `pubba.graph.unlinked` | Entities with no links: never suggested, but `match` and `search` still find them |
+| `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `APP_CATEGORY`, `skillWeight`, `callName` |
 | `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
 | `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt` |
+
+### Matching options (`config.match`)
+
+| Option | Effect |
+| --- | --- |
+| `typoMinLength` | Words shorter than this must be spelled right ("hire" isn't the skill Hive). Preset: 5 |
+| `distinctWords` | A word found in only one name, spelled right, is enough on its own ("ragnarok"). Preset: on |
+| `partialWords` | A name of 3+ words matches with all but one ("red dead"). Preset: on |
+| `precise` | Spelled right beats a typo of a longer name; ties go to the name covering more of the query. Preset: on |
+| `notDistinct` | Words never distinctive alone. Preset: page, channel, article, piece |
+| `notHere` | Names the site doesn't have ("React Native" next to React): the query matches nothing, with `notHere` set |
+| `ignore`, `stopWords`, `similarPattern` | The owner's name, words too common to count, and what "anything like X?" looks like |
+
+`portfolioConfig({ legacyMatching: true })` turns the first five off, matching
+the original site exactly.
+
+### Rules beyond the preset
+
+`extraRules` add to a preset's rules instead of replacing them, and
+`"before": "<rule id>"` runs one earlier so it wins the pair. `label-prefix`
+with `stems: true` links editions: "Student rePo (Android)" ↔ "(Web)".
+
+### JSON-LD options (`toJsonLd(graph, options)`)
+
+| Option | Effect |
+| --- | --- |
+| `baseUrl` | Makes urls absolute; ids stay under it, even for items hosted elsewhere |
+| `knowsAbout` | A curated list for the Person, instead of every skill |
+| `include` | Only these entity ids besides the person: one project's page |
+| `includeEmail` | Publish the person's email. Default off |
+| `types` | schema.org type per entity type (projects are SoftwareApplication, creative pieces CreativeWork) |
+
+Software apps get `applicationCategory` (from `data.applicationCategory`; the
+portfolio preset picks one of Google's app types from the project's topics) and
+`operatingSystem` (from `data.operatingSystem`: the project's platforms), the two
+properties Google's Software App rich result needs without a price or rating.
 
 ## The evaluation harness
 
@@ -284,10 +321,12 @@ Copy or link the folder into `~/.claude/skills/pubba` (or a project's
 
 ## Roadmap
 
-**v1 (this release):** the schema, the graph builder with derived-link rules,
+**v1 (0.1.x, released):** the schema, the graph builder with derived-link rules,
 related items, what-next from a trail, search, autocomplete and the matcher;
 machine-readable reasons with overridable sentence templates; the evaluation
-harness; the portfolio preset; JSON-LD and llms.txt helpers; the Claude skill.
+harness with generated cases and lint; the portfolio preset; JSON-LD and
+llms.txt helpers; the CLI and the Claude skill. Hardened by switching the
+portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 
 **v2: knowing the visitor, measuring, exporting**
 
