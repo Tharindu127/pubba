@@ -59,3 +59,14 @@ test("0.1.3: curated knowsAbout, one page's subset, headline plus full descripti
   assert.deepEqual((page["@graph"] as Record<string, any>[]).map((n) => n["@type"]), ["Person", "SoftwareApplication"]);
   assert.match(toLlmsTxt(graph), /Kiri Wallet\]\([^)]+\): A mobile wallet for everyday payments\./, "llms.txt keeps the short line");
 });
+
+test("0.1.4: a person with no links of their own is still in the JSON-LD and llms.txt", () => {
+  const lonely = examplePubba(undefined, { ...portfolio, roles: [], projects: portfolio.projects.map((p) => ({ ...p, tags: [] })) });
+  assert.ok(lonely.graph.unlinked.has("me"));
+  const nodes = toJsonLd(lonely.graph, { knowsAbout: ["Mobile architecture"] })["@graph"] as Record<string, any>[];
+  const person = nodes.find((n) => n["@type"] === "Person");
+  assert.equal(person?.name, "Nimali Perera");
+  assert.deepEqual(person?.knowsAbout, ["Mobile architecture"]);
+  assert.ok(nodes.filter((n) => n["@type"] !== "Person").every((n) => n.creator?.["@id"] === person!["@id"]));
+  assert.match(toLlmsTxt(lonely.graph), /^# Nimali Perera/);
+});

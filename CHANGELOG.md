@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4 (10 Nov 2026)
+
+- **The person is always in the exports.** A person with no links of their own
+  (no roles or ventures yet) was moved to `graph.unlinked` and left out of the
+  JSON-LD and llms.txt. `toJsonLd` and `toLlmsTxt` now find them there too.
+
 ## 0.1.3 (10 Nov 2026)
 
 Export options found by generating the portfolio site's JSON-LD from the graph:

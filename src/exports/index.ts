@@ -1,4 +1,4 @@
-import { isDestination, neighbours } from "../graph.ts";
+import { allEntities, isDestination, neighbours } from "../graph.ts";
 import { related } from "../next.ts";
 import type { Entity, Graph } from "../types.ts";
 
@@ -58,7 +58,8 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
   const topicTypes = o.topicTypes ?? ["topic"];
   const platformTypes = o.platformTypes ?? ["area"];
   const all = [...g.entities.values()];
-  const person = o.person ? g.entities.get(o.person) : all.find((e) => e.type === "person");
+  // The person may have no links of their own (no roles yet): they are still who the site is about.
+  const person = o.person ? (g.entities.get(o.person) ?? g.unlinked?.get(o.person)) : allEntities(g).find((e) => e.type === "person");
   const personUrl = absolute(person?.url, o.baseUrl) ?? absolute("/", o.baseUrl);
   const personId = person ? `${personUrl ?? ""}#${person.id}` : undefined;
   // Ids stay on the site: an item hosted elsewhere (a Medium article) gets one under the site's url.
@@ -158,7 +159,8 @@ export interface LlmsTxtOptions {
 /** An llms.txt (llmstxt.org): the site in plain Markdown for AI assistants, one section per type. */
 export function toLlmsTxt(g: Graph, o: LlmsTxtOptions = {}): string {
   const all = [...g.entities.values()];
-  const person = o.person ? g.entities.get(o.person) : all.find((e) => e.type === "person");
+  // The person may have no links of their own (no roles yet): they are still who the site is about.
+  const person = o.person ? (g.entities.get(o.person) ?? g.unlinked?.get(o.person)) : allEntities(g).find((e) => e.type === "person");
   const typeOrder = o.types ?? [...new Set([...Object.keys(g.config.types ?? {}), ...all.map((e) => e.type)])].filter((t) => all.some((e) => e.type === t && isDestination(g, e)));
   const lines = [`# ${o.title ?? person?.label ?? "Site"}`, ""];
   const summary = o.summary ?? (person ? description(person) : undefined);
