@@ -133,7 +133,7 @@ first-word, phrase; `name`: what matched).
 {
   "person": { "name": "", "short": "", "url": "", "jobTitle": "", "email": "", "sameAs": [], "description": "" },
   "roles": [{ "title": "Software Engineer II — Mobile", "company": "", "location": "", "start": "", "end": "Present", "points": [""], "aliases": [] }],
-  "projects": [{ "slug": "", "title": "", "subtitle": "", "description": "", "fullDescription": "", "category": "Mobile, Web", "tags": ["founded"], "technologies": [""], "url": "", "image": "", "date": "", "aliases": [], "markets": ["KW"] }],
+  "projects": [{ "slug": "", "title": "", "subtitle": "", "description": "", "fullDescription": "", "category": "Mobile, Web", "tags": ["founded"], "technologies": [""], "url": "", "image": "", "date": "", "aliases": [], "markets": ["KW"], "applicationCategory": "FinanceApplication" }],
   "skills": [{ "name": "", "category": "Languages | Frameworks | Platforms | Design | Tools", "aliases": [] }],
   "markets": [{ "code": "LK", "name": "Sri Lanka", "aliases": [] }],
   "games": [{ "id": "", "title": "", "platform": "PS5", "genre": "", "note": "", "aliases": [] }],

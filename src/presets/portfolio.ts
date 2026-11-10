@@ -46,7 +46,7 @@ export const skillWeight = (category?: string): number => SKILL_WEIGHT[lowerKey(
 
 /** Subjects a text can be about, wherever it appears. */
 export const PORTFOLIO_TOPICS: Topic[] = [
-  { key: "telecom", label: "Telecom", pattern: /\btelecom|\bsim\b|esim|roaming|\bmobile operator/i },
+  { key: "telecom", label: "Telecom", pattern: /\btelecom|\bsim\b|esim|roaming|\bmobile operator|\bprepaid|\brecharge|data bundle|\bmobile plans?\b/i },
   { key: "fintech", label: "Fintech", pattern: /fintech|payment|\bpay later|buy[- ]now|\bwallet|\bbanking|\bqr pay/i },
   { key: "delivery", label: "Delivery & logistics", pattern: /deliver|logistic|courier|\bdriver|\bmerchant|last[- ]mile/i },
   { key: "education", label: "Education", pattern: /\bstudent|\beducat|\be-?learning|\bcourse|\buniversit|\bschool/i },
@@ -179,6 +179,8 @@ export interface PortfolioInput {
     aliases?: string[];
     /** Market codes it shipped in, on top of the ones its text names. */
     markets?: string[];
+    /** Google's app type for JSON-LD ("FinanceApplication"). Default: from the project's topics, see APP_CATEGORY. */
+    applicationCategory?: string;
   }[];
   skills: { name: string; category?: string; aliases?: string[] }[];
   markets?: { code: string; name: string; aliases?: string[] }[];
@@ -197,6 +199,38 @@ export function callName(title: string): string | null {
 
 /** A role reads by its title alone in a sentence ("Software Engineer II"). */
 export const roleShort = (title: string): string => title.replace(/\s+[—–-]\s+.*$/, "");
+
+/** Category words that say what a project is, not what it runs on: kept out of `operatingSystem`. */
+const NOT_A_PLATFORM = new Set(["backend", "frontend", "api", "server", "fullstack", "full stack", "cms", "library"]);
+const platformsOf = (category?: string) =>
+  (category ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter((s) => s && !NOT_A_PLATFORM.has(lowerKey(s)));
+
+/**
+ * Google's app types (its Software App rich result needs one) for the preset's
+ * topics, in order of preference; projects about none of them are utilities.
+ */
+export const APP_CATEGORY: [topic: string, category: string][] = [
+  ["fintech", "FinanceApplication"],
+  ["education", "EducationalApplication"],
+  ["telecom", "CommunicationApplication"],
+  ["music", "MultimediaApplication"],
+  ["visual-art", "DesignApplication"],
+  ["delivery", "BusinessApplication"],
+  ["productivity", "BusinessApplication"],
+  ["research", "ReferenceApplication"],
+];
+
+function appCategory(text: string): string {
+  for (const [key, category] of APP_CATEGORY) {
+    const topic = PORTFOLIO_TOPICS.find((t) => t.key === key);
+    const re = topic && (typeof topic.pattern === "string" ? new RegExp(topic.pattern, "i") : topic.pattern);
+    if (re?.test(text)) return category;
+  }
+  return "UtilitiesApplication";
+}
 
 const KIND_WORD: Record<string, string> = { page: "page", channel: "channel", writing: "article", art: "piece" };
 
@@ -247,6 +281,8 @@ export function fromPortfolio(input: PortfolioInput): Dataset {
         headline: pr.subtitle || undefined,
         longDescription: pr.fullDescription || pr.description || undefined,
         category: pr.category,
+        operatingSystem: platformsOf(pr.category).join(", ") || undefined,
+        applicationCategory: pr.applicationCategory ?? appCategory(`${pr.title} ${pr.subtitle ?? ""} ${pr.description ?? ""} ${pr.fullDescription ?? ""}`),
         image: pr.image,
         date: pr.date,
       },

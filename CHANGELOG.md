@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.1.5 (10 Nov 2026)
+
+Found by Google's Rich Results Test on the live portfolio, which marked every
+project invalid ("two or more of offers, aggregateRating, applicationCategory,
+operatingSystem"):
+
+- **`applicationCategory` on every app.** `fromPortfolio` gives each project one
+  of Google's app types from its topics (fintech → FinanceApplication,
+  education → EducationalApplication, telecom → CommunicationApplication…,
+  else UtilitiesApplication; the table is `APP_CATEGORY`). A project's own
+  `applicationCategory` wins.
+- **`operatingSystem` from platforms only.** It comes from the project's
+  category (iOS, Android, Web…); tags ("Founded by me") and words like
+  "Backend" no longer leak in. JSON-LD reads `data.operatingSystem` first.
+- The preset's Telecom topic also recognises prepaid, recharge, data bundles and
+  mobile plans.
+
 ## 0.1.4 (10 Nov 2026)
 
 - **The person is always in the exports.** A person with no links of their own

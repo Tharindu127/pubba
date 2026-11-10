@@ -70,3 +70,23 @@ test("0.1.4: a person with no links of their own is still in the JSON-LD and llm
   assert.ok(nodes.filter((n) => n["@type"] !== "Person").every((n) => n.creator?.["@id"] === person!["@id"]));
   assert.match(toLlmsTxt(lonely.graph), /^# Nimali Perera/);
 });
+
+test("0.1.5: apps carry the two properties Google's Software App result needs; tags stay out of operatingSystem", () => {
+  const input = {
+    ...portfolio,
+    projects: portfolio.projects.map((p) =>
+      p.slug === "synthpad" ? { ...p, category: "Web, Backend" } : p.slug === "tidepool" ? { ...p, applicationCategory: "DeveloperApplication" } : p
+    ),
+  };
+  const nodes = toJsonLd(examplePubba(undefined, input).graph, { baseUrl: "https://nimali.example.com" })["@graph"] as Record<string, any>[];
+  const apps = nodes.filter((n) => n["@type"] === "SoftwareApplication");
+  assert.ok(apps.length > 0 && apps.every((n) => n.applicationCategory && n.operatingSystem), "every app has both");
+  const by = (name: string) => apps.find((n) => n.name === name)!;
+  assert.equal(by("Kiri Wallet").applicationCategory, "FinanceApplication");
+  assert.equal(by("StudyBuddy Planner").applicationCategory, "EducationalApplication");
+  assert.equal(by("Synthpad").applicationCategory, "MultimediaApplication");
+  assert.equal(by("Tidepool Dashboard").applicationCategory, "DeveloperApplication", "a project's own category wins");
+  assert.equal(by("Synthpad").operatingSystem, "Web", "not Backend, not the founded tag");
+  assert.equal(by("StudyBuddy Planner").operatingSystem, "Mobile");
+  assert.ok(!apps.some((n) => /founded/i.test(n.operatingSystem)));
+});

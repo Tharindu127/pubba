@@ -22,7 +22,7 @@ export interface JsonLdOptions {
   roleTypes?: string[];
   /** Types whose entities are topics, used for `about`. Default ["topic"]. */
   topicTypes?: string[];
-  /** Platform types, used for `operatingSystem`. Default ["area"]. */
+  /** Platform types, used for `operatingSystem` when an entity has no `data.operatingSystem`. Default ["area"]. */
   platformTypes?: string[];
   /** Publish the person's email (`data.email`). Default false. */
   includeEmail?: boolean;
@@ -113,7 +113,9 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
         dateCreated: str(e.data?.date),
         keywords: near(e, skillTypes).map((x) => x.label).join(", ") || undefined,
         about: near(e, topicTypes).map((x) => ({ "@type": "Thing", name: x.label })),
-        ...(type === "SoftwareApplication" ? { operatingSystem: platforms.join(", ") || undefined, applicationCategory: str(e.data?.applicationCategory) } : {}),
+        ...(type === "SoftwareApplication"
+          ? { operatingSystem: str(e.data?.operatingSystem) ?? (platforms.join(", ") || undefined), applicationCategory: str(e.data?.applicationCategory) }
+          : {}),
         creator: personId ? { "@id": personId } : undefined,
       })
     );
