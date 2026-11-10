@@ -153,7 +153,8 @@ export function portfolioConfig({ pronoun = "they", owner, legacyMatching = fals
     },
     match: {
       ...(owner ? { ignore: [owner] } : {}),
-      ...(legacyMatching ? {} : { typoMinLength: 5, distinctWords: true, partialWords: true, precise: true }),
+      // The words the preset puts in page labels ("TikTok channel") say what a page is, not which one.
+      ...(legacyMatching ? {} : { typoMinLength: 5, distinctWords: true, partialWords: true, precise: true, notDistinct: Object.values(KIND_WORD) }),
     },
     templates: portfolioTemplates(pronoun),
   };

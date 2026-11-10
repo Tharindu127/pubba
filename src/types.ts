@@ -204,6 +204,8 @@ export interface MatchConfig {
   typoMinLength?: number;
   /** A word of 5+ letters found in only one name is enough on its own ("ragnarok"). Default false. */
   distinctWords?: boolean;
+  /** Words never distinctive on their own, though they still count inside a name: generic labels like "channel" or "page". */
+  notDistinct?: string[];
   /** A name of 3+ significant words matches with all but one of them ("red dead"). Default false. */
   partialWords?: boolean;
   /**

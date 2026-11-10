@@ -75,7 +75,8 @@ function distinctWords(g: Graph, stop: Set<string>): Set<string> {
       for (const w of significant(normalize(raw), stop)) owners.set(w, (owners.get(w) ?? new Set()).add(e.id));
     }
   }
-  out = new Set([...owners].filter(([, ids]) => ids.size === 1).map(([w]) => w));
+  const generic = new Set((g.config.match?.notDistinct ?? []).map(normalize));
+  out = new Set([...owners].filter(([w, ids]) => ids.size === 1 && !generic.has(w)).map(([w]) => w));
   distinctCache.set(g, out);
   return out;
 }

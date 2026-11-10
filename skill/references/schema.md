@@ -79,7 +79,7 @@ site exactly):
 | `match` option | Effect | Fixes |
 | --- | --- | --- |
 | `typoMinLength: 5` | Words under 5 letters must be spelled right | "hire" matching the skill Hive |
-| `distinctWords: true` | A 5+ letter word found in only one name is enough (score 25) | "ragnarok", "music channel" |
+| `distinctWords: true` | A 5+ letter word found in only one name, spelled right, is enough (score 25). `notDistinct` lists words that never count alone (the preset: page, channel, article, piece) | "ragnarok", "music channel" |
 | `partialWords: true` | A name of 3+ significant words matches with all but one (40 + hits) | "red dead" |
 | `precise: true` | Spelled right beats a typo of a longer name; a typo'd whole name counts as the whole name (95 + length); ties go to the name covering more of the query; a whole name in a later tier beats one word of a name in an earlier tier | "Swift" → SwiftUI, "skyfroge saga ii" → Saga, "Odoo REST API" → Odoo Merchant |
 

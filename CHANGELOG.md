@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.2 (10 Nov 2026)
+
+- **`match.notDistinct`**: words that never count as distinctive on their own,
+  though they still count inside a whole name. The portfolio preset lists the
+  words it puts in page labels (page, channel, article, piece): an own page
+  labelled "TikTok channel" no longer answers "his youtube channel" just because
+  it is the only label with "channel" in it.
+
 ## 0.1.1 (10 Nov 2026)
 
 Fixes found by switching the portfolio site to pubba, on its live content:
