@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.1.3 (10 Nov 2026)
+
+Export options found by generating the portfolio site's JSON-LD from the graph:
+
+- **`toJsonLd({ knowsAbout })`**: a curated `knowsAbout` (free text or skill
+  labels) instead of every skill.
+- **`toJsonLd({ include })`**: only these entities besides the person, for one
+  project's page.
+- **`headline` and a full description.** Nodes read `data.headline`, and
+  `data.longDescription` before `data.description`. `fromPortfolio` fills them
+  from a project's subtitle and full description; llms.txt keeps the short line.
+- **Ids stay on the site.** An item hosted elsewhere (a Medium article) keeps its
+  own `url`, but its `@id` is now under the site's url, not the other site's.
+
 ## 0.1.2 (10 Nov 2026)
 
 - **`match.notDistinct`**: words that never count as distinctive on their own,

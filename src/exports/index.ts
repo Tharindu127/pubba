@@ -26,6 +26,10 @@ export interface JsonLdOptions {
   platformTypes?: string[];
   /** Publish the person's email (`data.email`). Default false. */
   includeEmail?: boolean;
+  /** The person's `knowsAbout`, curated: free text ("iOS development") or skill labels. Default: every skill. */
+  knowsAbout?: string[];
+  /** Only these entities (by id) besides the person: one project's page, say. Default: all. */
+  include?: string[];
 }
 
 const DEFAULT_SCHEMA_TYPES: Record<string, string | null> = { project: "SoftwareApplication", creative: "CreativeWork" };
@@ -41,6 +45,8 @@ const absolute = (url: string | undefined, base?: string) => {
 const str = (x: unknown) => (typeof x === "string" && x.trim() ? x.trim() : undefined);
 const clean = (o: Json): Json => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined && !(Array.isArray(v) && v.length === 0)));
 const description = (e: Entity) => str(e.data?.description);
+/** The fullest description, for JSON-LD: `data.longDescription`, else `data.description`. */
+const longDescription = (e: Entity) => str(e.data?.longDescription) ?? description(e);
 const sentence = (s: string | undefined) => (s && !/[.!?]$/.test(s) ? `${s}.` : s);
 const current = (e: Entity) => !str(e.data?.end) || /present|now|current/i.test(String(e.data?.end));
 
@@ -55,7 +61,18 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
   const person = o.person ? g.entities.get(o.person) : all.find((e) => e.type === "person");
   const personUrl = absolute(person?.url, o.baseUrl) ?? absolute("/", o.baseUrl);
   const personId = person ? `${personUrl ?? ""}#${person.id}` : undefined;
-  const idOf = (e: Entity) => `${absolute(e.url, o.baseUrl) ?? personUrl ?? ""}#${e.id}`;
+  // Ids stay on the site: an item hosted elsewhere (a Medium article) gets one under the site's url.
+  const site = (() => {
+    try {
+      return new URL(o.baseUrl ?? personUrl ?? "").origin;
+    } catch {
+      return undefined;
+    }
+  })();
+  const idOf = (e: Entity) => {
+    const own = absolute(e.url, o.baseUrl);
+    return `${own && site && own.startsWith(`${site}/`) ? own : (personUrl ?? "")}#${e.id}`;
+  };
   const near = (e: Entity, types: string[]) => neighbours(g, e.id).filter((n) => types.includes(n.entity.type)).map((n) => n.entity);
 
   const nodes: Json[] = [];
@@ -72,7 +89,7 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
         image: absolute(str(person.data?.image), o.baseUrl),
         email: o.includeEmail ? str(person.data?.email) : undefined,
         sameAs,
-        knowsAbout: all.filter((e) => skillTypes.includes(e.type)).map((e) => e.label),
+        knowsAbout: o.knowsAbout ?? all.filter((e) => skillTypes.includes(e.type)).map((e) => e.label),
         worksFor: all
           .filter((e) => roleTypes.includes(e.type) && current(e) && str(e.data?.company))
           .map((e) => ({ "@type": "Organization", name: str(e.data?.company) })),
@@ -81,7 +98,7 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
   }
   for (const e of all) {
     const type = schemaTypes[e.type];
-    if (!type) continue;
+    if (!type || (o.include && !o.include.includes(e.id))) continue;
     const platforms = near(e, platformTypes).map((x) => x.label);
     nodes.push(
       clean({
@@ -89,7 +106,8 @@ export function toJsonLd(g: Graph, o: JsonLdOptions = {}): Json {
         "@id": idOf(e),
         name: e.label,
         url: absolute(e.url, o.baseUrl),
-        description: description(e),
+        headline: str(e.data?.headline),
+        description: longDescription(e),
         image: absolute(str(e.data?.image), o.baseUrl),
         dateCreated: str(e.data?.date),
         keywords: near(e, skillTypes).map((x) => x.label).join(", ") || undefined,

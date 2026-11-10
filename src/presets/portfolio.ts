@@ -242,7 +242,14 @@ export function fromPortfolio(input: PortfolioInput): Dataset {
       mentionAs: call ? [call] : false,
       ...(pr.aliases ? { aliases: pr.aliases } : {}),
       ...(pr.url ? { url: pr.url } : {}),
-      data: { description: pr.subtitle || pr.description, category: pr.category, image: pr.image, date: pr.date },
+      data: {
+        description: pr.subtitle || pr.description,
+        headline: pr.subtitle || undefined,
+        longDescription: pr.fullDescription || pr.description || undefined,
+        category: pr.category,
+        image: pr.image,
+        date: pr.date,
+      },
     });
   }
   for (const s of input.skills) add({ id: `tech:${s.name}`, type: "tech", label: s.name, weight: skillWeight(s.category), ...(s.aliases ? { aliases: s.aliases } : {}), data: { category: s.category } });

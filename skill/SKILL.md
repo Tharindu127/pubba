@@ -71,6 +71,8 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
    pieces, each with `creator` pointing at the person. It validates as it writes
    and exits 1 on a problem (missing names, relative urls, dangling ids).
    - Email is left out unless the user asks; it's personal data.
+   - In code, `toJsonLd(graph, { knowsAbout: [...] })` takes a curated skill list,
+     and `{ include: ["project:<slug>"] }` gives one project page's subset.
    - If the site already has hand-written JSON-LD, diff the two and point out
      what the generated one adds or loses before replacing anything.
    - To use it in a page, embed it in a `<script type="application/ld+json">`.

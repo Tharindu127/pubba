@@ -24,7 +24,7 @@
 | `url` | | Its page |
 | `weight` | | 0 to 1: how much a link to it says. Common tools 0.4, core skills 1 |
 | `mentionAs` | | Names that count when another text mentions it. Default: the label. `false` for never |
-| `data` | | Anything else. Exports read `description`, `image`, `date`, `jobTitle`, `company`, `end`, `sameAs`, `email` |
+| `data` | | Anything else. Exports read `description` (short), `longDescription`, `headline`, `image`, `date`, `jobTitle`, `company`, `end`, `sameAs`, `email` |
 
 ## Link
 
