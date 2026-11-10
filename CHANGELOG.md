@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.2.0 (10 Nov 2026)
+
+First v2 release: privacy-safe measurement events (design: docs/v2-design.md).
+
+- **`createEvents({ goals })`** and **`createPubba(data, config, { events })`.**
+  pubba emits `suggested` (from `next` and `related`) and `matched` (what kind of
+  thing a query resolved to, never the query). Nothing is stored or sent.
+- **`pubba.track`**: `guideOpened()`, `guidedTo(id, via)` and `reached(goal)` for
+  the moments only the site sees. Unknown ids, vias and undeclared goals are
+  dropped, so nothing a visitor typed can reach an event.
+- **`summarise(events)`**: one visit's funnel: was the guide used, where did it
+  lead, which goals were reached, and was a goal reached after the guide led
+  somewhere.
+- Listeners that throw are ignored; events are frozen. Without `events`, nothing
+  changes.
+
 ## 0.1.6 (10 Nov 2026)
 
 - `package.json`: the `bin` path as npm writes it (no publish warning).

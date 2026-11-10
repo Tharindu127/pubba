@@ -1,4 +1,4 @@
-import { createPubba, mergeConfig, type Pubba } from "./index.ts";
+import { createPubba, mergeConfig, type CreateOptions, type Pubba } from "./index.ts";
 import { fromPortfolio, portfolioConfig, type PortfolioInput, type PortfolioOptions } from "./presets/portfolio.ts";
 import type { Dataset, Entity, Link, PubbaConfig } from "./types.ts";
 
@@ -26,6 +26,6 @@ export function documentDataset(doc: PubbaDocument): Dataset {
   return { entities: [...base.entities, ...(doc.entities ?? [])], links: [...(base.links ?? []), ...(doc.links ?? [])] };
 }
 
-export function fromDocument(doc: PubbaDocument): Pubba {
-  return createPubba(documentDataset(doc), documentConfig(doc));
+export function fromDocument(doc: PubbaDocument, options: CreateOptions = {}): Pubba {
+  return createPubba(documentDataset(doc), documentConfig(doc), options);
 }

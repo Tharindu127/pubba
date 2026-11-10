@@ -181,6 +181,8 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `pubba.match(query)` | `{ intent: "entity" \| "similar" \| "none", entity, match, similar }` |
 | `pubba.explain(reason, item, templates?)` | A reason as a sentence |
 | `createTrail({ max?, storage?, key? })` | `record`, `get`, `clear`, `subscribe` |
+| `createEvents({ goals? })`, `createPubba(data, config, { events })` | Privacy-safe measurement events; `pubba.track.guideOpened / guidedTo / reached` |
+| `summarise(events)` | One visit's funnel: `usedGuide`, `guidedTo`, `reached`, `guidedBeforeGoal` |
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
 | `pubba.graph.unlinked` | Entities with no links: never suggested, but `match` and `search` still find them |
@@ -223,6 +225,33 @@ Software apps get `applicationCategory` (from `data.applicationCategory`; the
 portfolio preset picks one of Google's app types from the project's topics) and
 `operatingSystem` (from `data.operatingSystem`: the project's platforms), the two
 properties Google's Software App rich result needs without a price or rating.
+
+## Measurement events
+
+pubba can tell a site how its guide is used, without tracking anyone. It only
+emits events: no storage, no network calls, no visitor or session ids, no
+timestamps, and never the text of a question or answer. The site decides where
+events go.
+
+```ts
+import { createEvents, createPubba, summarise, type PubbaEvent } from "pubba";
+
+const events = createEvents({ goals: ["contact", "resume"] });
+const visit: PubbaEvent[] = [];
+events.on((e) => visit.push(e)); // or forward to the site's own anonymous log
+
+const pubba = createPubba(data, config, { events });
+pubba.next(trail);                        // emits { type: "suggested", source: "next", ids, reasonKinds }
+pubba.match("anything like Kiri Wallet?"); // emits { type: "matched", intent: "similar", entityType: "project", by: "name" }
+pubba.track.guideOpened();
+pubba.track.guidedTo("project:kiri-wallet", "chip"); // unknown ids are dropped
+pubba.track.reached("contact");                     // undeclared goals are dropped
+
+summarise(visit); // { usedGuide, guidedTo, guidedToTypes, reached, guidedBeforeGoal }
+```
+
+`summarise` gives the funnel rows a guide is judged by: did the visitor use the
+guide, did it lead them to a project, and did they reach contact after it did.
 
 ## The evaluation harness
 
@@ -328,7 +357,7 @@ harness with generated cases and lint; the portfolio preset; JSON-LD and
 llms.txt helpers; the CLI and the Claude skill. Hardened by switching the
 portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 
-**v2: knowing the visitor, measuring, exporting**
+**v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles are next (0.3), then exports (0.4).
 
 - **Intent profiles.** Infer a visitor's likely intent from their trail ("mobile
   hiring" versus "web client") and weight related items and predictions by it.
