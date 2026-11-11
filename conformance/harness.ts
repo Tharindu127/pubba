@@ -1,5 +1,6 @@
 import { createEvents, createGuide, pubbaFor, type Chip, type Pubba, type PubbaEvent, type Reason, type Reply } from "../src/index.ts";
 import type { GuideVia } from "../src/events.ts";
+import type { Entity, GuideOptions } from "../src/index.ts";
 
 /*
  * What a conformance case asks, and the exact shape of its answer. The
@@ -25,12 +26,49 @@ export type Case =
   | { op: "related"; id: string; limit?: number; kinds?: string[] }
   | { op: "autocomplete"; typed: string; trail: string[]; limit: number }
   | { op: "explain"; reason: Reason; item: string }
-  | { op: "guide"; steps: GuideStep[] };
+  | { op: "guide"; steps: GuideStep[]; options?: GuideCaseOptions };
+
+/**
+ * Guide options as data, so every runtime can rebuild them: what a chip may not
+ * lead to, fallback chips by context, lines, templates, and types a nudge avoids.
+ */
+export interface GuideCaseOptions {
+  chips?: number;
+  /** An entity is hidden when it fits every field of any one rule. Labels compared lowercased. */
+  hide?: { types?: string[]; ids?: string[]; labelIncludes?: string[]; labelEndsWith?: string[] }[];
+  /** Keyed by reply kind ("none", "not-here", "start", "chips", "open"), or "open.<type>" before "open". */
+  fallback?: Record<string, string[]>;
+  /** id to line, for {line}. */
+  lines?: Record<string, string>;
+  templates?: Record<string, string>;
+  /** Types a nudge prefers not to pick. */
+  nudgeAvoids?: string[];
+}
+
+function guideOptions(o: GuideCaseOptions = {}): GuideOptions {
+  const hidden = (e: Entity) =>
+    (o.hide ?? []).some(
+      (r) =>
+        (!r.types || r.types.includes(e.type)) &&
+        (!r.ids || r.ids.includes(e.id)) &&
+        (!r.labelIncludes || r.labelIncludes.some((s) => e.label.toLowerCase().includes(s))) &&
+        (!r.labelEndsWith || r.labelEndsWith.some((s) => e.label.toLowerCase().endsWith(s)))
+    );
+  return {
+    ...(o.chips !== undefined ? { chips: o.chips } : {}),
+    ...(o.hide ? { accept: (e: Entity) => !hidden(e) } : {}),
+    ...(o.fallback ? { fallback: (c) => (c.kind === "open" && c.entity ? (o.fallback![`open.${c.entity.type}`] ?? o.fallback!.open) : o.fallback![c.kind]) } : {}),
+    ...(o.lines ? { line: (e: Entity) => o.lines![e.id] } : {}),
+    ...(o.templates ? { templates: o.templates } : {}),
+    ...(o.nudgeAvoids ? { nudge: { prefer: (e: Entity) => !o.nudgeAvoids!.includes(e.type) } } : {}),
+  };
+}
 
 const reason = (r: Reason) => JSON.parse(JSON.stringify(r)) as Reason;
 const scored = (x: { entity: { id: string }; reason: Reason; text: string; score: number }) => ({ id: x.entity.id, score: x.score, reason: reason(x.reason), text: x.text });
 const weighted = (x: { entity: { id: string }; reason: Reason; text: string; weight: number }) => ({ id: x.entity.id, weight: x.weight, reason: reason(x.reason), text: x.text });
-const chip = (c: Chip) => ({ id: c.id, label: c.label, ...(c.url !== undefined ? { url: c.url } : {}), reason: reason(c.reason), text: c.text });
+const chip = (c: Chip) =>
+  "question" in c ? { label: c.label, question: c.question } : { id: c.id, label: c.label, ...(c.url !== undefined ? { url: c.url } : {}), reason: reason(c.reason), text: c.text };
 const reply = (r: Reply | null) =>
   r && {
     kind: r.kind,
@@ -38,6 +76,7 @@ const reply = (r: Reply | null) =>
     ...(r.action ? { action: { ...r.action } } : {}),
     chips: r.chips.map(chip),
     ...(r.match ? { match: { id: r.match.entity.id, score: r.match.score, tier: r.match.tier, by: r.match.reason.by, name: r.match.reason.name } } : {}),
+    ...(r.similar ? { similar: r.similar.map(chip) } : {}),
   };
 
 /** The answer to one case, as plain JSON. */
@@ -64,18 +103,18 @@ export function run(pubba: Pubba, c: Case): unknown {
     case "explain":
       return pubba.explain(c.reason, c.item);
     case "guide":
-      return runGuide(pubba, c.steps);
+      return runGuide(pubba, c.steps, c.options);
   }
 }
 
 /** A scripted visit: each step's answer, and every event the visit emitted. */
-function runGuide(base: Pubba, steps: GuideStep[]) {
+function runGuide(base: Pubba, steps: GuideStep[], options?: GuideCaseOptions) {
   let clock = 0;
   const events = createEvents({ goals: ["contact"] });
   const emitted: PubbaEvent[] = [];
   events.on((e) => emitted.push(e));
   const pubba = pubbaFor(base.graph, { events });
-  const guide = createGuide(pubba, { now: () => clock });
+  const guide = createGuide(pubba, { ...guideOptions(options), now: () => clock });
   const answers = steps.map((s) => {
     switch (s.op) {
       case "visited":

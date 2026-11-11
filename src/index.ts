@@ -20,7 +20,7 @@ export { compileBundle, graphFromBundle, BUNDLE_FORMAT } from "./bundle.ts";
 export type { Bundle, BundleEntity, CompileOptions } from "./bundle.ts";
 export { VERSION } from "./version.ts";
 export { createGuide, DEFAULT_GUIDE_TEMPLATES } from "./guide.ts";
-export type { Guide, GuideOptions, GuideTemplates, NudgePolicy, Reply, ReplyKind, Chip } from "./guide.ts";
+export type { Guide, GuideOptions, GuideTemplates, NudgePolicy, Reply, ReplyKind, Chip, EntityChip, QuestionChip, ChipContext } from "./guide.ts";
 export type { Events, EventsOptions, EventListener, PubbaEvent, GuideVia, VisitSummary } from "./events.ts";
 export { normalize, editDistance, closeTo, hasPhrase, hasPhraseWith, mentions } from "./text.ts";
 

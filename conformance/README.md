@@ -63,7 +63,19 @@ and templates.
 | `{ op: "opened" }` | `guide.opened()` | null |
 | `{ op: "reached", goal }` | `guide.reached(goal)` | null |
 
-A reply is `{ kind, text, action?: { type, id, url? }, chips, match?: { id, score, tier, by, name } }`;
-a chip is `{ id, label, url?, reason, text }`. `trail` is the trail after the
+A reply is `{ kind, text, action?: { type, id, url? }, chips, match?: { id, score, tier, by, name }, similar? }`;
+a chip is `{ id, label, url?, reason, text }`, or `{ label, question }` for a
+question chip.
+
+Some scripts carry `options`, the guide options as data:
+
+| Key | Becomes |
+| --- | --- |
+| `chips` | the chip count |
+| `hide` | `accept`: an entity is hidden when it fits every given field of any one rule (`types`, `ids`, `labelIncludes`, `labelEndsWith`; labels lowercased) |
+| `fallback` | `fallback(context)`: the list for `"open.<type>"` (then `"open"`) when the context is `open` with an entity, else for the context's kind; missing means none |
+| `lines` | `line(entity)`: by id |
+| `templates` | the templates |
+| `nudgeAvoids` | `nudge.prefer`: an entity whose type isn't listed | `trail` is the trail after the
 script; `events` every event emitted, in order (SPEC section 8), including the
 `suggested` and `matched` events the guide's own calls caused.

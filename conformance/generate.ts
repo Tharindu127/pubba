@@ -108,6 +108,19 @@ function cases(pubba: Pubba, name: string): Case[] {
     [{ op: "ask", question: `something like ${pick(destinations).label}` }, { op: "follow", id: "unknown:id", via: "match" }, { op: "visited", id: "section:anything" }, { op: "tick", ms: 100000 }, { op: "nudge" }],
   ];
   for (const steps of scripts) out.push({ op: "guide", steps });
+
+  // The same visits with a site's options: hidden items, fallbacks, lines, per-type wording, nudge preference.
+  const types = [...new Set(destinations.map((e) => e.type))];
+  const options = {
+    chips: 2,
+    hide: [{ types: [types[types.length - 1]!], labelEndsWith: ["page", "channel"] }, { ids: [pick(ids)] }],
+    fallback: { none: ["Show me everything", "How do I get in touch?"], start: ["Where do I begin?"], [`open.${types[0]}`]: ["More like this"], open: ["Something else"], chips: ["Surprise me"] },
+    lines: Object.fromEntries(destinations.filter((_, i) => i % 3 === 0).map((e) => [e.id, `A line about ${e.label}.`])),
+    templates: { [`open.${types[0]}`]: "{label}: {line} Opening it.", open: "{item}, {line}", similar: "Like {of}: {list}.", [`nudge.${types[0]}`]: "{reason} Have a look?" },
+    nudgeAvoids: [types[1] ?? types[0]!],
+  };
+  for (const steps of scripts) out.push({ op: "guide", steps, options });
+  out.push({ op: "guide", options, steps: destinations.slice(0, 6).flatMap((e): GuideStep[] => [{ op: "visited", id: e.id }, { op: "tick", ms: 70000 }, { op: "nudge" }, { op: "ask", question: e.label }, { op: "chips" }]) });
   return out;
 }
 

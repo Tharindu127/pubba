@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.1 (11 Nov 2026)
+
+What the portfolio's guide needed to move onto `createGuide` without a visible
+change (all off by default; answers without them are unchanged):
+
+- **`accept(entity)`**: things a chip can't lead to are never suggested (chips,
+  nudges, similar items, starters).
+- **`fallback({ kind, entity })`**: chips by context when the trail suggests
+  nothing. Strings become **question chips** `{ label, question }`; `Chip` is
+  now `EntityChip | QuestionChip`.
+- **Per-type wording**: `open.<type>`, `similar.<type>`, `nudge.<type>`
+  templates, with `{label}` and `{line}` (from `line(entity)`), and `{of}` and
+  `{list}` for similar replies. Similar replies also carry every similar item
+  (`similar`).
+- **`nudge.prefer(entity)`**: which prediction a nudge favours, separate from
+  `route`.
+- Conformance: 25 more guide scripts with these options, as data
+  (4,682 cases); spec updated.
+
 ## 0.3.0 (11 Nov 2026)
 
 The foundation for pubba on every platform (docs/multiplatform-design.md).

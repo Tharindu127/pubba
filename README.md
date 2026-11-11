@@ -258,7 +258,14 @@ guide.nudge();                          // a suggestion to show unprompted, or n
   real link and a score of 0.3 or more. Call `nudge()` after
   `guide.nudgePolicy.delayMs`; it enforces the rest. All three numbers are options.
 - **Words** come from templates (`open`, `similar`, `none`, `notHere`, `start`,
-  `nudge`), so the guide speaks in the site's voice and language.
+  `nudge`), so the guide speaks in the site's voice and language. Add
+  `open.<type>` (and `similar.<type>`, `nudge.<type>`) for wording per kind of
+  thing, with `{label}`, `{line}` (from your `line(entity)`), and for similar
+  replies `{of}` and `{list}` ("Parcelo Courier (TypeScript, Node.js), …").
+- **Site options:** `accept(entity)` keeps things a chip can't lead to out of
+  every suggestion; `fallback({ kind, entity })` gives chips when the trail
+  suggests nothing (strings become question chips, `{ label, question }`);
+  `nudge.prefer(entity)` picks which prediction a nudge favours.
 
 ## Bundles: one brain, any platform
 

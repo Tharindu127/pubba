@@ -291,24 +291,47 @@ defaults to 3. Templates (each overridable):
 | start | "Where would you like to start?" |
 | nudge | "{reason} Want a look?" |
 
-Guide templates are filled by replacing `{item}` (short label), `{reason}` (a
-sentence) and `{name}`; unknown tokens are empty; then runs of white space
-become one space and the text is trimmed.
+A template for an entity is looked up as `"<key>.<entity type>"` first, then
+`"<key>"` (for `open`, `similar` with the asked-about entity's type, and
+`nudge`). Templates are filled by replacing `{item}` (short label), `{label}`
+(full label), `{line}` (the site's `line(entity)`, else empty), `{reason}` (a
+sentence) and `{name}`; for `similar` also `{of}` (the asked-about entity's
+full label) and `{list}` (each similar item's full label, followed by
+` (<first two via, joined by ", ">)` when it has any, joined by ", "); unknown
+tokens are empty; then runs of white space become one space and the text is
+trimmed.
 
-- **chip(s):** `{ id, label: short or label, url: route(entity) (if any), reason, text }`.
-- **chips(n = chipCount, extra = []):** `next(trail ++ extra, n)` as chips; if
-  empty, the **starters**: linked destinations sorted by degree descending
-  (ties in order), first `n`, each with reason `{ kind: "section" }` and its sentence.
+Options a site may pass (all optional; without them the guide behaves as
+written below with no filter, no fallback and no lines):
+
+- `accept(entity)`: only accepted entities may be suggested. It filters `next`
+  (chips and nudges), the starters, and the similar items.
+- `fallback(context)`: chips when `next` gives none, before the starters;
+  `context` is `{ kind, entity? }` with kind `start`, `none`, `not-here`,
+  `open` (with the entity) or `chips`. Strings become question chips
+  `{ label, question }` (both the string). At most `n` are used.
+- `line(entity)`: the text for `{line}`.
+- `nudge.prefer(entity)`: which option a nudge takes first (default: one with
+  a route).
+
+- **chip(s):** `{ id, label: short or label, url: route(entity) (if any), reason, text }`; the public `chips(n)` uses context `{ kind: "chips" }`.
+- **chips(n = chipCount, extra = [], context):** `next(trail ++ extra, n)` (with
+  `accept`) as chips; if empty, the first `n` of `fallback(context)` when it
+  gives a list; else the **starters**: accepted linked destinations sorted by
+  degree descending (ties in order), first `n`, each with reason
+  `{ kind: "section" }` and its sentence.
 - **ask(question):**
-  - blank (only white space): `{ kind: "start", text: start, chips: chips() }`.
+  - blank (only white space): `{ kind: "start", text: start, chips: chips(chipCount, [], { kind: "start" }) }`.
   - `m = match(question)`:
-    - `none` with `notHere`: `{ kind: "not-here", text: notHere(name), chips: chips() }`;
-    - `none`: `{ kind: "none", text: none, chips: chips() }`;
-    - `similar`: the first similar item becomes the action;
-      `{ kind: "similar", text: similar(reason = its sentence), action: open(it), chips: the rest, first chipCount, as chips }`;
-    - `entity`: `{ kind: "open", text: open(item = its label), action: open(it), chips }`,
-      where chips are `chips(chipCount, [its id])` without itself if it is
-      linked, else `chips()`.
+    - `none` with `notHere`: `{ kind: "not-here", text: notHere(name), chips: chips(chipCount, [], { kind: "not-here" }) }`;
+    - `none`: `{ kind: "none", text: none, chips: chips(chipCount, [], { kind: "none" }) }`;
+    - `similar` (after `accept` leaves at least one): the first similar item
+      becomes the action; `{ kind: "similar", text: similar(item, label and line
+      of the first, reason = its sentence, of, list), action: open(it), chips:
+      the rest, first chipCount, as chips, similar: all of them as chips }`;
+    - `entity`: `{ kind: "open", text: open(item, label, line of it), action: open(it), chips }`,
+      where chips are `chips(chipCount, [its id], { kind: "open", entity })`
+      without itself if it is linked, else `chips(chipCount, [], the same context)`.
   - `open(e)` = `{ type: "open", id, url: route(e) (if any) }`.
   - Asking doesn't change the trail.
 - **visited(id):** known ids and `section:` steps only: record it; `lastStepAt = now`; `lastStepSelf = true`.
@@ -317,8 +340,8 @@ become one space and the text is trimmed.
 - **nudge():** null unless all hold: there is a last step; `lastStepSelf`; it
   isn't a `section:` step; it isn't in `nudgedFrom`; `now - lastStepAt >= delayMs`
   (default 9000); `now - lastNudgeAt >= gapMs` (default 60000). Then
-  `options` = `next(trail, 5)` without section reasons and with score at least
-  `minScore` (default 0.3); `top` = the first option with a route, else the
-  first; none: null. Otherwise `lastNudgeAt = now`, add the last step to
-  `nudgedFrom`, and answer `{ kind: "open", text: nudge(reason = top's sentence), action: open(top), chips: [top as a chip] }`.
+  `options` = `next(trail, 5)` (with `accept`) without section reasons and with
+  score at least `minScore` (default 0.3); `top` = the first option `prefer`
+  accepts, else the first; none: null. Otherwise `lastNudgeAt = now`, add the last step to
+  `nudgedFrom`, and answer `{ kind: "open", text: nudge(item, label and line of top, reason = top's sentence), action: open(top), chips: [top as a chip] }`.
 - **opened()**, **reached(goal):** `track.guideOpened()`, `track.reached(goal)`.
