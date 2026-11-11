@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.0 (11 Nov 2026)
+
+The foundation for pubba on every platform (docs/multiplatform-design.md).
+
+- **Bundles.** `pubba compile` (and `compileBundle`) writes the finished graph
+  as one versioned JSON file; `loadBundle` answers from it exactly as the full
+  build does. Templates written as functions are refused (they can't cross
+  languages). Every CLI command except `compile` also accepts a bundle.
+- **`createGuide`**: the headless navigator. `ask` turns a question into a
+  reply (open, similar, none, not-here, start) with an action and chips;
+  `visited` and `follow` record the trail (follow is measured); `nudge`
+  applies Pubba's rules (own step, 9 s delay, once per item, 60 s apart,
+  score 0.3 or more); words come from overridable templates.
+- **spec/SPEC.md**: the runtime behaviour every language implements.
+- **conformance/**: 4,657 cases over five sample sites (two portfolios, a
+  catalogue, a course list, a docs site), generated from the reference; the
+  TypeScript runtime passes all of them, and CI fails when the files are out
+  of date.
+- `assembleGraph`, `pubbaFor` and `VERSION` are exported.
+
 ## 0.2.0 (10 Nov 2026)
 
 First v2 release: privacy-safe measurement events (design: docs/v2-design.md).

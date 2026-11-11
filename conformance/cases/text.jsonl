@@ -1,0 +1,1470 @@
+{"op":"normalize","input":"flutter","expect":"flutter"}
+{"op":"normalize","input":"flutr","expect":"flutr"}
+{"op":"normalize","input":"fluttre","expect":"fluttre"}
+{"op":"normalize","input":"Café","expect":"cafe"}
+{"op":"normalize","input":"naïve","expect":"naive"}
+{"op":"normalize","input":"C#","expect":"c#"}
+{"op":"normalize","input":"Next.js","expect":"next.js"}
+{"op":"normalize","input":"C++","expect":"c++"}
+{"op":"normalize","input":"ÉCOLE","expect":"ecole"}
+{"op":"normalize","input":"  spaced   out  ","expect":"spaced out"}
+{"op":"normalize","input":"hire","expect":"hire"}
+{"op":"normalize","input":"hive","expect":"hive"}
+{"op":"normalize","input":"notes","expect":"notes"}
+{"op":"normalize","input":"node","expect":"node"}
+{"op":"normalize","input":"weather","expect":"weather"}
+{"op":"normalize","input":"whether","expect":"whether"}
+{"op":"normalize","input":"lankan","expect":"lankan"}
+{"op":"normalize","input":"lanka","expect":"lanka"}
+{"op":"normalize","input":"apps","expect":"apps"}
+{"op":"normalize","input":"app","expect":"app"}
+{"op":"normalize","input":"swiftui","expect":"swiftui"}
+{"op":"normalize","input":"swfitui","expect":"swfitui"}
+{"op":"normalize","input":"kenia","expect":"kenia"}
+{"op":"normalize","input":"kenya","expect":"kenya"}
+{"op":"normalize","input":"ragnarök","expect":"ragnarok"}
+{"op":"normalize","input":"ragnarok","expect":"ragnarok"}
+{"op":"normalize","input":"react-native","expect":"react native"}
+{"op":"normalize","input":"e-mail","expect":"e mail"}
+{"op":"normalize","input":"ß","expect":""}
+{"op":"normalize","input":"ﬁle","expect":"file"}
+{"op":"distance","a":"flutter","b":"flutter","expect":0}
+{"op":"closeTo","token":"flutter","word":"flutter","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutter","word":"flutter","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutter","b":"flutr","expect":2}
+{"op":"closeTo","token":"flutter","word":"flutr","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutter","word":"flutr","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutter","b":"fluttre","expect":1}
+{"op":"closeTo","token":"flutter","word":"fluttre","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutter","word":"fluttre","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutter","b":"cafe","expect":6}
+{"op":"closeTo","token":"flutter","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"naive","expect":6}
+{"op":"closeTo","token":"flutter","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"c#","expect":7}
+{"op":"closeTo","token":"flutter","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"next.js","expect":6}
+{"op":"closeTo","token":"flutter","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"c++","expect":7}
+{"op":"closeTo","token":"flutter","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"ecole","expect":6}
+{"op":"closeTo","token":"flutter","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"spaced out","expect":10}
+{"op":"closeTo","token":"flutter","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"hire","expect":6}
+{"op":"closeTo","token":"flutter","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"hive","expect":6}
+{"op":"closeTo","token":"flutter","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"notes","expect":5}
+{"op":"closeTo","token":"flutter","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"node","expect":6}
+{"op":"closeTo","token":"flutter","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"weather","expect":4}
+{"op":"closeTo","token":"flutter","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutter","b":"whether","expect":4}
+{"op":"closeTo","token":"flutter","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutter","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"flutter","expect":2}
+{"op":"closeTo","token":"flutr","word":"flutter","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutr","word":"flutter","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutr","b":"flutr","expect":0}
+{"op":"closeTo","token":"flutr","word":"flutr","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutr","word":"flutr","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutr","b":"fluttre","expect":2}
+{"op":"closeTo","token":"flutr","word":"fluttre","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"flutr","word":"fluttre","typoMinLength":5,"expect":true}
+{"op":"distance","a":"flutr","b":"cafe","expect":5}
+{"op":"closeTo","token":"flutr","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"naive","expect":5}
+{"op":"closeTo","token":"flutr","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"c#","expect":5}
+{"op":"closeTo","token":"flutr","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"next.js","expect":6}
+{"op":"closeTo","token":"flutr","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"c++","expect":5}
+{"op":"closeTo","token":"flutr","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"ecole","expect":5}
+{"op":"closeTo","token":"flutr","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"spaced out","expect":9}
+{"op":"closeTo","token":"flutr","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"hire","expect":5}
+{"op":"closeTo","token":"flutr","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"hive","expect":5}
+{"op":"closeTo","token":"flutr","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"notes","expect":5}
+{"op":"closeTo","token":"flutr","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"node","expect":5}
+{"op":"closeTo","token":"flutr","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"weather","expect":5}
+{"op":"closeTo","token":"flutr","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"flutr","b":"whether","expect":5}
+{"op":"closeTo","token":"flutr","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"flutr","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"flutter","expect":1}
+{"op":"closeTo","token":"fluttre","word":"flutter","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"fluttre","word":"flutter","typoMinLength":5,"expect":true}
+{"op":"distance","a":"fluttre","b":"flutr","expect":2}
+{"op":"closeTo","token":"fluttre","word":"flutr","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"fluttre","word":"flutr","typoMinLength":5,"expect":true}
+{"op":"distance","a":"fluttre","b":"fluttre","expect":0}
+{"op":"closeTo","token":"fluttre","word":"fluttre","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"fluttre","word":"fluttre","typoMinLength":5,"expect":true}
+{"op":"distance","a":"fluttre","b":"cafe","expect":6}
+{"op":"closeTo","token":"fluttre","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"naive","expect":6}
+{"op":"closeTo","token":"fluttre","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"c#","expect":7}
+{"op":"closeTo","token":"fluttre","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"next.js","expect":6}
+{"op":"closeTo","token":"fluttre","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"c++","expect":7}
+{"op":"closeTo","token":"fluttre","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"ecole","expect":6}
+{"op":"closeTo","token":"fluttre","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"spaced out","expect":10}
+{"op":"closeTo","token":"fluttre","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"hire","expect":5}
+{"op":"closeTo","token":"fluttre","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"hive","expect":6}
+{"op":"closeTo","token":"fluttre","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"notes","expect":6}
+{"op":"closeTo","token":"fluttre","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"node","expect":6}
+{"op":"closeTo","token":"fluttre","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"weather","expect":5}
+{"op":"closeTo","token":"fluttre","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"fluttre","b":"whether","expect":5}
+{"op":"closeTo","token":"fluttre","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"fluttre","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"flutter","expect":6}
+{"op":"closeTo","token":"cafe","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"flutr","expect":5}
+{"op":"closeTo","token":"cafe","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"fluttre","expect":6}
+{"op":"closeTo","token":"cafe","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"cafe","expect":0}
+{"op":"closeTo","token":"cafe","word":"cafe","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"cafe","word":"cafe","typoMinLength":5,"expect":true}
+{"op":"distance","a":"cafe","b":"naive","expect":3}
+{"op":"closeTo","token":"cafe","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"c#","expect":3}
+{"op":"closeTo","token":"cafe","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"next.js","expect":7}
+{"op":"closeTo","token":"cafe","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"c++","expect":3}
+{"op":"closeTo","token":"cafe","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"ecole","expect":3}
+{"op":"closeTo","token":"cafe","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"spaced out","expect":8}
+{"op":"closeTo","token":"cafe","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"hire","expect":3}
+{"op":"closeTo","token":"cafe","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"hive","expect":3}
+{"op":"closeTo","token":"cafe","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"notes","expect":4}
+{"op":"closeTo","token":"cafe","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"node","expect":3}
+{"op":"closeTo","token":"cafe","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"weather","expect":5}
+{"op":"closeTo","token":"cafe","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"cafe","b":"whether","expect":6}
+{"op":"closeTo","token":"cafe","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"cafe","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"flutter","expect":6}
+{"op":"closeTo","token":"naive","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"flutr","expect":5}
+{"op":"closeTo","token":"naive","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"fluttre","expect":6}
+{"op":"closeTo","token":"naive","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"cafe","expect":3}
+{"op":"closeTo","token":"naive","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"naive","expect":0}
+{"op":"closeTo","token":"naive","word":"naive","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"naive","word":"naive","typoMinLength":5,"expect":true}
+{"op":"distance","a":"naive","b":"c#","expect":5}
+{"op":"closeTo","token":"naive","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"next.js","expect":6}
+{"op":"closeTo","token":"naive","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"c++","expect":5}
+{"op":"closeTo","token":"naive","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"ecole","expect":4}
+{"op":"closeTo","token":"naive","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"spaced out","expect":9}
+{"op":"closeTo","token":"naive","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"hire","expect":3}
+{"op":"closeTo","token":"naive","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"hive","expect":2}
+{"op":"closeTo","token":"naive","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"notes","expect":4}
+{"op":"closeTo","token":"naive","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"node","expect":3}
+{"op":"closeTo","token":"naive","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"weather","expect":5}
+{"op":"closeTo","token":"naive","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"naive","b":"whether","expect":6}
+{"op":"closeTo","token":"naive","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"naive","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"flutter","expect":7}
+{"op":"closeTo","token":"c#","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"flutr","expect":5}
+{"op":"closeTo","token":"c#","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"fluttre","expect":7}
+{"op":"closeTo","token":"c#","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"cafe","expect":3}
+{"op":"closeTo","token":"c#","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"naive","expect":5}
+{"op":"closeTo","token":"c#","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"c#","expect":0}
+{"op":"closeTo","token":"c#","word":"c#","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"c#","word":"c#","typoMinLength":5,"expect":true}
+{"op":"distance","a":"c#","b":"next.js","expect":7}
+{"op":"closeTo","token":"c#","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"c++","expect":2}
+{"op":"closeTo","token":"c#","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"ecole","expect":4}
+{"op":"closeTo","token":"c#","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"spaced out","expect":9}
+{"op":"closeTo","token":"c#","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"hire","expect":4}
+{"op":"closeTo","token":"c#","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"hive","expect":4}
+{"op":"closeTo","token":"c#","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"notes","expect":5}
+{"op":"closeTo","token":"c#","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"node","expect":4}
+{"op":"closeTo","token":"c#","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"weather","expect":7}
+{"op":"closeTo","token":"c#","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c#","b":"whether","expect":7}
+{"op":"closeTo","token":"c#","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c#","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"flutter","expect":6}
+{"op":"closeTo","token":"next.js","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"flutr","expect":6}
+{"op":"closeTo","token":"next.js","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"fluttre","expect":6}
+{"op":"closeTo","token":"next.js","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"cafe","expect":7}
+{"op":"closeTo","token":"next.js","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"naive","expect":6}
+{"op":"closeTo","token":"next.js","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"c#","expect":7}
+{"op":"closeTo","token":"next.js","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"next.js","expect":0}
+{"op":"closeTo","token":"next.js","word":"next.js","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"next.js","word":"next.js","typoMinLength":5,"expect":true}
+{"op":"distance","a":"next.js","b":"c++","expect":7}
+{"op":"closeTo","token":"next.js","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"ecole","expect":6}
+{"op":"closeTo","token":"next.js","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"spaced out","expect":9}
+{"op":"closeTo","token":"next.js","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"hire","expect":7}
+{"op":"closeTo","token":"next.js","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"hive","expect":7}
+{"op":"closeTo","token":"next.js","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"notes","expect":4}
+{"op":"closeTo","token":"next.js","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"node","expect":6}
+{"op":"closeTo","token":"next.js","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"weather","expect":5}
+{"op":"closeTo","token":"next.js","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"next.js","b":"whether","expect":6}
+{"op":"closeTo","token":"next.js","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"next.js","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"flutter","expect":7}
+{"op":"closeTo","token":"c++","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"flutr","expect":5}
+{"op":"closeTo","token":"c++","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"fluttre","expect":7}
+{"op":"closeTo","token":"c++","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"cafe","expect":3}
+{"op":"closeTo","token":"c++","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"naive","expect":5}
+{"op":"closeTo","token":"c++","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"c#","expect":2}
+{"op":"closeTo","token":"c++","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"next.js","expect":7}
+{"op":"closeTo","token":"c++","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"c++","expect":0}
+{"op":"closeTo","token":"c++","word":"c++","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"c++","word":"c++","typoMinLength":5,"expect":true}
+{"op":"distance","a":"c++","b":"ecole","expect":4}
+{"op":"closeTo","token":"c++","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"spaced out","expect":9}
+{"op":"closeTo","token":"c++","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"hire","expect":4}
+{"op":"closeTo","token":"c++","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"hive","expect":4}
+{"op":"closeTo","token":"c++","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"notes","expect":5}
+{"op":"closeTo","token":"c++","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"node","expect":4}
+{"op":"closeTo","token":"c++","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"weather","expect":7}
+{"op":"closeTo","token":"c++","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"c++","b":"whether","expect":7}
+{"op":"closeTo","token":"c++","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"c++","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"flutter","expect":6}
+{"op":"closeTo","token":"ecole","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"flutr","expect":5}
+{"op":"closeTo","token":"ecole","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"fluttre","expect":6}
+{"op":"closeTo","token":"ecole","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"cafe","expect":3}
+{"op":"closeTo","token":"ecole","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"naive","expect":4}
+{"op":"closeTo","token":"ecole","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"c#","expect":4}
+{"op":"closeTo","token":"ecole","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"next.js","expect":6}
+{"op":"closeTo","token":"ecole","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"c++","expect":4}
+{"op":"closeTo","token":"ecole","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"ecole","expect":0}
+{"op":"closeTo","token":"ecole","word":"ecole","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"ecole","word":"ecole","typoMinLength":5,"expect":true}
+{"op":"distance","a":"ecole","b":"spaced out","expect":8}
+{"op":"closeTo","token":"ecole","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"hire","expect":4}
+{"op":"closeTo","token":"ecole","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"hive","expect":4}
+{"op":"closeTo","token":"ecole","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"notes","expect":4}
+{"op":"closeTo","token":"ecole","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"node","expect":3}
+{"op":"closeTo","token":"ecole","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"weather","expect":5}
+{"op":"closeTo","token":"ecole","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ecole","b":"whether","expect":6}
+{"op":"closeTo","token":"ecole","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ecole","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"flutter","expect":10}
+{"op":"closeTo","token":"spaced out","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"flutr","expect":9}
+{"op":"closeTo","token":"spaced out","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"fluttre","expect":10}
+{"op":"closeTo","token":"spaced out","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"cafe","expect":8}
+{"op":"closeTo","token":"spaced out","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"naive","expect":9}
+{"op":"closeTo","token":"spaced out","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"c#","expect":9}
+{"op":"closeTo","token":"spaced out","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"next.js","expect":9}
+{"op":"closeTo","token":"spaced out","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"c++","expect":9}
+{"op":"closeTo","token":"spaced out","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"ecole","expect":8}
+{"op":"closeTo","token":"spaced out","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"spaced out","expect":0}
+{"op":"closeTo","token":"spaced out","word":"spaced out","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"spaced out","word":"spaced out","typoMinLength":5,"expect":true}
+{"op":"distance","a":"spaced out","b":"hire","expect":9}
+{"op":"closeTo","token":"spaced out","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"hive","expect":9}
+{"op":"closeTo","token":"spaced out","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"notes","expect":9}
+{"op":"closeTo","token":"spaced out","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"node","expect":9}
+{"op":"closeTo","token":"spaced out","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"weather","expect":9}
+{"op":"closeTo","token":"spaced out","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"spaced out","b":"whether","expect":9}
+{"op":"closeTo","token":"spaced out","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"spaced out","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"flutter","expect":6}
+{"op":"closeTo","token":"hire","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"flutr","expect":5}
+{"op":"closeTo","token":"hire","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"fluttre","expect":5}
+{"op":"closeTo","token":"hire","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"cafe","expect":3}
+{"op":"closeTo","token":"hire","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"naive","expect":3}
+{"op":"closeTo","token":"hire","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"c#","expect":4}
+{"op":"closeTo","token":"hire","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"next.js","expect":7}
+{"op":"closeTo","token":"hire","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"c++","expect":4}
+{"op":"closeTo","token":"hire","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"ecole","expect":4}
+{"op":"closeTo","token":"hire","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"spaced out","expect":9}
+{"op":"closeTo","token":"hire","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"hire","expect":0}
+{"op":"closeTo","token":"hire","word":"hire","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"hire","word":"hire","typoMinLength":5,"expect":true}
+{"op":"distance","a":"hire","b":"hive","expect":1}
+{"op":"closeTo","token":"hire","word":"hive","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"hire","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"notes","expect":4}
+{"op":"closeTo","token":"hire","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"node","expect":3}
+{"op":"closeTo","token":"hire","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"weather","expect":6}
+{"op":"closeTo","token":"hire","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hire","b":"whether","expect":5}
+{"op":"closeTo","token":"hire","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hire","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"flutter","expect":6}
+{"op":"closeTo","token":"hive","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"flutr","expect":5}
+{"op":"closeTo","token":"hive","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"fluttre","expect":6}
+{"op":"closeTo","token":"hive","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"cafe","expect":3}
+{"op":"closeTo","token":"hive","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"naive","expect":2}
+{"op":"closeTo","token":"hive","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"c#","expect":4}
+{"op":"closeTo","token":"hive","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"next.js","expect":7}
+{"op":"closeTo","token":"hive","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"c++","expect":4}
+{"op":"closeTo","token":"hive","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"ecole","expect":4}
+{"op":"closeTo","token":"hive","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"spaced out","expect":9}
+{"op":"closeTo","token":"hive","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"hire","expect":1}
+{"op":"closeTo","token":"hive","word":"hire","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"hive","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"hive","expect":0}
+{"op":"closeTo","token":"hive","word":"hive","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"hive","word":"hive","typoMinLength":5,"expect":true}
+{"op":"distance","a":"hive","b":"notes","expect":4}
+{"op":"closeTo","token":"hive","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"node","expect":3}
+{"op":"closeTo","token":"hive","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"weather","expect":6}
+{"op":"closeTo","token":"hive","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"hive","b":"whether","expect":5}
+{"op":"closeTo","token":"hive","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"hive","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"flutter","expect":5}
+{"op":"closeTo","token":"notes","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"flutr","expect":5}
+{"op":"closeTo","token":"notes","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"fluttre","expect":6}
+{"op":"closeTo","token":"notes","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"cafe","expect":4}
+{"op":"closeTo","token":"notes","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"naive","expect":4}
+{"op":"closeTo","token":"notes","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"c#","expect":5}
+{"op":"closeTo","token":"notes","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"next.js","expect":4}
+{"op":"closeTo","token":"notes","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"c++","expect":5}
+{"op":"closeTo","token":"notes","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"ecole","expect":4}
+{"op":"closeTo","token":"notes","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"spaced out","expect":9}
+{"op":"closeTo","token":"notes","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"hire","expect":4}
+{"op":"closeTo","token":"notes","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"hive","expect":4}
+{"op":"closeTo","token":"notes","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"notes","expect":0}
+{"op":"closeTo","token":"notes","word":"notes","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"notes","word":"notes","typoMinLength":5,"expect":true}
+{"op":"distance","a":"notes","b":"node","expect":2}
+{"op":"closeTo","token":"notes","word":"node","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"notes","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"weather","expect":5}
+{"op":"closeTo","token":"notes","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"notes","b":"whether","expect":5}
+{"op":"closeTo","token":"notes","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"notes","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"flutter","expect":6}
+{"op":"closeTo","token":"node","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"flutr","expect":5}
+{"op":"closeTo","token":"node","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"fluttre","expect":6}
+{"op":"closeTo","token":"node","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"cafe","expect":3}
+{"op":"closeTo","token":"node","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"naive","expect":3}
+{"op":"closeTo","token":"node","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"c#","expect":4}
+{"op":"closeTo","token":"node","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"next.js","expect":6}
+{"op":"closeTo","token":"node","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"c++","expect":4}
+{"op":"closeTo","token":"node","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"ecole","expect":3}
+{"op":"closeTo","token":"node","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"spaced out","expect":9}
+{"op":"closeTo","token":"node","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"hire","expect":3}
+{"op":"closeTo","token":"node","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"hive","expect":3}
+{"op":"closeTo","token":"node","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"notes","expect":2}
+{"op":"closeTo","token":"node","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"node","expect":0}
+{"op":"closeTo","token":"node","word":"node","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"node","word":"node","typoMinLength":5,"expect":true}
+{"op":"distance","a":"node","b":"weather","expect":6}
+{"op":"closeTo","token":"node","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"node","b":"whether","expect":6}
+{"op":"closeTo","token":"node","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"node","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"flutter","expect":4}
+{"op":"closeTo","token":"weather","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"flutr","expect":5}
+{"op":"closeTo","token":"weather","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"fluttre","expect":5}
+{"op":"closeTo","token":"weather","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"cafe","expect":5}
+{"op":"closeTo","token":"weather","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"naive","expect":5}
+{"op":"closeTo","token":"weather","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"c#","expect":7}
+{"op":"closeTo","token":"weather","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"next.js","expect":5}
+{"op":"closeTo","token":"weather","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"c++","expect":7}
+{"op":"closeTo","token":"weather","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"ecole","expect":5}
+{"op":"closeTo","token":"weather","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"spaced out","expect":9}
+{"op":"closeTo","token":"weather","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"hire","expect":6}
+{"op":"closeTo","token":"weather","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"hive","expect":6}
+{"op":"closeTo","token":"weather","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"notes","expect":5}
+{"op":"closeTo","token":"weather","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"node","expect":6}
+{"op":"closeTo","token":"weather","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"weather","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"weather","b":"weather","expect":0}
+{"op":"closeTo","token":"weather","word":"weather","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"weather","word":"weather","typoMinLength":5,"expect":true}
+{"op":"distance","a":"weather","b":"whether","expect":2}
+{"op":"closeTo","token":"weather","word":"whether","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"weather","word":"whether","typoMinLength":5,"expect":true}
+{"op":"distance","a":"whether","b":"flutter","expect":4}
+{"op":"closeTo","token":"whether","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"flutr","expect":5}
+{"op":"closeTo","token":"whether","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"fluttre","expect":5}
+{"op":"closeTo","token":"whether","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"cafe","expect":6}
+{"op":"closeTo","token":"whether","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"naive","expect":6}
+{"op":"closeTo","token":"whether","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"c#","expect":7}
+{"op":"closeTo","token":"whether","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"next.js","expect":6}
+{"op":"closeTo","token":"whether","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"c++","expect":7}
+{"op":"closeTo","token":"whether","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"ecole","expect":6}
+{"op":"closeTo","token":"whether","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"spaced out","expect":9}
+{"op":"closeTo","token":"whether","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"hire","expect":5}
+{"op":"closeTo","token":"whether","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"hive","expect":5}
+{"op":"closeTo","token":"whether","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"notes","expect":5}
+{"op":"closeTo","token":"whether","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"node","expect":6}
+{"op":"closeTo","token":"whether","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"whether","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"whether","b":"weather","expect":2}
+{"op":"closeTo","token":"whether","word":"weather","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"whether","word":"weather","typoMinLength":5,"expect":true}
+{"op":"distance","a":"whether","b":"whether","expect":0}
+{"op":"closeTo","token":"whether","word":"whether","typoMinLength":4,"expect":true}
+{"op":"closeTo","token":"whether","word":"whether","typoMinLength":5,"expect":true}
+{"op":"distance","a":"lankan","b":"flutter","expect":6}
+{"op":"closeTo","token":"lankan","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"flutr","expect":6}
+{"op":"closeTo","token":"lankan","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"fluttre","expect":6}
+{"op":"closeTo","token":"lankan","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"cafe","expect":5}
+{"op":"closeTo","token":"lankan","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"naive","expect":5}
+{"op":"closeTo","token":"lankan","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"c#","expect":6}
+{"op":"closeTo","token":"lankan","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"next.js","expect":7}
+{"op":"closeTo","token":"lankan","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"c++","expect":6}
+{"op":"closeTo","token":"lankan","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"ecole","expect":6}
+{"op":"closeTo","token":"lankan","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"spaced out","expect":9}
+{"op":"closeTo","token":"lankan","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"hire","expect":6}
+{"op":"closeTo","token":"lankan","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"hive","expect":6}
+{"op":"closeTo","token":"lankan","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"notes","expect":6}
+{"op":"closeTo","token":"lankan","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"node","expect":5}
+{"op":"closeTo","token":"lankan","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"weather","expect":6}
+{"op":"closeTo","token":"lankan","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lankan","b":"whether","expect":7}
+{"op":"closeTo","token":"lankan","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lankan","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"flutter","expect":6}
+{"op":"closeTo","token":"lanka","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"flutr","expect":5}
+{"op":"closeTo","token":"lanka","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"fluttre","expect":6}
+{"op":"closeTo","token":"lanka","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"cafe","expect":4}
+{"op":"closeTo","token":"lanka","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"naive","expect":4}
+{"op":"closeTo","token":"lanka","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"c#","expect":5}
+{"op":"closeTo","token":"lanka","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"next.js","expect":7}
+{"op":"closeTo","token":"lanka","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"c++","expect":5}
+{"op":"closeTo","token":"lanka","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"ecole","expect":5}
+{"op":"closeTo","token":"lanka","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"spaced out","expect":9}
+{"op":"closeTo","token":"lanka","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"hire","expect":5}
+{"op":"closeTo","token":"lanka","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"hive","expect":5}
+{"op":"closeTo","token":"lanka","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"notes","expect":5}
+{"op":"closeTo","token":"lanka","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"node","expect":5}
+{"op":"closeTo","token":"lanka","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"weather","expect":6}
+{"op":"closeTo","token":"lanka","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"lanka","b":"whether","expect":7}
+{"op":"closeTo","token":"lanka","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"lanka","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"flutter","expect":7}
+{"op":"closeTo","token":"apps","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"flutr","expect":5}
+{"op":"closeTo","token":"apps","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"fluttre","expect":7}
+{"op":"closeTo","token":"apps","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"cafe","expect":4}
+{"op":"closeTo","token":"apps","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"naive","expect":4}
+{"op":"closeTo","token":"apps","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"c#","expect":4}
+{"op":"closeTo","token":"apps","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"next.js","expect":6}
+{"op":"closeTo","token":"apps","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"c++","expect":4}
+{"op":"closeTo","token":"apps","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"ecole","expect":5}
+{"op":"closeTo","token":"apps","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"spaced out","expect":9}
+{"op":"closeTo","token":"apps","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"hire","expect":4}
+{"op":"closeTo","token":"apps","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"hive","expect":4}
+{"op":"closeTo","token":"apps","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"notes","expect":4}
+{"op":"closeTo","token":"apps","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"node","expect":4}
+{"op":"closeTo","token":"apps","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"weather","expect":6}
+{"op":"closeTo","token":"apps","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"apps","b":"whether","expect":7}
+{"op":"closeTo","token":"apps","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"apps","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"flutter","expect":7}
+{"op":"closeTo","token":"app","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"flutr","expect":5}
+{"op":"closeTo","token":"app","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"fluttre","expect":7}
+{"op":"closeTo","token":"app","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"cafe","expect":3}
+{"op":"closeTo","token":"app","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"naive","expect":4}
+{"op":"closeTo","token":"app","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"c#","expect":3}
+{"op":"closeTo","token":"app","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"next.js","expect":7}
+{"op":"closeTo","token":"app","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"c++","expect":3}
+{"op":"closeTo","token":"app","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"ecole","expect":5}
+{"op":"closeTo","token":"app","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"spaced out","expect":9}
+{"op":"closeTo","token":"app","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"hire","expect":4}
+{"op":"closeTo","token":"app","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"hive","expect":4}
+{"op":"closeTo","token":"app","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"notes","expect":5}
+{"op":"closeTo","token":"app","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"node","expect":4}
+{"op":"closeTo","token":"app","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"weather","expect":6}
+{"op":"closeTo","token":"app","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"app","b":"whether","expect":7}
+{"op":"closeTo","token":"app","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"app","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"flutter","expect":6}
+{"op":"closeTo","token":"swiftui","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"flutr","expect":6}
+{"op":"closeTo","token":"swiftui","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"fluttre","expect":6}
+{"op":"closeTo","token":"swiftui","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"cafe","expect":6}
+{"op":"closeTo","token":"swiftui","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"naive","expect":6}
+{"op":"closeTo","token":"swiftui","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"c#","expect":7}
+{"op":"closeTo","token":"swiftui","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"next.js","expect":7}
+{"op":"closeTo","token":"swiftui","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"c++","expect":7}
+{"op":"closeTo","token":"swiftui","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"ecole","expect":7}
+{"op":"closeTo","token":"swiftui","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"spaced out","expect":8}
+{"op":"closeTo","token":"swiftui","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"hire","expect":6}
+{"op":"closeTo","token":"swiftui","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"hive","expect":6}
+{"op":"closeTo","token":"swiftui","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"notes","expect":6}
+{"op":"closeTo","token":"swiftui","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"node","expect":7}
+{"op":"closeTo","token":"swiftui","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"weather","expect":6}
+{"op":"closeTo","token":"swiftui","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swiftui","b":"whether","expect":6}
+{"op":"closeTo","token":"swiftui","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swiftui","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"flutter","expect":6}
+{"op":"closeTo","token":"swfitui","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"flutr","expect":5}
+{"op":"closeTo","token":"swfitui","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"fluttre","expect":6}
+{"op":"closeTo","token":"swfitui","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"cafe","expect":6}
+{"op":"closeTo","token":"swfitui","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"naive","expect":6}
+{"op":"closeTo","token":"swfitui","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"c#","expect":7}
+{"op":"closeTo","token":"swfitui","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"next.js","expect":7}
+{"op":"closeTo","token":"swfitui","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"c++","expect":7}
+{"op":"closeTo","token":"swfitui","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"ecole","expect":7}
+{"op":"closeTo","token":"swfitui","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"spaced out","expect":8}
+{"op":"closeTo","token":"swfitui","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"hire","expect":6}
+{"op":"closeTo","token":"swfitui","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"hive","expect":6}
+{"op":"closeTo","token":"swfitui","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"notes","expect":6}
+{"op":"closeTo","token":"swfitui","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"node","expect":7}
+{"op":"closeTo","token":"swfitui","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"weather","expect":6}
+{"op":"closeTo","token":"swfitui","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"swfitui","b":"whether","expect":6}
+{"op":"closeTo","token":"swfitui","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"swfitui","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"flutter","expect":7}
+{"op":"closeTo","token":"kenia","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"flutr","expect":5}
+{"op":"closeTo","token":"kenia","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"fluttre","expect":7}
+{"op":"closeTo","token":"kenia","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"cafe","expect":5}
+{"op":"closeTo","token":"kenia","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"naive","expect":5}
+{"op":"closeTo","token":"kenia","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"c#","expect":5}
+{"op":"closeTo","token":"kenia","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"next.js","expect":6}
+{"op":"closeTo","token":"kenia","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"c++","expect":5}
+{"op":"closeTo","token":"kenia","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"ecole","expect":5}
+{"op":"closeTo","token":"kenia","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"spaced out","expect":9}
+{"op":"closeTo","token":"kenia","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"hire","expect":5}
+{"op":"closeTo","token":"kenia","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"hive","expect":5}
+{"op":"closeTo","token":"kenia","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"notes","expect":5}
+{"op":"closeTo","token":"kenia","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"node","expect":5}
+{"op":"closeTo","token":"kenia","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"weather","expect":6}
+{"op":"closeTo","token":"kenia","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenia","b":"whether","expect":6}
+{"op":"closeTo","token":"kenia","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenia","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"flutter","expect":7}
+{"op":"closeTo","token":"kenya","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"flutr","expect":5}
+{"op":"closeTo","token":"kenya","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"fluttre","expect":7}
+{"op":"closeTo","token":"kenya","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"cafe","expect":5}
+{"op":"closeTo","token":"kenya","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"naive","expect":5}
+{"op":"closeTo","token":"kenya","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"c#","expect":5}
+{"op":"closeTo","token":"kenya","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"next.js","expect":6}
+{"op":"closeTo","token":"kenya","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"c++","expect":5}
+{"op":"closeTo","token":"kenya","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"ecole","expect":5}
+{"op":"closeTo","token":"kenya","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"spaced out","expect":9}
+{"op":"closeTo","token":"kenya","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"hire","expect":5}
+{"op":"closeTo","token":"kenya","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"hive","expect":5}
+{"op":"closeTo","token":"kenya","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"notes","expect":5}
+{"op":"closeTo","token":"kenya","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"node","expect":5}
+{"op":"closeTo","token":"kenya","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"weather","expect":6}
+{"op":"closeTo","token":"kenya","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"kenya","b":"whether","expect":6}
+{"op":"closeTo","token":"kenya","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"kenya","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"flutter","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"flutr","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"fluttre","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"cafe","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"naive","expect":6}
+{"op":"closeTo","token":"ragnarok","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"c#","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"next.js","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"c++","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"ecole","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"spaced out","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"hire","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"hive","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"notes","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"node","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"weather","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"whether","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"flutter","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"flutr","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"fluttre","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"cafe","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"naive","expect":6}
+{"op":"closeTo","token":"ragnarok","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"c#","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"next.js","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"c++","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"ecole","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"spaced out","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"hire","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"hive","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"notes","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"node","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"weather","expect":7}
+{"op":"closeTo","token":"ragnarok","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"ragnarok","b":"whether","expect":8}
+{"op":"closeTo","token":"ragnarok","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"ragnarok","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"flutter","expect":10}
+{"op":"closeTo","token":"react native","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"flutr","expect":11}
+{"op":"closeTo","token":"react native","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"fluttre","expect":9}
+{"op":"closeTo","token":"react native","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"cafe","expect":9}
+{"op":"closeTo","token":"react native","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"naive","expect":7}
+{"op":"closeTo","token":"react native","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"c#","expect":11}
+{"op":"closeTo","token":"react native","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"next.js","expect":10}
+{"op":"closeTo","token":"react native","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"c++","expect":11}
+{"op":"closeTo","token":"react native","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"ecole","expect":9}
+{"op":"closeTo","token":"react native","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"spaced out","expect":9}
+{"op":"closeTo","token":"react native","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"hire","expect":10}
+{"op":"closeTo","token":"react native","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"hive","expect":9}
+{"op":"closeTo","token":"react native","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"notes","expect":10}
+{"op":"closeTo","token":"react native","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"node","expect":10}
+{"op":"closeTo","token":"react native","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"weather","expect":9}
+{"op":"closeTo","token":"react native","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"react native","b":"whether","expect":11}
+{"op":"closeTo","token":"react native","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"react native","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"flutter","expect":7}
+{"op":"closeTo","token":"e mail","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"flutr","expect":6}
+{"op":"closeTo","token":"e mail","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"fluttre","expect":7}
+{"op":"closeTo","token":"e mail","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"cafe","expect":5}
+{"op":"closeTo","token":"e mail","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"naive","expect":5}
+{"op":"closeTo","token":"e mail","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"c#","expect":6}
+{"op":"closeTo","token":"e mail","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"next.js","expect":6}
+{"op":"closeTo","token":"e mail","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"c++","expect":6}
+{"op":"closeTo","token":"e mail","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"ecole","expect":5}
+{"op":"closeTo","token":"e mail","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"spaced out","expect":9}
+{"op":"closeTo","token":"e mail","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"hire","expect":6}
+{"op":"closeTo","token":"e mail","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"hive","expect":6}
+{"op":"closeTo","token":"e mail","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"notes","expect":6}
+{"op":"closeTo","token":"e mail","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"node","expect":6}
+{"op":"closeTo","token":"e mail","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"weather","expect":6}
+{"op":"closeTo","token":"e mail","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"e mail","b":"whether","expect":7}
+{"op":"closeTo","token":"e mail","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"e mail","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"flutter","expect":7}
+{"op":"closeTo","token":"","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"flutr","expect":5}
+{"op":"closeTo","token":"","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"fluttre","expect":7}
+{"op":"closeTo","token":"","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"cafe","expect":4}
+{"op":"closeTo","token":"","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"naive","expect":5}
+{"op":"closeTo","token":"","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"c#","expect":2}
+{"op":"closeTo","token":"","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"next.js","expect":7}
+{"op":"closeTo","token":"","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"c++","expect":3}
+{"op":"closeTo","token":"","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"ecole","expect":5}
+{"op":"closeTo","token":"","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"spaced out","expect":10}
+{"op":"closeTo","token":"","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"hire","expect":4}
+{"op":"closeTo","token":"","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"hive","expect":4}
+{"op":"closeTo","token":"","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"notes","expect":5}
+{"op":"closeTo","token":"","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"node","expect":4}
+{"op":"closeTo","token":"","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"weather","expect":7}
+{"op":"closeTo","token":"","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"","b":"whether","expect":7}
+{"op":"closeTo","token":"","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"","word":"whether","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"flutter","expect":5}
+{"op":"closeTo","token":"file","word":"flutter","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"flutter","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"flutr","expect":4}
+{"op":"closeTo","token":"file","word":"flutr","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"flutr","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"fluttre","expect":5}
+{"op":"closeTo","token":"file","word":"fluttre","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"fluttre","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"cafe","expect":3}
+{"op":"closeTo","token":"file","word":"cafe","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"cafe","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"naive","expect":3}
+{"op":"closeTo","token":"file","word":"naive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"naive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"c#","expect":4}
+{"op":"closeTo","token":"file","word":"c#","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"c#","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"next.js","expect":7}
+{"op":"closeTo","token":"file","word":"next.js","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"next.js","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"c++","expect":4}
+{"op":"closeTo","token":"file","word":"c++","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"c++","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"ecole","expect":3}
+{"op":"closeTo","token":"file","word":"ecole","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"ecole","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"spaced out","expect":9}
+{"op":"closeTo","token":"file","word":"spaced out","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"spaced out","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"hire","expect":2}
+{"op":"closeTo","token":"file","word":"hire","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"hire","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"hive","expect":2}
+{"op":"closeTo","token":"file","word":"hive","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"hive","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"notes","expect":4}
+{"op":"closeTo","token":"file","word":"notes","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"notes","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"node","expect":3}
+{"op":"closeTo","token":"file","word":"node","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"node","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"weather","expect":6}
+{"op":"closeTo","token":"file","word":"weather","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"weather","typoMinLength":5,"expect":false}
+{"op":"distance","a":"file","b":"whether","expect":6}
+{"op":"closeTo","token":"file","word":"whether","typoMinLength":4,"expect":false}
+{"op":"closeTo","token":"file","word":"whether","typoMinLength":5,"expect":false}

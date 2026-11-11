@@ -1,0 +1,668 @@
+{
+ "format": 1,
+ "compiler": "pubba@0.3.0",
+ "config": {
+  "types": {
+   "product": {
+    "label": "Product",
+    "plural": "Products",
+    "match": {
+     "tier": 1,
+     "firstWord": true
+    },
+    "similar": [
+     "goes-with"
+    ]
+   },
+   "brand": {
+    "label": "Brand",
+    "plural": "Brands",
+    "match": {
+     "tier": 2,
+     "minLength": 3
+    }
+   },
+   "category": {
+    "label": "Category",
+    "plural": "Categories",
+    "match": {
+     "tier": 2,
+     "minLength": 3
+    }
+   },
+   "material": {
+    "label": "Material",
+    "plural": "Materials",
+    "destination": false,
+    "match": {
+     "tier": 3,
+     "mode": "phrase"
+    }
+   },
+   "topic": {
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   }
+  },
+  "kinds": {
+   "made-by": {
+    "label": "made by",
+    "pull": 0.8
+   },
+   "in-category": {
+    "label": "in",
+    "pull": 0.6
+   },
+   "made-of": {
+    "label": "made of",
+    "pull": 0.5
+   },
+   "goes-with": {
+    "label": "goes with",
+    "pull": 1
+   },
+   "same-collection": {
+    "label": "same collection as",
+    "pull": 1
+   },
+   "paired": {
+    "label": "paired with",
+    "pull": 0.4
+   },
+   "about": {
+    "label": "about",
+    "pull": 0.7
+   },
+   "mentions": {
+    "label": "mentions",
+    "pull": 0.5
+   }
+  },
+  "next": {
+   "sections": {
+    "shop": "product",
+    "brands": "brand"
+   }
+  },
+  "match": {
+   "typoMinLength": 5,
+   "distinctWords": true,
+   "partialWords": true,
+   "precise": true,
+   "notHere": [
+    "Glass Table"
+   ],
+   "notDistinct": [
+    "set"
+   ]
+  },
+  "templates": {
+   "made-by": {
+    "out": "{item} is made by {other}.",
+    "in": "{item} makes {other}."
+   },
+   "in-category": {
+    "out": "{item} is in {other}.",
+    "in": "{item} has {other}."
+   },
+   "made-of": {
+    "out": "{item} is made of {otherLower}.",
+    "in": "{item} goes into {other}."
+   },
+   "goes-with": "{item} goes with {other}[ (both {via})].",
+   "same-collection": "{item} is from the same collection as {other}.",
+   "paired": "{item} is often paired with {other}[, as in {via}].",
+   "about": "{item} is for {otherLower} too.",
+   "mentions": {
+    "out": "{item} mentions {other}.",
+    "in": "{other} mentions {item}."
+   },
+   "section": "{item} is popular."
+  }
+ },
+ "entities": [
+  {
+   "id": "product:oak-desk",
+   "type": "product",
+   "label": "Oak Desk",
+   "aliases": [
+    "writing desk"
+   ],
+   "url": "/p/oak-desk"
+  },
+  {
+   "id": "product:oak-desk-xl",
+   "type": "product",
+   "label": "Oak Desk XL",
+   "url": "/p/oak-desk-xl"
+  },
+  {
+   "id": "product:oak-chair",
+   "type": "product",
+   "label": "Oak Chair",
+   "url": "/p/oak-chair"
+  },
+  {
+   "id": "product:linen-sofa",
+   "type": "product",
+   "label": "Linen Sofa",
+   "url": "/p/linen-sofa"
+  },
+  {
+   "id": "product:teak-bench",
+   "type": "product",
+   "label": "Teak Garden Bench",
+   "url": "/p/teak-bench"
+  },
+  {
+   "id": "product:teak-table",
+   "type": "product",
+   "label": "Teak Patio Table",
+   "url": "/p/teak-table"
+  },
+  {
+   "id": "product:bunk-bed",
+   "type": "product",
+   "label": "Pine Bunk Bed",
+   "url": "/p/bunk-bed"
+  },
+  {
+   "id": "product:toy-chest",
+   "type": "product",
+   "label": "Pine Toy Chest",
+   "url": "/p/toy-chest"
+  },
+  {
+   "id": "product:brass-lamp",
+   "type": "product",
+   "label": "Brass Floor Lamp",
+   "url": "/p/brass-lamp"
+  },
+  {
+   "id": "product:dining-set",
+   "type": "product",
+   "label": "Oak Dining Set",
+   "url": "/p/dining-set"
+  },
+  {
+   "id": "brand:north",
+   "type": "brand",
+   "label": "North & Co",
+   "aliases": [
+    "North"
+   ]
+  },
+  {
+   "id": "brand:harbour",
+   "type": "brand",
+   "label": "Harbour Living"
+  },
+  {
+   "id": "brand:little",
+   "type": "brand",
+   "label": "Little Pine"
+  },
+  {
+   "id": "category:office",
+   "type": "category",
+   "label": "Office"
+  },
+  {
+   "id": "category:living",
+   "type": "category",
+   "label": "Living Room"
+  },
+  {
+   "id": "category:outdoor",
+   "type": "category",
+   "label": "Outdoor"
+  },
+  {
+   "id": "category:kids",
+   "type": "category",
+   "label": "Kids Room"
+  },
+  {
+   "id": "category:lighting",
+   "type": "category",
+   "label": "Lighting"
+  },
+  {
+   "id": "material:oak",
+   "type": "material",
+   "label": "Oak"
+  },
+  {
+   "id": "material:linen",
+   "type": "material",
+   "label": "Linen"
+  },
+  {
+   "id": "material:teak",
+   "type": "material",
+   "label": "Teak"
+  },
+  {
+   "id": "material:pine",
+   "type": "material",
+   "label": "Pine"
+  },
+  {
+   "id": "material:brass",
+   "type": "material",
+   "label": "Brass"
+  },
+  {
+   "id": "material:steel",
+   "type": "material",
+   "label": "Steel"
+  },
+  {
+   "id": "material:glue",
+   "type": "material",
+   "label": "Glue"
+  },
+  {
+   "id": "topic:outdoor",
+   "type": "topic",
+   "label": "Outdoor"
+  },
+  {
+   "id": "topic:kids",
+   "type": "topic",
+   "label": "Kids"
+  }
+ ],
+ "unlinked": [
+  {
+   "id": "category:clearance",
+   "type": "category",
+   "label": "Clearance"
+  }
+ ],
+ "links": [
+  {
+   "from": "product:oak-desk",
+   "kind": "made-by",
+   "to": "brand:north",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk-xl",
+   "kind": "made-by",
+   "to": "brand:north",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "made-by",
+   "to": "brand:north",
+   "weight": 1
+  },
+  {
+   "from": "product:dining-set",
+   "kind": "made-by",
+   "to": "brand:north",
+   "weight": 1
+  },
+  {
+   "from": "product:linen-sofa",
+   "kind": "made-by",
+   "to": "brand:harbour",
+   "weight": 1
+  },
+  {
+   "from": "product:brass-lamp",
+   "kind": "made-by",
+   "to": "brand:harbour",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "made-by",
+   "to": "brand:harbour",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-table",
+   "kind": "made-by",
+   "to": "brand:harbour",
+   "weight": 1
+  },
+  {
+   "from": "product:bunk-bed",
+   "kind": "made-by",
+   "to": "brand:little",
+   "weight": 1
+  },
+  {
+   "from": "product:toy-chest",
+   "kind": "made-by",
+   "to": "brand:little",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "in-category",
+   "to": "category:office",
+   "weight": 0.6
+  },
+  {
+   "from": "product:oak-desk-xl",
+   "kind": "in-category",
+   "to": "category:office",
+   "weight": 0.6
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "in-category",
+   "to": "category:office",
+   "weight": 0.6
+  },
+  {
+   "from": "product:linen-sofa",
+   "kind": "in-category",
+   "to": "category:living",
+   "weight": 0.6
+  },
+  {
+   "from": "product:dining-set",
+   "kind": "in-category",
+   "to": "category:living",
+   "weight": 0.6
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "in-category",
+   "to": "category:outdoor",
+   "weight": 0.6
+  },
+  {
+   "from": "product:teak-table",
+   "kind": "in-category",
+   "to": "category:outdoor",
+   "weight": 0.6
+  },
+  {
+   "from": "product:bunk-bed",
+   "kind": "in-category",
+   "to": "category:kids",
+   "weight": 0.6
+  },
+  {
+   "from": "product:toy-chest",
+   "kind": "in-category",
+   "to": "category:kids",
+   "weight": 0.6
+  },
+  {
+   "from": "product:brass-lamp",
+   "kind": "in-category",
+   "to": "category:lighting",
+   "weight": 0.6
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "made-of",
+   "to": "material:oak",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "made-of",
+   "to": "material:steel",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "made-of",
+   "to": "material:glue",
+   "weight": 0.2
+  },
+  {
+   "from": "product:oak-desk-xl",
+   "kind": "made-of",
+   "to": "material:oak",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk-xl",
+   "kind": "made-of",
+   "to": "material:steel",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "made-of",
+   "to": "material:oak",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "made-of",
+   "to": "material:linen",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "made-of",
+   "to": "material:glue",
+   "weight": 0.2
+  },
+  {
+   "from": "product:linen-sofa",
+   "kind": "made-of",
+   "to": "material:linen",
+   "weight": 1
+  },
+  {
+   "from": "product:linen-sofa",
+   "kind": "made-of",
+   "to": "material:oak",
+   "weight": 1
+  },
+  {
+   "from": "product:dining-set",
+   "kind": "made-of",
+   "to": "material:oak",
+   "weight": 1
+  },
+  {
+   "from": "product:dining-set",
+   "kind": "made-of",
+   "to": "material:linen",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "made-of",
+   "to": "material:teak",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "made-of",
+   "to": "material:steel",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-table",
+   "kind": "made-of",
+   "to": "material:teak",
+   "weight": 1
+  },
+  {
+   "from": "product:teak-table",
+   "kind": "made-of",
+   "to": "material:steel",
+   "weight": 1
+  },
+  {
+   "from": "product:bunk-bed",
+   "kind": "made-of",
+   "to": "material:pine",
+   "weight": 1
+  },
+  {
+   "from": "product:toy-chest",
+   "kind": "made-of",
+   "to": "material:pine",
+   "weight": 1
+  },
+  {
+   "from": "product:brass-lamp",
+   "kind": "made-of",
+   "to": "material:brass",
+   "weight": 1
+  },
+  {
+   "from": "product:brass-lamp",
+   "kind": "made-of",
+   "to": "material:linen",
+   "weight": 1
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "same-collection",
+   "to": "product:oak-desk-xl",
+   "weight": 1,
+   "rule": "same-collection"
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "goes-with",
+   "to": "product:linen-sofa",
+   "weight": 1,
+   "via": [
+    "Oak",
+    "Linen"
+   ],
+   "rule": "goes-with"
+  },
+  {
+   "from": "product:oak-chair",
+   "kind": "goes-with",
+   "to": "product:dining-set",
+   "weight": 1,
+   "via": [
+    "Oak",
+    "Linen"
+   ],
+   "rule": "goes-with"
+  },
+  {
+   "from": "product:linen-sofa",
+   "kind": "goes-with",
+   "to": "product:dining-set",
+   "weight": 1,
+   "via": [
+    "Linen",
+    "Oak"
+   ],
+   "rule": "goes-with"
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "goes-with",
+   "to": "product:teak-table",
+   "weight": 1,
+   "via": [
+    "Teak",
+    "Steel"
+   ],
+   "rule": "goes-with"
+  },
+  {
+   "from": "material:oak",
+   "kind": "paired",
+   "to": "material:steel",
+   "weight": 0.5,
+   "via": [
+    "Oak Desk",
+    "Oak Desk XL"
+   ],
+   "rule": "paired"
+  },
+  {
+   "from": "material:linen",
+   "kind": "paired",
+   "to": "material:oak",
+   "weight": 0.75,
+   "via": [
+    "Oak Chair",
+    "Linen Sofa",
+    "Oak Dining Set"
+   ],
+   "rule": "paired"
+  },
+  {
+   "from": "material:steel",
+   "kind": "paired",
+   "to": "material:teak",
+   "weight": 0.5,
+   "via": [
+    "Teak Garden Bench",
+    "Teak Patio Table"
+   ],
+   "rule": "paired"
+  },
+  {
+   "from": "product:teak-bench",
+   "kind": "about",
+   "to": "topic:outdoor",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "product:bunk-bed",
+   "kind": "about",
+   "to": "topic:kids",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "product:toy-chest",
+   "kind": "about",
+   "to": "topic:kids",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "product:oak-desk",
+   "kind": "mentions",
+   "to": "product:oak-chair",
+   "weight": 0.5,
+   "rule": "mentions"
+  }
+ ],
+ "index": {
+  "distinctWords": [
+   "bed",
+   "bench",
+   "bunk",
+   "chair",
+   "chest",
+   "clearance",
+   "dining",
+   "floor",
+   "garden",
+   "glue",
+   "harbour",
+   "kids",
+   "lamp",
+   "lighting",
+   "little",
+   "north",
+   "office",
+   "outdoor",
+   "patio",
+   "sofa",
+   "steel",
+   "table",
+   "toy",
+   "writing"
+  ]
+ }
+}

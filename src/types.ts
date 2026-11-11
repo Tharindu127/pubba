@@ -286,6 +286,13 @@ export interface Graph {
   /** Every link touching an entity. */
   adjacent: Map<string, GraphLink[]>;
   config: PubbaConfig;
+  /** Lookups a compiled bundle carries, so runtimes in any language skip recomputing them. */
+  index?: GraphIndex;
+}
+
+export interface GraphIndex {
+  /** Significant words found in exactly one matchable name (for `match.distinctWords`). */
+  distinctWords: string[];
 }
 
 /** A result with its reason and the reason as a sentence. */

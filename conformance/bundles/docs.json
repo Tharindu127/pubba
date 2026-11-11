@@ -1,0 +1,412 @@
+{
+ "format": 1,
+ "compiler": "pubba@0.3.0",
+ "config": {
+  "types": {
+   "page": {
+    "label": "Page",
+    "plural": "Pages",
+    "match": {
+     "tier": 1,
+     "firstWord": true
+    },
+    "similar": [
+     "see-also",
+     "same-concepts"
+    ]
+   },
+   "api": {
+    "label": "API",
+    "plural": "API reference",
+    "match": {
+     "tier": 2,
+     "mode": "phrase"
+    }
+   },
+   "concept": {
+    "label": "Concept",
+    "plural": "Concepts",
+    "match": {
+     "tier": 2,
+     "minLength": 3
+    }
+   },
+   "version": {
+    "label": "Version",
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   }
+  },
+  "kinds": {
+   "explains": {
+    "label": "explains",
+    "pull": 0.9
+   },
+   "uses-api": {
+    "label": "uses",
+    "pull": 0.8
+   },
+   "see-also": {
+    "label": "see also",
+    "pull": 1
+   },
+   "since": {
+    "label": "since",
+    "pull": 0.3
+   },
+   "same-concepts": {
+    "label": "covers the same concepts as",
+    "pull": 0.9
+   },
+   "mentions": {
+    "label": "mentions",
+    "pull": 0.5
+   }
+  },
+  "match": {
+   "typoMinLength": 5,
+   "distinctWords": true,
+   "precise": true,
+   "stopWords": [
+    "the",
+    "a",
+    "how",
+    "to",
+    "guide",
+    "page"
+   ]
+  },
+  "templates": {
+   "explains": {
+    "out": "{item} explains {other}.",
+    "in": "{item} is explained in {other}."
+   },
+   "uses-api": {
+    "out": "{item} uses {other}.",
+    "in": "{item} is used in {other}."
+   },
+   "see-also": "See also {item}.",
+   "same-concepts": "{item} covers the same concepts as {other}[ ({via})].",
+   "since": "{item} is new in {other}."
+  }
+ },
+ "entities": [
+  {
+   "id": "page:install",
+   "type": "page",
+   "label": "Installation",
+   "url": "/docs/install"
+  },
+  {
+   "id": "page:start",
+   "type": "page",
+   "label": "Getting Started",
+   "url": "/docs/start"
+  },
+  {
+   "id": "page:auth",
+   "type": "page",
+   "label": "Authentication Guide",
+   "url": "/docs/auth"
+  },
+  {
+   "id": "page:pagination",
+   "type": "page",
+   "label": "Pagination",
+   "url": "/docs/pagination"
+  },
+  {
+   "id": "page:errors",
+   "type": "page",
+   "label": "Errors and Retries",
+   "url": "/docs/errors"
+  },
+  {
+   "id": "page:webhooks",
+   "type": "page",
+   "label": "Webhooks",
+   "url": "/docs/webhooks"
+  },
+  {
+   "id": "page:migrate",
+   "type": "page",
+   "label": "Migrating to v3",
+   "aliases": [
+    "upgrade guide"
+   ],
+   "url": "/docs/migrate"
+  },
+  {
+   "id": "api:createClient",
+   "type": "api",
+   "label": "createClient",
+   "aliases": [
+    "create client"
+   ],
+   "url": "/api/createClient"
+  },
+  {
+   "id": "api:signIn",
+   "type": "api",
+   "label": "signIn",
+   "url": "/api/signIn"
+  },
+  {
+   "id": "api:refreshToken",
+   "type": "api",
+   "label": "refreshToken",
+   "url": "/api/refreshToken"
+  },
+  {
+   "id": "api:listItems",
+   "type": "api",
+   "label": "listItems",
+   "url": "/api/listItems"
+  },
+  {
+   "id": "api:verifyWebhook",
+   "type": "api",
+   "label": "verifyWebhook",
+   "url": "/api/verifyWebhook"
+  },
+  {
+   "id": "concept:tokens",
+   "type": "concept",
+   "label": "Access tokens"
+  },
+  {
+   "id": "concept:cursor",
+   "type": "concept",
+   "label": "Cursors"
+  },
+  {
+   "id": "concept:retries",
+   "type": "concept",
+   "label": "Retries"
+  },
+  {
+   "id": "concept:signatures",
+   "type": "concept",
+   "label": "Signatures"
+  },
+  {
+   "id": "concept:clients",
+   "type": "concept",
+   "label": "Clients"
+  },
+  {
+   "id": "version:v3",
+   "type": "version",
+   "label": "v3"
+  }
+ ],
+ "unlinked": [
+  {
+   "id": "api:deleteAll",
+   "type": "api",
+   "label": "deleteAll",
+   "url": "/api/deleteAll"
+  }
+ ],
+ "links": [
+  {
+   "from": "page:auth",
+   "kind": "explains",
+   "to": "concept:clients",
+   "weight": 1
+  },
+  {
+   "from": "page:auth",
+   "kind": "explains",
+   "to": "concept:tokens",
+   "weight": 1
+  },
+  {
+   "from": "page:auth",
+   "kind": "explains",
+   "to": "concept:signatures",
+   "weight": 1
+  },
+  {
+   "from": "page:webhooks",
+   "kind": "explains",
+   "to": "concept:signatures",
+   "weight": 1
+  },
+  {
+   "from": "page:webhooks",
+   "kind": "explains",
+   "to": "concept:retries",
+   "weight": 1
+  },
+  {
+   "from": "page:errors",
+   "kind": "explains",
+   "to": "concept:retries",
+   "weight": 1
+  },
+  {
+   "from": "page:errors",
+   "kind": "explains",
+   "to": "concept:clients",
+   "weight": 1
+  },
+  {
+   "from": "page:start",
+   "kind": "explains",
+   "to": "concept:clients",
+   "weight": 1
+  },
+  {
+   "from": "page:start",
+   "kind": "explains",
+   "to": "concept:tokens",
+   "weight": 1
+  },
+  {
+   "from": "page:pagination",
+   "kind": "explains",
+   "to": "concept:cursor",
+   "weight": 1
+  },
+  {
+   "from": "page:migrate",
+   "kind": "explains",
+   "to": "concept:clients",
+   "weight": 1
+  },
+  {
+   "from": "page:migrate",
+   "kind": "explains",
+   "to": "concept:cursor",
+   "weight": 1
+  },
+  {
+   "from": "page:install",
+   "kind": "see-also",
+   "to": "page:start",
+   "weight": 1
+  },
+  {
+   "from": "page:auth",
+   "kind": "see-also",
+   "to": "page:webhooks",
+   "weight": 1
+  },
+  {
+   "from": "page:migrate",
+   "kind": "since",
+   "to": "version:v3",
+   "weight": 0.4
+  },
+  {
+   "from": "api:listItems",
+   "kind": "since",
+   "to": "version:v3",
+   "weight": 0.4
+  },
+  {
+   "from": "page:start",
+   "kind": "uses-api",
+   "to": "api:createClient",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:auth",
+   "kind": "uses-api",
+   "to": "api:signIn",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:auth",
+   "kind": "uses-api",
+   "to": "api:refreshToken",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:pagination",
+   "kind": "uses-api",
+   "to": "api:listItems",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:errors",
+   "kind": "uses-api",
+   "to": "api:createClient",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:webhooks",
+   "kind": "uses-api",
+   "to": "api:verifyWebhook",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:migrate",
+   "kind": "uses-api",
+   "to": "api:createClient",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:migrate",
+   "kind": "uses-api",
+   "to": "api:listItems",
+   "weight": 0.6,
+   "rule": "api-mentions"
+  },
+  {
+   "from": "page:start",
+   "kind": "same-concepts",
+   "to": "page:auth",
+   "weight": 0.8333333333333333,
+   "via": [
+    "Clients",
+    "Access tokens"
+   ],
+   "rule": "same-concepts"
+  },
+  {
+   "from": "page:errors",
+   "kind": "mentions",
+   "to": "page:webhooks",
+   "weight": 0.5,
+   "rule": "mentions"
+  }
+ ],
+ "index": {
+  "distinctWords": [
+   "access",
+   "and",
+   "authentication",
+   "client",
+   "clients",
+   "create",
+   "createclient",
+   "cursors",
+   "deleteall",
+   "errors",
+   "getting",
+   "installation",
+   "listitems",
+   "migrating",
+   "pagination",
+   "refreshtoken",
+   "signatures",
+   "signin",
+   "started",
+   "tokens",
+   "upgrade",
+   "verifywebhook",
+   "webhooks"
+  ]
+ }
+}

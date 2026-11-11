@@ -4,10 +4,13 @@ import { dirname, resolve } from "node:path";
 import { documentDataset, fromDocument, type PubbaDocument } from "./document.ts";
 import { evaluate, formatLint, formatReport, generateCases, lint, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
 import { toJsonLd, toLlmsTxt, validateJsonLd } from "./exports/index.ts";
+import { compileBundle } from "./bundle.ts";
+import { loadBundle } from "./index.ts";
 
 const HELP = `pubba: a knowledge graph for showroom sites
 
 Usage:
+  pubba compile  <pubba.json> --out <file> [--with-data]   the bundle every runtime loads
   pubba inspect  <pubba.json>                    counts of entities and links, by type and kind
   pubba preview  <pubba.json>                    the mapping as Markdown tables, for review before writing
   pubba match    <pubba.json> "<query>"          what a typed query means
@@ -31,7 +34,11 @@ function readDocument(path: string): PubbaDocument {
   return doc as PubbaDocument;
 }
 
-const load = (path: string) => fromDocument(readDocument(path));
+/** A pubba.json, or a compiled bundle (answers exactly as a runtime would). */
+const load = (path: string) => {
+  const raw = readJson<Record<string, unknown>>(path);
+  return typeof raw.format === "number" && Array.isArray(raw.links) ? loadBundle(raw) : fromDocument(readDocument(path));
+};
 const documentDatasetFor = (path: string) => documentDataset(readDocument(path));
 
 function flag(args: string[], name: string): string | undefined {
@@ -52,6 +59,14 @@ function main(argv: string[]): number {
   }
   const pubba = load(file);
   switch (command) {
+    case "compile": {
+      const out = flag(rest, "--out");
+      if (!out) return fail("pubba compile: --out <file> is required");
+      const bundle = compileBundle(pubba.graph, { withData: rest.includes("--with-data") });
+      writeFileSync(out, `${JSON.stringify(bundle)}\n`);
+      console.log(`${bundle.entities.length + bundle.unlinked.length} entities and ${bundle.links.length} links written to ${out} (bundle format ${bundle.format}).`);
+      return 0;
+    }
     case "inspect": {
       const byType: Record<string, number> = {};
       const byKind: Record<string, number> = {};

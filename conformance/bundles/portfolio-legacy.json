@@ -1,0 +1,1566 @@
+{
+ "format": 1,
+ "compiler": "pubba@0.3.0",
+ "config": {
+  "types": {
+   "person": {
+    "label": "Person",
+    "plural": "People",
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   },
+   "project": {
+    "label": "Project",
+    "plural": "Projects",
+    "match": {
+     "tier": 1,
+     "firstWord": true
+    },
+    "similar": [
+     "same-stack"
+    ]
+   },
+   "tech": {
+    "label": "Skill",
+    "plural": "Skills",
+    "match": {
+     "tier": 3,
+     "mode": "phrase"
+    }
+   },
+   "role": {
+    "label": "Role",
+    "plural": "Experience",
+    "match": {
+     "tier": 2,
+     "minLength": 3,
+     "minWordsLength": 4,
+     "firstWord": true
+    }
+   },
+   "market": {
+    "label": "Market",
+    "plural": "Markets",
+    "match": {
+     "tier": 2,
+     "minLength": 3,
+     "minWordsLength": 4
+    }
+   },
+   "game": {
+    "label": "Game",
+    "plural": "Games",
+    "match": {
+     "tier": 2,
+     "minLength": 3,
+     "minWordsLength": 4
+    }
+   },
+   "creative": {
+    "label": "Creative work",
+    "plural": "Creative work",
+    "match": {
+     "tier": 2,
+     "minLength": 3,
+     "minWordsLength": 4
+    }
+   },
+   "area": {
+    "label": "Platform",
+    "plural": "Platforms",
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   },
+   "topic": {
+    "label": "Topic",
+    "plural": "Topics",
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   }
+  },
+  "kinds": {
+   "same-stack": {
+    "label": "same stack as",
+    "pull": 1
+   },
+   "same-series": {
+    "label": "same series as",
+    "pull": 1
+   },
+   "built-with": {
+    "label": "built with",
+    "pull": 0.9
+   },
+   "shipped-in": {
+    "label": "shipped in",
+    "pull": 0.9
+   },
+   "made-at": {
+    "label": "made at",
+    "pull": 0.8
+   },
+   "used-with": {
+    "label": "used with",
+    "pull": 0.8
+   },
+   "used-at": {
+    "label": "used at",
+    "pull": 0.6
+   },
+   "about": {
+    "label": "about",
+    "pull": 0.75
+   },
+   "runs-on": {
+    "label": "runs on",
+    "pull": 0.55
+   },
+   "worked-as": {
+    "label": "worked as",
+    "pull": 0.7
+   },
+   "founded": {
+    "label": "founded",
+    "pull": 0.8
+   },
+   "mentions": {
+    "label": "mentions",
+    "pull": 0.5
+   }
+  },
+  "next": {
+   "recency": 0.6,
+   "secondStep": 0.4,
+   "sections": {
+    "projects": "project",
+    "skills": "tech",
+    "reach": "market",
+    "experience": "role",
+    "games": "game",
+    "creative": "creative"
+   }
+  },
+  "match": {
+   "ignore": [
+    "Nimali"
+   ],
+   "notHere": [
+    "React Native Web"
+   ]
+  },
+  "templates": {
+   "section": "{item} is worth a look.",
+   "section.game": "{item} is one they play.",
+   "same-stack": "{item} is built on the same stack as {other}[ ({via})].",
+   "same-series": "{item} is from the same series as {other}.",
+   "built-with": {
+    "out": "{item} is built with {other}.",
+    "in": "{item} is part of {other}'s stack."
+   },
+   "shipped-in": {
+    "out": "{item} shipped in {other} too.",
+    "in": "{item} is where {other} shipped."
+   },
+   "made-at": {
+    "cases": [
+     {
+      "item": "role",
+      "text": "As {item}, they built {other}."
+     }
+    ],
+    "default": "{item} is what they built as {other}."
+   },
+   "used-with": "{item} goes with {other}[, as in {via}].",
+   "used-at": {
+    "cases": [
+     {
+      "item": "role",
+      "text": "As {item}, they worked with {other}."
+     }
+    ],
+    "default": "{item} was part of their work as {other}."
+   },
+   "about": "{item} is about {otherLower} too.",
+   "runs-on": "{item} is on {other} as well.",
+   "worked-as": "{item} is one of their roles.",
+   "founded": "{item} is one of their own ventures.",
+   "mentions": {
+    "cases": [
+     {
+      "item": "role",
+      "other": "market",
+      "text": "As {item}, they shipped to {other}."
+     },
+     {
+      "item": "market",
+      "other": "role",
+      "text": "{item} is where they shipped as {other}."
+     }
+    ],
+    "out": "{item} mentions {other}.",
+    "in": "{other} mentions {item}."
+   }
+  }
+ },
+ "entities": [
+  {
+   "id": "me",
+   "type": "person",
+   "label": "Nimali Perera",
+   "short": "Nimali",
+   "url": "https://nimali.example.com"
+  },
+  {
+   "id": "role:0",
+   "type": "role",
+   "label": "Senior Mobile Engineer — Payments, Lumen Labs",
+   "short": "Senior Mobile Engineer",
+   "aliases": [
+    "Lumen Labs",
+    "Senior Mobile Engineer"
+   ]
+  },
+  {
+   "id": "role:1",
+   "type": "role",
+   "label": "Software Engineer — Web, Harbor Studio",
+   "short": "Software Engineer",
+   "aliases": [
+    "Harbor Studio",
+    "Software Engineer"
+   ]
+  },
+  {
+   "id": "role:2",
+   "type": "role",
+   "label": "Research Intern, Colombo University Lab",
+   "short": "Research Intern",
+   "aliases": [
+    "Colombo University Lab",
+    "Research Intern"
+   ]
+  },
+  {
+   "id": "project:kiri-wallet",
+   "type": "project",
+   "label": "Kiri Wallet",
+   "url": "https://nimali.example.com/projects/kiri-wallet"
+  },
+  {
+   "id": "project:kiri-merchant",
+   "type": "project",
+   "label": "Kiri Merchant",
+   "url": "https://nimali.example.com/projects/kiri-merchant"
+  },
+  {
+   "id": "project:parcelo",
+   "type": "project",
+   "label": "Parcelo Courier",
+   "url": "https://nimali.example.com/projects/parcelo"
+  },
+  {
+   "id": "project:tidepool",
+   "type": "project",
+   "label": "Tidepool Dashboard",
+   "url": "https://nimali.example.com/projects/tidepool"
+  },
+  {
+   "id": "project:ferrylink",
+   "type": "project",
+   "label": "Ferrylink Booking",
+   "url": "https://nimali.example.com/projects/ferrylink"
+  },
+  {
+   "id": "project:studybuddy",
+   "type": "project",
+   "label": "StudyBuddy Planner",
+   "url": "https://nimali.example.com/projects/studybuddy"
+  },
+  {
+   "id": "project:synthpad",
+   "type": "project",
+   "label": "Synthpad",
+   "url": "https://nimali.example.com/projects/synthpad"
+  },
+  {
+   "id": "project:routewise",
+   "type": "project",
+   "label": "Routewise",
+   "url": "https://nimali.example.com/projects/routewise"
+  },
+  {
+   "id": "project:the-app",
+   "type": "project",
+   "label": "The App"
+  },
+  {
+   "id": "project:kiri-cards",
+   "type": "project",
+   "label": "Kiri Cards (beta)"
+  },
+  {
+   "id": "project:kiri-cards-web",
+   "type": "project",
+   "label": "Kiri Cards (web)"
+  },
+  {
+   "id": "tech:Flutter",
+   "type": "tech",
+   "label": "Flutter"
+  },
+  {
+   "id": "tech:Dart",
+   "type": "tech",
+   "label": "Dart"
+  },
+  {
+   "id": "tech:Firebase",
+   "type": "tech",
+   "label": "Firebase"
+  },
+  {
+   "id": "tech:Figma",
+   "type": "tech",
+   "label": "Figma"
+  },
+  {
+   "id": "tech:Jira",
+   "type": "tech",
+   "label": "Jira"
+  },
+  {
+   "id": "tech:React",
+   "type": "tech",
+   "label": "React",
+   "aliases": [
+    "reactjs"
+   ]
+  },
+  {
+   "id": "tech:React Native",
+   "type": "tech",
+   "label": "React Native",
+   "aliases": [
+    "rn"
+   ]
+  },
+  {
+   "id": "tech:TypeScript",
+   "type": "tech",
+   "label": "TypeScript",
+   "aliases": [
+    "ts"
+   ]
+  },
+  {
+   "id": "tech:Node.js",
+   "type": "tech",
+   "label": "Node.js",
+   "aliases": [
+    "node",
+    "nodejs"
+   ]
+  },
+  {
+   "id": "tech:Next.js",
+   "type": "tech",
+   "label": "Next.js",
+   "aliases": [
+    "nextjs"
+   ]
+  },
+  {
+   "id": "tech:PostgreSQL",
+   "type": "tech",
+   "label": "PostgreSQL",
+   "aliases": [
+    "postgres"
+   ]
+  },
+  {
+   "id": "tech:Swift",
+   "type": "tech",
+   "label": "Swift"
+  },
+  {
+   "id": "tech:SwiftUI",
+   "type": "tech",
+   "label": "SwiftUI",
+   "aliases": [
+    "swift ui"
+   ]
+  },
+  {
+   "id": "tech:Python",
+   "type": "tech",
+   "label": "Python"
+  },
+  {
+   "id": "tech:Web Audio",
+   "type": "tech",
+   "label": "Web Audio"
+  },
+  {
+   "id": "tech:Kotlin",
+   "type": "tech",
+   "label": "Kotlin"
+  },
+  {
+   "id": "game:skyforge-saga",
+   "type": "game",
+   "label": "Skyforge Saga"
+  },
+  {
+   "id": "game:skyforge-saga-2",
+   "type": "game",
+   "label": "Skyforge Saga II"
+  },
+  {
+   "id": "game:pixel-rally",
+   "type": "game",
+   "label": "Pixel Rally"
+  },
+  {
+   "id": "game:rally-2",
+   "type": "game",
+   "label": "Pixel Rally 2"
+  },
+  {
+   "id": "creative:youtube",
+   "type": "creative",
+   "label": "YouTube channel"
+  },
+  {
+   "id": "creative:offline-first",
+   "type": "creative",
+   "label": "Field notes on offline-first apps",
+   "aliases": [
+    "Field notes"
+   ]
+  },
+  {
+   "id": "creative:night-synth",
+   "type": "creative",
+   "label": "Night synth sessions"
+  },
+  {
+   "id": "creative:tiktok",
+   "type": "creative",
+   "label": "TikTok channel"
+  },
+  {
+   "id": "creative:ig",
+   "type": "creative",
+   "label": "Instagram page"
+  },
+  {
+   "id": "market:KE",
+   "type": "market",
+   "label": "Kenya"
+  },
+  {
+   "id": "market:GH",
+   "type": "market",
+   "label": "Ghana"
+  },
+  {
+   "id": "area:mobile",
+   "type": "area",
+   "label": "Mobile"
+  },
+  {
+   "id": "market:SG",
+   "type": "market",
+   "label": "Singapore"
+  },
+  {
+   "id": "area:web",
+   "type": "area",
+   "label": "Web"
+  },
+  {
+   "id": "market:LK",
+   "type": "market",
+   "label": "Sri Lanka"
+  },
+  {
+   "id": "market:AE",
+   "type": "market",
+   "label": "United Arab Emirates",
+   "aliases": [
+    "UAE",
+    "Emirates"
+   ]
+  },
+  {
+   "id": "area:founded",
+   "type": "area",
+   "label": "Founded by me"
+  },
+  {
+   "id": "area:backend",
+   "type": "area",
+   "label": "Backend"
+  },
+  {
+   "id": "area:fintech",
+   "type": "area",
+   "label": "fintech"
+  },
+  {
+   "id": "area:pc",
+   "type": "area",
+   "label": "PC"
+  },
+  {
+   "id": "area:youtube",
+   "type": "area",
+   "label": "YouTube"
+  },
+  {
+   "id": "area:medium",
+   "type": "area",
+   "label": "Medium"
+  },
+  {
+   "id": "area:instagram",
+   "type": "area",
+   "label": "Instagram"
+  },
+  {
+   "id": "area:tiktok",
+   "type": "area",
+   "label": "TikTok"
+  },
+  {
+   "id": "topic:fintech",
+   "type": "topic",
+   "label": "Fintech"
+  },
+  {
+   "id": "topic:delivery",
+   "type": "topic",
+   "label": "Delivery & logistics"
+  },
+  {
+   "id": "topic:research",
+   "type": "topic",
+   "label": "Research"
+  },
+  {
+   "id": "topic:education",
+   "type": "topic",
+   "label": "Education"
+  },
+  {
+   "id": "topic:productivity",
+   "type": "topic",
+   "label": "Productivity"
+  },
+  {
+   "id": "topic:music",
+   "type": "topic",
+   "label": "Music"
+  },
+  {
+   "id": "topic:visual-art",
+   "type": "topic",
+   "label": "Visual art"
+  }
+ ],
+ "unlinked": [
+  {
+   "id": "tech:Postman",
+   "type": "tech",
+   "label": "Postman"
+  },
+  {
+   "id": "tech:Hive",
+   "type": "tech",
+   "label": "Hive"
+  },
+  {
+   "id": "market:QA",
+   "type": "market",
+   "label": "Qatar"
+  }
+ ],
+ "links": [
+  {
+   "from": "me",
+   "kind": "worked-as",
+   "to": "role:0",
+   "weight": 1
+  },
+  {
+   "from": "me",
+   "kind": "worked-as",
+   "to": "role:1",
+   "weight": 1
+  },
+  {
+   "from": "me",
+   "kind": "worked-as",
+   "to": "role:2",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "built-with",
+   "to": "tech:Flutter",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "built-with",
+   "to": "tech:Dart",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "built-with",
+   "to": "tech:Firebase",
+   "weight": 0.7
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "built-with",
+   "to": "tech:Figma",
+   "weight": 0.4
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "shipped-in",
+   "to": "market:KE",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "shipped-in",
+   "to": "market:GH",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "built-with",
+   "to": "tech:Flutter",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "built-with",
+   "to": "tech:Dart",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "built-with",
+   "to": "tech:Firebase",
+   "weight": 0.7
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "shipped-in",
+   "to": "market:KE",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "built-with",
+   "to": "tech:React Native",
+   "weight": 1
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "built-with",
+   "to": "tech:Node.js",
+   "weight": 1
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "built-with",
+   "to": "tech:Firebase",
+   "weight": 0.7
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "shipped-in",
+   "to": "market:SG",
+   "weight": 1
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "built-with",
+   "to": "tech:React",
+   "weight": 1
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "built-with",
+   "to": "tech:Node.js",
+   "weight": 1
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "built-with",
+   "to": "tech:PostgreSQL",
+   "weight": 0.7
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "built-with",
+   "to": "tech:Jira",
+   "weight": 0.4
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "built-with",
+   "to": "tech:React",
+   "weight": 1
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "built-with",
+   "to": "tech:Next.js",
+   "weight": 1
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "built-with",
+   "to": "tech:Figma",
+   "weight": 0.4
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "shipped-in",
+   "to": "market:LK",
+   "weight": 1
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "shipped-in",
+   "to": "market:AE",
+   "weight": 1
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "me",
+   "kind": "founded",
+   "to": "project:studybuddy",
+   "weight": 1
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "built-with",
+   "to": "tech:Swift",
+   "weight": 1
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "built-with",
+   "to": "tech:SwiftUI",
+   "weight": 1
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "built-with",
+   "to": "tech:Firebase",
+   "weight": 0.7
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "shipped-in",
+   "to": "market:LK",
+   "weight": 1
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "runs-on",
+   "to": "area:founded",
+   "weight": 0.6
+  },
+  {
+   "from": "me",
+   "kind": "founded",
+   "to": "project:synthpad",
+   "weight": 1
+  },
+  {
+   "from": "project:synthpad",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:synthpad",
+   "kind": "built-with",
+   "to": "tech:Web Audio",
+   "weight": 0.7
+  },
+  {
+   "from": "project:synthpad",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "project:synthpad",
+   "kind": "runs-on",
+   "to": "area:founded",
+   "weight": 0.6
+  },
+  {
+   "from": "project:routewise",
+   "kind": "built-with",
+   "to": "tech:Python",
+   "weight": 1
+  },
+  {
+   "from": "project:routewise",
+   "kind": "built-with",
+   "to": "tech:PostgreSQL",
+   "weight": 0.7
+  },
+  {
+   "from": "project:routewise",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "project:the-app",
+   "kind": "built-with",
+   "to": "tech:Kotlin",
+   "weight": 1
+  },
+  {
+   "from": "project:the-app",
+   "kind": "built-with",
+   "to": "tech:Firebase",
+   "weight": 0.7
+  },
+  {
+   "from": "project:the-app",
+   "kind": "built-with",
+   "to": "tech:Jira",
+   "weight": 0.4
+  },
+  {
+   "from": "project:the-app",
+   "kind": "shipped-in",
+   "to": "market:KE",
+   "weight": 1
+  },
+  {
+   "from": "project:the-app",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:the-app",
+   "kind": "runs-on",
+   "to": "area:backend",
+   "weight": 0.6
+  },
+  {
+   "from": "me",
+   "kind": "founded",
+   "to": "project:kiri-cards",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "built-with",
+   "to": "tech:Flutter",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "built-with",
+   "to": "tech:Dart",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "built-with",
+   "to": "tech:Node.js",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "runs-on",
+   "to": "area:founded",
+   "weight": 0.6
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "runs-on",
+   "to": "area:fintech",
+   "weight": 0.6
+  },
+  {
+   "from": "project:kiri-cards-web",
+   "kind": "built-with",
+   "to": "tech:React",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards-web",
+   "kind": "built-with",
+   "to": "tech:TypeScript",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards-web",
+   "kind": "shipped-in",
+   "to": "market:SG",
+   "weight": 1
+  },
+  {
+   "from": "project:kiri-cards-web",
+   "kind": "runs-on",
+   "to": "area:web",
+   "weight": 0.6
+  },
+  {
+   "from": "game:skyforge-saga",
+   "kind": "runs-on",
+   "to": "area:pc",
+   "weight": 0.6
+  },
+  {
+   "from": "game:skyforge-saga-2",
+   "kind": "runs-on",
+   "to": "area:pc",
+   "weight": 0.6
+  },
+  {
+   "from": "game:pixel-rally",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "game:rally-2",
+   "kind": "runs-on",
+   "to": "area:mobile",
+   "weight": 0.6
+  },
+  {
+   "from": "creative:youtube",
+   "kind": "runs-on",
+   "to": "area:youtube",
+   "weight": 0.5
+  },
+  {
+   "from": "creative:offline-first",
+   "kind": "runs-on",
+   "to": "area:medium",
+   "weight": 0.5
+  },
+  {
+   "from": "creative:night-synth",
+   "kind": "runs-on",
+   "to": "area:instagram",
+   "weight": 0.5
+  },
+  {
+   "from": "creative:tiktok",
+   "kind": "runs-on",
+   "to": "area:tiktok",
+   "weight": 0.5
+  },
+  {
+   "from": "creative:ig",
+   "kind": "runs-on",
+   "to": "area:instagram",
+   "weight": 0.5
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "made-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "made-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "made-at",
+   "to": "role:1",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "made-at",
+   "to": "role:1",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "made-at",
+   "to": "role:1",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "made-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "project:kiri-cards-web",
+   "kind": "made-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "made-at"
+  },
+  {
+   "from": "tech:Flutter",
+   "kind": "used-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "used-at"
+  },
+  {
+   "from": "tech:Dart",
+   "kind": "used-at",
+   "to": "role:0",
+   "weight": 1,
+   "rule": "used-at"
+  },
+  {
+   "from": "tech:Firebase",
+   "kind": "used-at",
+   "to": "role:0",
+   "weight": 0.7,
+   "rule": "used-at"
+  },
+  {
+   "from": "tech:React",
+   "kind": "used-at",
+   "to": "role:1",
+   "weight": 1,
+   "rule": "used-at"
+  },
+  {
+   "from": "tech:TypeScript",
+   "kind": "used-at",
+   "to": "role:1",
+   "weight": 1,
+   "rule": "used-at"
+  },
+  {
+   "from": "tech:Python",
+   "kind": "used-at",
+   "to": "role:2",
+   "weight": 1,
+   "rule": "used-at"
+  },
+  {
+   "from": "game:skyforge-saga",
+   "kind": "same-series",
+   "to": "game:skyforge-saga-2",
+   "weight": 1,
+   "rule": "same-series"
+  },
+  {
+   "from": "game:pixel-rally",
+   "kind": "same-series",
+   "to": "game:rally-2",
+   "weight": 1,
+   "rule": "same-series"
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "same-stack",
+   "to": "project:kiri-merchant",
+   "weight": 1,
+   "via": [
+    "Flutter",
+    "Dart"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "same-stack",
+   "to": "project:kiri-cards",
+   "weight": 0.75,
+   "via": [
+    "Flutter",
+    "Dart"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "same-stack",
+   "to": "project:kiri-cards",
+   "weight": 0.75,
+   "via": [
+    "Flutter",
+    "Dart"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "same-stack",
+   "to": "project:tidepool",
+   "weight": 0.75,
+   "via": [
+    "TypeScript",
+    "Node.js"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "same-stack",
+   "to": "project:kiri-cards",
+   "weight": 0.7,
+   "via": [
+    "TypeScript",
+    "Node.js"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "same-stack",
+   "to": "project:ferrylink",
+   "weight": 0.75,
+   "via": [
+    "React",
+    "TypeScript"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "same-stack",
+   "to": "project:kiri-cards",
+   "weight": 0.7,
+   "via": [
+    "TypeScript",
+    "Node.js"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "same-stack",
+   "to": "project:kiri-cards-web",
+   "weight": 0.8333333333333333,
+   "via": [
+    "React",
+    "TypeScript"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "project:ferrylink",
+   "kind": "same-stack",
+   "to": "project:kiri-cards-web",
+   "weight": 0.8333333333333333,
+   "via": [
+    "React",
+    "TypeScript"
+   ],
+   "rule": "same-stack"
+  },
+  {
+   "from": "tech:Dart",
+   "kind": "used-with",
+   "to": "tech:Flutter",
+   "weight": 0.75,
+   "via": [
+    "Kiri Wallet",
+    "Kiri Merchant",
+    "Kiri Cards (beta)"
+   ],
+   "rule": "used-with"
+  },
+  {
+   "from": "tech:Firebase",
+   "kind": "used-with",
+   "to": "tech:Flutter",
+   "weight": 0.5,
+   "via": [
+    "Kiri Wallet",
+    "Kiri Merchant"
+   ],
+   "rule": "used-with"
+  },
+  {
+   "from": "tech:Dart",
+   "kind": "used-with",
+   "to": "tech:Firebase",
+   "weight": 0.5,
+   "via": [
+    "Kiri Wallet",
+    "Kiri Merchant"
+   ],
+   "rule": "used-with"
+  },
+  {
+   "from": "tech:Node.js",
+   "kind": "used-with",
+   "to": "tech:TypeScript",
+   "weight": 0.75,
+   "via": [
+    "Parcelo Courier",
+    "Tidepool Dashboard",
+    "Kiri Cards (beta)"
+   ],
+   "rule": "used-with"
+  },
+  {
+   "from": "tech:React",
+   "kind": "used-with",
+   "to": "tech:TypeScript",
+   "weight": 0.75,
+   "via": [
+    "Tidepool Dashboard",
+    "Ferrylink Booking",
+    "Kiri Cards (web)"
+   ],
+   "rule": "used-with"
+  },
+  {
+   "from": "role:0",
+   "kind": "about",
+   "to": "topic:fintech",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "role:1",
+   "kind": "about",
+   "to": "topic:delivery",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "role:2",
+   "kind": "about",
+   "to": "topic:research",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "about",
+   "to": "topic:fintech",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "about",
+   "to": "topic:fintech",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "about",
+   "to": "topic:delivery",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:parcelo",
+   "kind": "about",
+   "to": "topic:delivery",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:tidepool",
+   "kind": "about",
+   "to": "topic:research",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "about",
+   "to": "topic:education",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:studybuddy",
+   "kind": "about",
+   "to": "topic:productivity",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:synthpad",
+   "kind": "about",
+   "to": "topic:music",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:routewise",
+   "kind": "about",
+   "to": "topic:research",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "about",
+   "to": "topic:fintech",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "creative:youtube",
+   "kind": "about",
+   "to": "topic:visual-art",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "creative:offline-first",
+   "kind": "about",
+   "to": "topic:fintech",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "creative:night-synth",
+   "kind": "about",
+   "to": "topic:music",
+   "weight": 0.7,
+   "rule": "about"
+  },
+  {
+   "from": "project:kiri-cards",
+   "kind": "same-series",
+   "to": "project:kiri-cards-web",
+   "weight": 1,
+   "rule": "editions"
+  },
+  {
+   "from": "role:0",
+   "kind": "mentions",
+   "to": "market:KE",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "role:0",
+   "kind": "mentions",
+   "to": "market:GH",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "role:1",
+   "kind": "mentions",
+   "to": "market:SG",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "project:kiri-wallet",
+   "kind": "mentions",
+   "to": "project:kiri-cards-web",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "project:kiri-merchant",
+   "kind": "mentions",
+   "to": "project:kiri-cards-web",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "creative:youtube",
+   "kind": "mentions",
+   "to": "tech:Flutter",
+   "weight": 0.5,
+   "rule": "mentions"
+  },
+  {
+   "from": "creative:night-synth",
+   "kind": "mentions",
+   "to": "project:synthpad",
+   "weight": 0.5,
+   "rule": "mentions"
+  }
+ ],
+ "index": {
+  "distinctWords": [
+   "apps",
+   "arab",
+   "audio",
+   "beta",
+   "booking",
+   "colombo",
+   "courier",
+   "dart",
+   "dashboard",
+   "emirates",
+   "ferrylink",
+   "field",
+   "figma",
+   "firebase",
+   "first",
+   "flutter",
+   "ghana",
+   "harbor",
+   "hive",
+   "instagram",
+   "intern",
+   "jira",
+   "kenya",
+   "kotlin",
+   "lab",
+   "labs",
+   "lanka",
+   "lumen",
+   "merchant",
+   "native",
+   "next.js",
+   "nextjs",
+   "night",
+   "node",
+   "node.js",
+   "nodejs",
+   "notes",
+   "offline",
+   "page",
+   "parcelo",
+   "payments",
+   "planner",
+   "postgres",
+   "postgresql",
+   "postman",
+   "python",
+   "qatar",
+   "reactjs",
+   "research",
+   "routewise",
+   "senior",
+   "sessions",
+   "singapore",
+   "software",
+   "sri",
+   "studio",
+   "studybuddy",
+   "swiftui",
+   "synth",
+   "synthpad",
+   "tidepool",
+   "tiktok",
+   "typescript",
+   "uae",
+   "united",
+   "university",
+   "wallet",
+   "youtube"
+  ]
+ }
+}

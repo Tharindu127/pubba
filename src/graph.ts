@@ -1,5 +1,5 @@
 import { lowerKey, mentions } from "./text.ts";
-import type { CoOccurRule, Dataset, Entity, Graph, GraphLink, LabelPrefixRule, NamedInRule, PubbaConfig, Rule, SharedRule, TopicsRule } from "./types.ts";
+import type { CoOccurRule, Dataset, Entity, Graph, GraphIndex, GraphLink, LabelPrefixRule, NamedInRule, PubbaConfig, Rule, SharedRule, TopicsRule } from "./types.ts";
 
 const pairKey = (a: string, b: string) => (a < b ? `${a}|${b}` : `${b}|${a}`);
 
@@ -181,18 +181,24 @@ export function buildGraph(data: Dataset, config: PubbaConfig = {}): Graph {
   for (const l of data.links ?? []) b.link(l);
   for (const r of ruleOrder(config)) applyRule(b, r);
 
+  return assembleGraph([...b.entities.values()], b.links, config);
+}
+
+/**
+ * A graph from its final entities and links, in order: each link indexed under
+ * both ends, and entities with no link moved to `unlinked`. Shared by the
+ * builder and by bundles, so both give the same graph.
+ */
+export function assembleGraph(entities: Entity[], links: GraphLink[], config: PubbaConfig, index?: GraphIndex): Graph {
   const adjacent = new Map<string, GraphLink[]>();
-  for (const l of b.links) {
+  for (const l of links) {
     adjacent.set(l.from, [...(adjacent.get(l.from) ?? []), l]);
     adjacent.set(l.to, [...(adjacent.get(l.to) ?? []), l]);
   }
+  const linked = new Map<string, Entity>();
   const unlinked = new Map<string, Entity>();
-  for (const [id, e] of [...b.entities]) {
-    if (adjacent.has(id)) continue;
-    b.entities.delete(id);
-    unlinked.set(id, e);
-  }
-  return { entities: b.entities, unlinked, links: b.links, adjacent, config };
+  for (const e of entities) (adjacent.has(e.id) ? linked : unlinked).set(e.id, e);
+  return { entities: linked, unlinked, links, adjacent, config, ...(index ? { index } : {}) };
 }
 
 export const degree = (g: Graph, id: string): number => g.adjacent.get(id)?.length ?? 0;

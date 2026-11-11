@@ -1,0 +1,340 @@
+{
+  "preset": "none",
+  "config": {
+    "types": {
+      "page": {
+        "label": "Page",
+        "plural": "Pages",
+        "match": {
+          "tier": 1,
+          "firstWord": true
+        },
+        "similar": [
+          "see-also",
+          "same-concepts"
+        ]
+      },
+      "api": {
+        "label": "API",
+        "plural": "API reference",
+        "match": {
+          "tier": 2,
+          "mode": "phrase"
+        }
+      },
+      "concept": {
+        "label": "Concept",
+        "plural": "Concepts",
+        "match": {
+          "tier": 2,
+          "minLength": 3
+        }
+      },
+      "version": {
+        "label": "Version",
+        "destination": false,
+        "match": {
+          "skip": true
+        }
+      }
+    },
+    "kinds": {
+      "explains": {
+        "label": "explains",
+        "pull": 0.9,
+        "weight": 1
+      },
+      "uses-api": {
+        "label": "uses",
+        "pull": 0.8,
+        "weight": 0.8
+      },
+      "see-also": {
+        "label": "see also",
+        "pull": 1,
+        "weight": 1
+      },
+      "since": {
+        "label": "since",
+        "pull": 0.3,
+        "weight": 0.4
+      },
+      "same-concepts": {
+        "label": "covers the same concepts as",
+        "pull": 0.9
+      },
+      "mentions": {
+        "label": "mentions",
+        "pull": 0.5,
+        "weight": 0.5
+      }
+    },
+    "rules": [
+      {
+        "type": "named-in",
+        "id": "api-mentions",
+        "kind": "uses-api",
+        "named": [
+          "api"
+        ],
+        "in": [
+          "page"
+        ],
+        "direction": "text-to-named",
+        "weight": 0.6,
+        "minNameLength": 4
+      },
+      {
+        "type": "shared",
+        "kind": "same-concepts",
+        "among": "page",
+        "through": [
+          "explains"
+        ],
+        "min": 2
+      },
+      {
+        "type": "named-in",
+        "kind": "mentions",
+        "named": [
+          "page"
+        ],
+        "in": [
+          "page"
+        ],
+        "minNameLength": 6
+      }
+    ],
+    "match": {
+      "typoMinLength": 5,
+      "distinctWords": true,
+      "precise": true,
+      "stopWords": [
+        "the",
+        "a",
+        "how",
+        "to",
+        "guide",
+        "page"
+      ]
+    },
+    "templates": {
+      "explains": {
+        "out": "{item} explains {other}.",
+        "in": "{item} is explained in {other}."
+      },
+      "uses-api": {
+        "out": "{item} uses {other}.",
+        "in": "{item} is used in {other}."
+      },
+      "see-also": "See also {item}.",
+      "same-concepts": "{item} covers the same concepts as {other}[ ({via})].",
+      "since": "{item} is new in {other}."
+    }
+  },
+  "entities": [
+    {
+      "id": "page:install",
+      "type": "page",
+      "label": "Installation",
+      "url": "/docs/install",
+      "text": "Install the package, then read Getting Started."
+    },
+    {
+      "id": "page:start",
+      "type": "page",
+      "label": "Getting Started",
+      "url": "/docs/start",
+      "text": "Create a client with createClient and make your first query."
+    },
+    {
+      "id": "page:auth",
+      "type": "page",
+      "label": "Authentication Guide",
+      "url": "/docs/auth",
+      "text": "Sign requests with signIn and refresh tokens with refreshToken."
+    },
+    {
+      "id": "page:pagination",
+      "type": "page",
+      "label": "Pagination",
+      "url": "/docs/pagination",
+      "text": "Use listItems with a cursor."
+    },
+    {
+      "id": "page:errors",
+      "type": "page",
+      "label": "Errors and Retries",
+      "url": "/docs/errors",
+      "text": "How retries work when createClient sees a timeout. Signed events retry too: see Webhooks."
+    },
+    {
+      "id": "page:webhooks",
+      "type": "page",
+      "label": "Webhooks",
+      "url": "/docs/webhooks",
+      "text": "Verify signatures with verifyWebhook."
+    },
+    {
+      "id": "page:migrate",
+      "type": "page",
+      "label": "Migrating to v3",
+      "aliases": [
+        "upgrade guide"
+      ],
+      "url": "/docs/migrate",
+      "text": "What changed in createClient and listItems."
+    },
+    {
+      "id": "api:createClient",
+      "type": "api",
+      "label": "createClient",
+      "aliases": [
+        "create client"
+      ],
+      "url": "/api/createClient"
+    },
+    {
+      "id": "api:signIn",
+      "type": "api",
+      "label": "signIn",
+      "url": "/api/signIn"
+    },
+    {
+      "id": "api:refreshToken",
+      "type": "api",
+      "label": "refreshToken",
+      "url": "/api/refreshToken"
+    },
+    {
+      "id": "api:listItems",
+      "type": "api",
+      "label": "listItems",
+      "url": "/api/listItems"
+    },
+    {
+      "id": "api:verifyWebhook",
+      "type": "api",
+      "label": "verifyWebhook",
+      "url": "/api/verifyWebhook"
+    },
+    {
+      "id": "api:deleteAll",
+      "type": "api",
+      "label": "deleteAll",
+      "url": "/api/deleteAll"
+    },
+    {
+      "id": "concept:tokens",
+      "type": "concept",
+      "label": "Access tokens"
+    },
+    {
+      "id": "concept:cursor",
+      "type": "concept",
+      "label": "Cursors"
+    },
+    {
+      "id": "concept:retries",
+      "type": "concept",
+      "label": "Retries"
+    },
+    {
+      "id": "concept:signatures",
+      "type": "concept",
+      "label": "Signatures"
+    },
+    {
+      "id": "concept:clients",
+      "type": "concept",
+      "label": "Clients"
+    },
+    {
+      "id": "version:v3",
+      "type": "version",
+      "label": "v3"
+    }
+  ],
+  "links": [
+    {
+      "from": "page:auth",
+      "kind": "explains",
+      "to": "concept:clients"
+    },
+    {
+      "from": "page:auth",
+      "kind": "explains",
+      "to": "concept:tokens"
+    },
+    {
+      "from": "page:auth",
+      "kind": "explains",
+      "to": "concept:signatures"
+    },
+    {
+      "from": "page:webhooks",
+      "kind": "explains",
+      "to": "concept:signatures"
+    },
+    {
+      "from": "page:webhooks",
+      "kind": "explains",
+      "to": "concept:retries"
+    },
+    {
+      "from": "page:errors",
+      "kind": "explains",
+      "to": "concept:retries"
+    },
+    {
+      "from": "page:errors",
+      "kind": "explains",
+      "to": "concept:clients"
+    },
+    {
+      "from": "page:start",
+      "kind": "explains",
+      "to": "concept:clients"
+    },
+    {
+      "from": "page:start",
+      "kind": "explains",
+      "to": "concept:tokens"
+    },
+    {
+      "from": "page:pagination",
+      "kind": "explains",
+      "to": "concept:cursor"
+    },
+    {
+      "from": "page:migrate",
+      "kind": "explains",
+      "to": "concept:clients"
+    },
+    {
+      "from": "page:migrate",
+      "kind": "explains",
+      "to": "concept:cursor"
+    },
+    {
+      "from": "page:install",
+      "kind": "see-also",
+      "to": "page:start"
+    },
+    {
+      "from": "page:auth",
+      "kind": "see-also",
+      "to": "page:webhooks"
+    },
+    {
+      "from": "page:migrate",
+      "kind": "since",
+      "to": "version:v3"
+    },
+    {
+      "from": "api:listItems",
+      "kind": "since",
+      "to": "version:v3"
+    }
+  ]
+}

@@ -1,0 +1,335 @@
+{
+  "preset": "portfolio",
+  "presetOptions": {
+    "pronoun": "she",
+    "owner": "Nimali"
+  },
+  "portfolio": {
+    "person": {
+      "name": "Nimali Perera",
+      "short": "Nimali",
+      "url": "https://nimali.example.com",
+      "jobTitle": "Senior Mobile Engineer",
+      "email": "hello@nimali.example.com",
+      "sameAs": [
+        "https://github.com/nimali-example",
+        "https://www.linkedin.com/in/nimali-example"
+      ],
+      "description": "A mobile and web developer from Colombo who builds payment, delivery and learning apps."
+    },
+    "roles": [
+      {
+        "title": "Senior Mobile Engineer \u2014 Payments",
+        "company": "Lumen Labs",
+        "location": "Colombo, Sri Lanka",
+        "start": "2023",
+        "end": "Present",
+        "points": [
+          "Leads the Kiri Wallet team: a Flutter and Dart app for mobile payments in Kenya and Ghana.",
+          "Introduced Firebase crash reporting and cut release crashes by half."
+        ]
+      },
+      {
+        "title": "Software Engineer \u2014 Web",
+        "company": "Harbor Studio",
+        "location": "Singapore",
+        "start": "2020",
+        "end": "2023",
+        "points": [
+          "Built the Ferrylink booking site and the Tidepool dashboard with React and TypeScript.",
+          "Shipped the Parcelo courier tracker for clients in Singapore."
+        ]
+      },
+      {
+        "title": "Research Intern",
+        "company": "Colombo University Lab",
+        "location": "Colombo, Sri Lanka",
+        "start": "2019",
+        "end": "2020",
+        "points": [
+          "Researched route planning for city buses in Python and presented it at a regional conference."
+        ]
+      }
+    ],
+    "projects": [
+      {
+        "slug": "kiri-wallet",
+        "title": "Kiri Wallet",
+        "subtitle": "A mobile wallet for everyday payments",
+        "description": "Send money, pay bills and split costs with friends. Live in Kenya and Ghana.",
+        "category": "Mobile",
+        "technologies": [
+          "Flutter",
+          "Dart",
+          "Firebase",
+          "Figma"
+        ],
+        "url": "https://nimali.example.com/projects/kiri-wallet",
+        "date": "2024"
+      },
+      {
+        "slug": "kiri-merchant",
+        "title": "Kiri Merchant",
+        "subtitle": "Lets small shops accept QR payments",
+        "description": "The shop side of Kiri Wallet: take QR payments and see the day's sales. Used by merchants in Kenya.",
+        "category": "Mobile",
+        "technologies": [
+          "Flutter",
+          "Dart",
+          "Firebase"
+        ],
+        "url": "https://nimali.example.com/projects/kiri-merchant",
+        "date": "2025"
+      },
+      {
+        "slug": "parcelo",
+        "title": "Parcelo Courier",
+        "subtitle": "Live tracking for a courier fleet",
+        "description": "Riders scan parcels, customers follow their delivery on a map. Runs across Singapore.",
+        "category": "Mobile, Web",
+        "technologies": [
+          "React Native",
+          "TypeScript",
+          "Node.js",
+          "Firebase"
+        ],
+        "url": "https://nimali.example.com/projects/parcelo",
+        "date": "2022"
+      },
+      {
+        "slug": "tidepool",
+        "title": "Tidepool Dashboard",
+        "subtitle": "Analytics for marine researchers",
+        "description": "Charts years of reef sensor data so researchers can spot change early.",
+        "category": "Web",
+        "technologies": [
+          "React",
+          "TypeScript",
+          "Node.js",
+          "PostgreSQL",
+          "Jira"
+        ],
+        "url": "https://nimali.example.com/projects/tidepool",
+        "date": "2021"
+      },
+      {
+        "slug": "ferrylink",
+        "title": "Ferrylink Booking",
+        "subtitle": "Book ferry trips in a few taps",
+        "description": "Timetables, seats and tickets for island ferries in Sri Lanka and the UAE.",
+        "category": "Web",
+        "technologies": [
+          "React",
+          "TypeScript",
+          "Next.js",
+          "Figma"
+        ],
+        "url": "https://nimali.example.com/projects/ferrylink",
+        "date": "2021"
+      },
+      {
+        "slug": "studybuddy",
+        "title": "StudyBuddy Planner",
+        "subtitle": "A study planner for university students",
+        "description": "Plans revision around lectures and exams. Popular with students across Sri Lanka.",
+        "category": "Mobile",
+        "tags": [
+          "founded"
+        ],
+        "technologies": [
+          "Swift",
+          "SwiftUI",
+          "Firebase"
+        ],
+        "url": "https://nimali.example.com/projects/studybuddy",
+        "date": "2023"
+      },
+      {
+        "slug": "synthpad",
+        "title": "Synthpad",
+        "subtitle": "A music synth that runs in the browser",
+        "description": "Play chords and loops with your keyboard. Built for fun on weekends.",
+        "category": "Web",
+        "tags": [
+          "founded"
+        ],
+        "technologies": [
+          "TypeScript",
+          "Web Audio"
+        ],
+        "url": "https://nimali.example.com/projects/synthpad",
+        "date": "2024"
+      },
+      {
+        "slug": "routewise",
+        "title": "Routewise",
+        "subtitle": "Bus route planning research",
+        "description": "A research prototype that plans city bus routes from ticket data, presented at a regional conference.",
+        "category": "Web",
+        "technologies": [
+          "Python",
+          "PostgreSQL"
+        ],
+        "url": "https://nimali.example.com/projects/routewise",
+        "date": "2020"
+      }
+    ],
+    "skills": [
+      {
+        "name": "Flutter",
+        "category": "Frameworks"
+      },
+      {
+        "name": "Dart",
+        "category": "Languages"
+      },
+      {
+        "name": "Firebase",
+        "category": "Platforms"
+      },
+      {
+        "name": "Figma",
+        "category": "Design"
+      },
+      {
+        "name": "Jira",
+        "category": "Tools"
+      },
+      {
+        "name": "React",
+        "category": "Frameworks",
+        "aliases": [
+          "reactjs"
+        ]
+      },
+      {
+        "name": "React Native",
+        "category": "Frameworks",
+        "aliases": [
+          "rn"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "category": "Languages",
+        "aliases": [
+          "ts"
+        ]
+      },
+      {
+        "name": "Node.js",
+        "category": "Frameworks",
+        "aliases": [
+          "node",
+          "nodejs"
+        ]
+      },
+      {
+        "name": "Next.js",
+        "category": "Frameworks",
+        "aliases": [
+          "nextjs"
+        ]
+      },
+      {
+        "name": "PostgreSQL",
+        "category": "Platforms",
+        "aliases": [
+          "postgres"
+        ]
+      },
+      {
+        "name": "Swift",
+        "category": "Languages"
+      },
+      {
+        "name": "SwiftUI",
+        "category": "Frameworks",
+        "aliases": [
+          "swift ui"
+        ]
+      },
+      {
+        "name": "Python",
+        "category": "Languages"
+      },
+      {
+        "name": "Web Audio",
+        "category": "Platforms"
+      }
+    ],
+    "markets": [
+      {
+        "code": "LK",
+        "name": "Sri Lanka"
+      },
+      {
+        "code": "KE",
+        "name": "Kenya"
+      },
+      {
+        "code": "GH",
+        "name": "Ghana"
+      },
+      {
+        "code": "SG",
+        "name": "Singapore"
+      },
+      {
+        "code": "AE",
+        "name": "United Arab Emirates",
+        "aliases": [
+          "UAE",
+          "Emirates"
+        ]
+      }
+    ],
+    "games": [
+      {
+        "id": "skyforge-saga",
+        "title": "Skyforge Saga",
+        "platform": "PC",
+        "genre": "Open-world RPG"
+      },
+      {
+        "id": "skyforge-saga-2",
+        "title": "Skyforge Saga II",
+        "platform": "PC",
+        "genre": "Open-world RPG",
+        "note": "The sequel, finished twice."
+      },
+      {
+        "id": "pixel-rally",
+        "title": "Pixel Rally",
+        "platform": "Mobile",
+        "genre": "Racing"
+      }
+    ],
+    "creative": [
+      {
+        "id": "youtube",
+        "title": "Nimali on YouTube",
+        "platform": "YouTube",
+        "kind": "channel",
+        "description": "Short videos on building Flutter apps."
+      },
+      {
+        "id": "offline-first",
+        "title": "Field notes on offline-first apps",
+        "platform": "Medium",
+        "kind": "writing",
+        "description": "What building payment apps for patchy networks taught me.",
+        "aliases": [
+          "Field notes"
+        ]
+      },
+      {
+        "id": "night-synth",
+        "title": "Night synth sessions",
+        "platform": "Instagram",
+        "kind": "art",
+        "description": "Short clips of synth music made in Synthpad."
+      }
+    ]
+  }
+}

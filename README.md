@@ -183,6 +183,8 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `createTrail({ max?, storage?, key? })` | `record`, `get`, `clear`, `subscribe` |
 | `createEvents({ goals? })`, `createPubba(data, config, { events })` | Privacy-safe measurement events; `pubba.track.guideOpened / guidedTo / reached` |
 | `summarise(events)` | One visit's funnel: `usedGuide`, `guidedTo`, `reached`, `guidedBeforeGoal` |
+| `createGuide(pubba, { trail?, route?, chips?, nudge?, templates?, now? })` | The headless navigator: `ask`, `chips`, `visited`, `follow`, `nudge`, `opened`, `reached` |
+| `compileBundle(graph, { withData? })`, `loadBundle(json, { events? })` | The finished graph as portable JSON, and a runtime from it |
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
 | `pubba.graph.unlinked` | Entities with no links: never suggested, but `match` and `search` still find them |
@@ -225,6 +227,53 @@ Software apps get `applicationCategory` (from `data.applicationCategory`; the
 portfolio preset picks one of Google's app types from the project's topics) and
 `operatingSystem` (from `data.operatingSystem`: the project's platforms), the two
 properties Google's Software App rich result needs without a price or rating.
+
+## The guide: `createGuide`
+
+The navigator without any UI or personality. What it looks like (a search bar,
+a chat bubble, a bot, a character) is entirely yours; the guide decides what
+to say, where to go and when to nudge.
+
+```ts
+import { createGuide } from "pubba";
+
+const guide = createGuide(pubba, { trail, route: (e) => e.url });
+
+guide.ask("anything like kiri walet?");
+// { kind: "similar", text: "Kiri Merchant is built on the same stack as Kiri Wallet (Flutter, Dart).",
+//   action: { type: "open", id: "project:kiri-merchant", url: "https://nimali.example.com/projects/kiri-merchant" }, chips: [] }
+guide.ask("best pizza near me"); // { kind: "none", text: "I couldn't find that here. These might help:", chips: [...] }
+
+guide.visited("project:sira");          // the visitor went there on their own
+guide.follow("project:adventurers", "chip"); // the guide sent them (measured)
+guide.chips();                          // follow-ups for where they are now
+guide.nudge();                          // a suggestion to show unprompted, or null
+```
+
+- **Replies** are `{ kind, text, action?, chips }` with `kind` one of `open`,
+  `similar`, `none` (nothing here answers: show the chips, or ask your AI),
+  `not-here` (a name the site doesn't have) and `start` (an empty question).
+- **Nudges** follow Pubba's rules: only after a step the visitor took
+  themselves, 9 s later, once per item, at least 60 s apart, and only with a
+  real link and a score of 0.3 or more. Call `nudge()` after
+  `guide.nudgePolicy.delayMs`; it enforces the rest. All three numbers are options.
+- **Words** come from templates (`open`, `similar`, `none`, `notHere`, `start`,
+  `nudge`), so the guide speaks in the site's voice and language.
+
+## Bundles: one brain, any platform
+
+`pubba compile pubba.json --out pubba.bundle.json` writes the finished graph
+as one versioned JSON file: entities, links with their final weights, runtime
+settings and sentence templates. All the rule work happens there, once.
+`loadBundle(json)` answers from it exactly as the full build does (checked on
+the portfolio's live content: 1,251 answers compared, no differences). The
+portfolio's bundle is 6.4 KB gzipped.
+
+This is how pubba reaches other languages: a small runtime per language loads
+the same bundle, implements [spec/SPEC.md](spec/SPEC.md), and must pass the
+[conformance suite](conformance/README.md) (4,657 cases over five sample sites)
+to count as done. The TypeScript runtime passes 100%. Next: Python, then
+Kotlin, Swift, Dart, C# and PHP ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
 
 ## Measurement events
 
@@ -298,6 +347,7 @@ queries, 12 + 35 trails, all passing), and CI runs it with lint on every push.
 ## CLI
 
 ```
+pubba compile  <pubba.json> --out <file> [--with-data]  the bundle every runtime loads
 pubba inspect  <pubba.json>
 pubba preview  <pubba.json>                  the mapping as Markdown tables
 pubba match    <pubba.json> "<query>"
@@ -310,7 +360,9 @@ pubba jsonld   <pubba.json> [--base-url <url>] [--out <f>]
 pubba llms     <pubba.json> [--base-url <url>] [--out <f>]
 ```
 
-A `pubba.json` holds a preset, content and config:
+Every command except `compile` also takes a compiled bundle in place of the
+`pubba.json`, answering exactly as a runtime would. A `pubba.json` holds a
+preset, content and config:
 [examples/portfolio/pubba.json](examples/portfolio/pubba.json).
 
 ## The Claude skill
@@ -357,7 +409,12 @@ harness with generated cases and lint; the portfolio preset; JSON-LD and
 llms.txt helpers; the CLI and the Claude skill. Hardened by switching the
 portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 
-**v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles are next (0.3), then exports (0.4).
+**Every platform** (design: [docs/multiplatform-design.md](docs/multiplatform-design.md)).
+0.3.0 laid the foundation: bundles, the spec, the conformance suite and the
+headless guide. Next, runtimes in Python (0.4, with an HTTP and MCP server),
+Kotlin (0.5), Swift (0.6), Dart (0.7), then C# and PHP (0.8).
+
+**v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 
 - **Intent profiles.** Infer a visitor's likely intent from their trail ("mobile
   hiring" versus "web client") and weight related items and predictions by it.
@@ -384,7 +441,9 @@ portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 ## Development
 
 ```bash
-npm test          # unit, parity and eval tests (node:test, no build needed)
+npm test          # unit, parity, conformance and eval tests (node:test, no build needed)
+npm run conformance        # regenerate conformance/ after a behaviour change (review the diff)
+npm run conformance:check  # fails when conformance/ is out of date (CI runs it)
 npm run eval      # the harness on the example; fails below eval/baseline.json
 npm run example
 npm run typecheck

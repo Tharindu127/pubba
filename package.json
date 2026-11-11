@@ -1,6 +1,6 @@
 {
   "name": "pubba",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A knowledge-graph engine for showroom sites: related items with reasons, what-next predictions from a visitor's trail, and typo-tolerant matching. Portfolios first.",
   "license": "MIT",
   "author": "Tharindu Athapaththu",
@@ -62,8 +62,10 @@
     "test": "node --experimental-strip-types --no-warnings --test \"test/**/*.test.ts\"",
     "eval": "node --experimental-strip-types --no-warnings src/cli.ts eval examples/portfolio/pubba.json --queries eval/queries.json --trails eval/trails.json --generated --baseline eval/baseline.json",
     "example": "node --experimental-strip-types --no-warnings examples/portfolio/demo.ts",
-    "prepublishOnly": "npm run typecheck && npm test && npm run build",
-    "lint:content": "node --experimental-strip-types --no-warnings src/cli.ts lint examples/portfolio/pubba.json"
+    "prepublishOnly": "npm run typecheck && npm test && npm run conformance:check && npm run build",
+    "lint:content": "node --experimental-strip-types --no-warnings src/cli.ts lint examples/portfolio/pubba.json",
+    "conformance": "node --experimental-strip-types --no-warnings conformance/generate.ts",
+    "conformance:check": "node --experimental-strip-types --no-warnings conformance/generate.ts --check"
   },
   "devDependencies": {
     "@types/node": "^22.20.5",

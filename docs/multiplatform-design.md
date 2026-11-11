@@ -1,6 +1,6 @@
 # pubba on every platform: design
 
-Status: **agreed 11 Nov 2026** (decisions in section 10).
+Status: **agreed 11 Nov 2026** (decisions in section 10). **0.3.0 built**: bundles, spec/SPEC.md, conformance/ (4,657 cases, TypeScript passes 100%) and `createGuide`.
 
 Goal: any site or app, in any popular language or framework, can use the same
 pubba brain (related items with reasons, what-next from a trail, typo-tolerant

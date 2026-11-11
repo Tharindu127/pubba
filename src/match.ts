@@ -65,9 +65,14 @@ const STRONG = 50;
 const distinctCache = new WeakMap<Graph, Set<string>>();
 
 /** Significant words that occur in the names of exactly one matchable entity. */
-function distinctWords(g: Graph, stop: Set<string>): Set<string> {
+export function distinctWords(g: Graph, stop: Set<string>): Set<string> {
   let out = distinctCache.get(g);
   if (out) return out;
+  if (g.index) {
+    out = new Set(g.index.distinctWords);
+    distinctCache.set(g, out);
+    return out;
+  }
   const owners = new Map<string, Set<string>>();
   for (const e of allEntities(g)) {
     if (g.config.types?.[e.type]?.match?.skip) continue;

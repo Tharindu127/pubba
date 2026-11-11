@@ -1,0 +1,574 @@
+{
+ "format": 1,
+ "compiler": "pubba@0.3.0",
+ "config": {
+  "types": {
+   "course": {
+    "label": "Course",
+    "plural": "Courses",
+    "match": {
+     "tier": 1,
+     "firstWord": true
+    },
+    "similar": [
+     "same-topics",
+     "same-series"
+    ]
+   },
+   "instructor": {
+    "label": "Instructor",
+    "plural": "Instructors",
+    "match": {
+     "tier": 2,
+     "minLength": 3,
+     "firstWord": true
+    }
+   },
+   "level": {
+    "label": "Level",
+    "plural": "Levels",
+    "destination": false,
+    "match": {
+     "skip": true
+    }
+   },
+   "topic": {
+    "label": "Topic",
+    "plural": "Topics",
+    "match": {
+     "tier": 3,
+     "mode": "phrase"
+    }
+   }
+  },
+  "kinds": {
+   "about": {
+    "label": "about",
+    "pull": 0.8
+   },
+   "taught-by": {
+    "label": "taught by",
+    "pull": 0.7
+   },
+   "at-level": {
+    "label": "at",
+    "pull": 0.4
+   },
+   "prerequisite": {
+    "label": "needs",
+    "pull": 0.9
+   },
+   "same-series": {
+    "label": "same series as",
+    "pull": 1
+   },
+   "same-topics": {
+    "label": "covers the same as",
+    "pull": 1
+   },
+   "taught-together": {
+    "label": "taught together with",
+    "pull": 0.6
+   }
+  },
+  "next": {
+   "recency": 0.5,
+   "secondStep": 0.5,
+   "hubDamping": 2
+  },
+  "match": {
+   "typoMinLength": 4,
+   "partialWords": true,
+   "ignore": [
+    "Academy"
+   ],
+   "similarPattern": "\\b(like|similar|instead of)\\b"
+  },
+  "templates": {
+   "about": {
+    "out": "{item} covers {other}.",
+    "in": "{item} is taught in {other}."
+   },
+   "taught-by": {
+    "out": "{item} is taught by {other}.",
+    "in": "{item} teaches {other}."
+   },
+   "prerequisite": {
+    "out": "{item} needs {other} first.",
+    "in": "{item} leads on to {other}."
+   },
+   "same-series": "{item} is part of the same series as {other}.",
+   "same-topics": "{item} covers the same ground as {other}[ ({via})].",
+   "taught-together": "{item} is often taught with {other}."
+  }
+ },
+ "entities": [
+  {
+   "id": "course:ml-1",
+   "type": "course",
+   "label": "Machine Learning (Part 1)",
+   "url": "/c/ml-1"
+  },
+  {
+   "id": "course:ml-2",
+   "type": "course",
+   "label": "Machine Learning (Part 2)",
+   "url": "/c/ml-2"
+  },
+  {
+   "id": "course:stats",
+   "type": "course",
+   "label": "Statistics for Data Science",
+   "aliases": [
+    "stats"
+   ],
+   "url": "/c/stats"
+  },
+  {
+   "id": "course:python",
+   "type": "course",
+   "label": "Python Foundations",
+   "url": "/c/python"
+  },
+  {
+   "id": "course:python-data",
+   "type": "course",
+   "label": "Python Foundations for Data",
+   "url": "/c/python-data"
+  },
+  {
+   "id": "course:sql",
+   "type": "course",
+   "label": "SQL Essentials",
+   "aliases": [
+    "databases"
+   ],
+   "url": "/c/sql"
+  },
+  {
+   "id": "course:viz",
+   "type": "course",
+   "label": "Data Visualisation",
+   "aliases": [
+    "data visualization",
+    "charts"
+   ],
+   "url": "/c/viz"
+  },
+  {
+   "id": "course:deep",
+   "type": "course",
+   "label": "Deep Learning",
+   "url": "/c/deep"
+  },
+  {
+   "id": "instructor:ada",
+   "type": "instructor",
+   "label": "Ada Mensah"
+  },
+  {
+   "id": "instructor:li",
+   "type": "instructor",
+   "label": "Li Wei"
+  },
+  {
+   "id": "instructor:sam",
+   "type": "instructor",
+   "label": "Sam Okafor"
+  },
+  {
+   "id": "level:beginner",
+   "type": "level",
+   "label": "Beginner"
+  },
+  {
+   "id": "level:advanced",
+   "type": "level",
+   "label": "Advanced"
+  },
+  {
+   "id": "topic:python",
+   "type": "topic",
+   "label": "Python"
+  },
+  {
+   "id": "topic:statistics",
+   "type": "topic",
+   "label": "Statistics"
+  },
+  {
+   "id": "topic:linear-algebra",
+   "type": "topic",
+   "label": "Linear Algebra"
+  },
+  {
+   "id": "topic:neural-networks",
+   "type": "topic",
+   "label": "Neural Networks"
+  },
+  {
+   "id": "topic:sql",
+   "type": "topic",
+   "label": "SQL"
+  },
+  {
+   "id": "topic:charts",
+   "type": "topic",
+   "label": "Charts"
+  },
+  {
+   "id": "topic:jupyter",
+   "type": "topic",
+   "label": "Jupyter"
+  }
+ ],
+ "unlinked": [
+  {
+   "id": "course:academy-tour",
+   "type": "course",
+   "label": "Academy Tour",
+   "url": "/c/tour"
+  }
+ ],
+ "links": [
+  {
+   "from": "course:ml-1",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "about",
+   "to": "topic:statistics",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "about",
+   "to": "topic:linear-algebra",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "about",
+   "to": "topic:jupyter",
+   "weight": 0.4
+  },
+  {
+   "from": "course:ml-2",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-2",
+   "kind": "about",
+   "to": "topic:neural-networks",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-2",
+   "kind": "about",
+   "to": "topic:linear-algebra",
+   "weight": 1
+  },
+  {
+   "from": "course:deep",
+   "kind": "about",
+   "to": "topic:neural-networks",
+   "weight": 1
+  },
+  {
+   "from": "course:deep",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:deep",
+   "kind": "about",
+   "to": "topic:linear-algebra",
+   "weight": 1
+  },
+  {
+   "from": "course:stats",
+   "kind": "about",
+   "to": "topic:statistics",
+   "weight": 1
+  },
+  {
+   "from": "course:stats",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:stats",
+   "kind": "about",
+   "to": "topic:charts",
+   "weight": 0.7
+  },
+  {
+   "from": "course:python",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:python",
+   "kind": "about",
+   "to": "topic:jupyter",
+   "weight": 0.4
+  },
+  {
+   "from": "course:python-data",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:python-data",
+   "kind": "about",
+   "to": "topic:charts",
+   "weight": 0.7
+  },
+  {
+   "from": "course:python-data",
+   "kind": "about",
+   "to": "topic:jupyter",
+   "weight": 0.4
+  },
+  {
+   "from": "course:sql",
+   "kind": "about",
+   "to": "topic:sql",
+   "weight": 1
+  },
+  {
+   "from": "course:viz",
+   "kind": "about",
+   "to": "topic:charts",
+   "weight": 0.7
+  },
+  {
+   "from": "course:viz",
+   "kind": "about",
+   "to": "topic:python",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "taught-by",
+   "to": "instructor:ada",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-2",
+   "kind": "taught-by",
+   "to": "instructor:ada",
+   "weight": 1
+  },
+  {
+   "from": "course:deep",
+   "kind": "taught-by",
+   "to": "instructor:ada",
+   "weight": 1
+  },
+  {
+   "from": "course:stats",
+   "kind": "taught-by",
+   "to": "instructor:li",
+   "weight": 1
+  },
+  {
+   "from": "course:sql",
+   "kind": "taught-by",
+   "to": "instructor:li",
+   "weight": 1
+  },
+  {
+   "from": "course:python",
+   "kind": "taught-by",
+   "to": "instructor:sam",
+   "weight": 1
+  },
+  {
+   "from": "course:python-data",
+   "kind": "taught-by",
+   "to": "instructor:sam",
+   "weight": 1
+  },
+  {
+   "from": "course:viz",
+   "kind": "taught-by",
+   "to": "instructor:li",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "prerequisite",
+   "to": "course:python",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "prerequisite",
+   "to": "course:stats",
+   "weight": 1
+  },
+  {
+   "from": "course:deep",
+   "kind": "prerequisite",
+   "to": "course:ml-2",
+   "weight": 1
+  },
+  {
+   "from": "course:stats",
+   "kind": "prerequisite",
+   "to": "course:python",
+   "weight": 1
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "at-level",
+   "to": "level:advanced",
+   "weight": 0.5
+  },
+  {
+   "from": "course:ml-2",
+   "kind": "at-level",
+   "to": "level:advanced",
+   "weight": 0.5
+  },
+  {
+   "from": "course:deep",
+   "kind": "at-level",
+   "to": "level:advanced",
+   "weight": 0.5
+  },
+  {
+   "from": "course:python",
+   "kind": "at-level",
+   "to": "level:beginner",
+   "weight": 0.5
+  },
+  {
+   "from": "course:sql",
+   "kind": "at-level",
+   "to": "level:beginner",
+   "weight": 0.5
+  },
+  {
+   "from": "course:viz",
+   "kind": "at-level",
+   "to": "level:beginner",
+   "weight": 0.5
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "same-series",
+   "to": "course:ml-2",
+   "weight": 1,
+   "rule": "same-series"
+  },
+  {
+   "from": "course:python",
+   "kind": "same-series",
+   "to": "course:python-data",
+   "weight": 1,
+   "rule": "same-series"
+  },
+  {
+   "from": "course:ml-1",
+   "kind": "same-topics",
+   "to": "course:deep",
+   "weight": 0.7,
+   "via": [
+    "Python",
+    "Linear Algebra"
+   ],
+   "rule": "same-topics"
+  },
+  {
+   "from": "topic:python",
+   "kind": "taught-together",
+   "to": "topic:statistics",
+   "weight": 0.6666666666666666,
+   "via": [
+    "Machine Learning (Part 1)",
+    "Statistics for Data Science"
+   ],
+   "rule": "taught-together"
+  },
+  {
+   "from": "topic:linear-algebra",
+   "kind": "taught-together",
+   "to": "topic:python",
+   "weight": 1,
+   "via": [
+    "Machine Learning (Part 1)",
+    "Machine Learning (Part 2)",
+    "Deep Learning"
+   ],
+   "rule": "taught-together"
+  },
+  {
+   "from": "topic:neural-networks",
+   "kind": "taught-together",
+   "to": "topic:python",
+   "weight": 0.6666666666666666,
+   "via": [
+    "Machine Learning (Part 2)",
+    "Deep Learning"
+   ],
+   "rule": "taught-together"
+  },
+  {
+   "from": "topic:linear-algebra",
+   "kind": "taught-together",
+   "to": "topic:neural-networks",
+   "weight": 0.6666666666666666,
+   "via": [
+    "Machine Learning (Part 2)",
+    "Deep Learning"
+   ],
+   "rule": "taught-together"
+  },
+  {
+   "from": "topic:charts",
+   "kind": "taught-together",
+   "to": "topic:python",
+   "weight": 1,
+   "via": [
+    "Statistics for Data Science",
+    "Python Foundations for Data",
+    "Data Visualisation"
+   ],
+   "rule": "taught-together"
+  }
+ ],
+ "index": {
+  "distinctWords": [
+   "academy",
+   "ada",
+   "algebra",
+   "databases",
+   "deep",
+   "essentials",
+   "jupyter",
+   "linear",
+   "mensah",
+   "networks",
+   "neural",
+   "okafor",
+   "sam",
+   "science",
+   "stats",
+   "tour",
+   "visualisation",
+   "visualization",
+   "wei"
+  ]
+ }
+}

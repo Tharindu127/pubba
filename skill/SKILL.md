@@ -20,6 +20,7 @@ skill folder): it uses the project's installed `pubba`, else a checkout named by
 
 | Command | What it does |
 | --- | --- |
+| `pubba.sh compile <pubba.json> --out <bundle.json>` | The finished graph as one JSON file, which the site's runtime loads (`loadBundle`) |
 | `pubba.sh preview <pubba.json>` | The mapping as Markdown tables: entities, links, which links rules derived, and what got dropped |
 | `pubba.sh inspect <pubba.json>` | Counts by type and kind |
 | `pubba.sh match <pubba.json> "<query>"` | What a query resolves to, and why |
@@ -123,6 +124,42 @@ there as the content grows.
    CI with `lint`, so a drop or a name collision fails the build (example in
    `references/evaluation.md`). Every content publish then re-runs it, and the
    generated cases grow with the content.
+
+## 4. Add a guide, in any design
+
+The site owner decides what the guide looks like: a search bar, a chat bubble,
+a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
+`createGuide` is headless, so any of these sits on the same brain.
+
+1. **Ask** what form they want, where it lives, and how it should sound. Look at
+   the site's own components, styles and design tokens before building anything.
+2. **Compile** in the build: `pubba.sh compile pubba.json --out <public path>/pubba.bundle.json`
+   (or keep `createPubba` with the content at build time, if the site already
+   has it in JavaScript).
+3. **Wire** it, in the site's framework:
+   - `const pubba = loadBundle(bundle, { events })` and
+     `const guide = createGuide(pubba, { trail: createTrail({ storage: sessionStorage }), route })`,
+     where `route(entity)` returns that entity's url in this site.
+   - Record steps: `guide.visited(id)` on every page or item view;
+     `guide.follow(id, via)` when the guide's action or a chip took the visitor there.
+   - `guide.ask(text)` for typed questions: show `text`, perform `action`
+     (navigate), show `chips`. For `kind: "none"`, show the chips (or, if the
+     site has an AI, ask it and fall back to the chips on any failure).
+   - Nudges: after each step the visitor takes themselves, schedule
+     `guide.nudge()` after `guide.nudgePolicy.delayMs`; show it if not null.
+   - Words: pass `templates` for the guide's voice and language.
+4. **Accessibility:** keyboard reachable, focus handled when it opens and
+   closes, announced replies (`aria-live`), labelled controls, and respect
+   reduced motion.
+5. **Verify** in a browser: ask a name, a typo, "anything like X", an
+   off-topic question; follow a chip; check a nudge appears once. Then run lint
+   and the evaluation.
+
+**Platforms:** the runtime today is JavaScript/TypeScript (any web framework,
+Node, React Native with an async storage wrapper for the trail, Electron). For
+Python, Kotlin, Swift, Dart, C# or PHP projects, say plainly that their runtime
+isn't released yet (see the library's docs/multiplatform-design.md); you can
+still map the content, compile the bundle and run the evaluation now.
 
 ## Rules
 

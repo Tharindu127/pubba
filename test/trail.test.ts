@@ -44,3 +44,9 @@ test("trail: storage that throws doesn't break it", () => {
   t.record("a");
   assert.deepEqual(t.get(), ["a"]);
 });
+
+test("VERSION matches package.json", async () => {
+  const { VERSION } = await import("../src/index.ts");
+  const { readFileSync } = await import("node:fs");
+  assert.equal(VERSION, JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")).version);
+});

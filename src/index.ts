@@ -1,4 +1,5 @@
 import { buildGraph } from "./graph.ts";
+import { graphFromBundle } from "./bundle.ts";
 import { autocomplete, predictNext, related, type AutocompleteOptions, type NextOptions, type RelatedOptions } from "./next.ts";
 import { match, search, type MatchOptions, type SearchOptions } from "./match.ts";
 import { renderReason } from "./reasons.ts";
@@ -6,7 +7,7 @@ import { GUIDE_VIAS, type Events, type GuideVia } from "./events.ts";
 import type { Dataset, Entity, Graph, MatchResult, Match, PubbaConfig, Reason, Related, Suggestion, Template } from "./types.ts";
 
 export * from "./types.ts";
-export { buildGraph, neighbours, degree, isDestination } from "./graph.ts";
+export { buildGraph, assembleGraph, neighbours, degree, isDestination } from "./graph.ts";
 export { predictNext, autocomplete, related, spread } from "./next.ts";
 export type { NextOptions, AutocompleteOptions, RelatedOptions } from "./next.ts";
 export { match, search, DEFAULT_STOP_WORDS, DEFAULT_SIMILAR } from "./match.ts";
@@ -15,6 +16,11 @@ export { renderReason, reasonFromLink, shortLabel, DEFAULT_TEMPLATES } from "./r
 export { createTrail, sectionStep } from "./trail.ts";
 export type { Trail, TrailOptions, TrailStorage } from "./trail.ts";
 export { createEvents, summarise, GUIDE_VIAS } from "./events.ts";
+export { compileBundle, graphFromBundle, BUNDLE_FORMAT } from "./bundle.ts";
+export type { Bundle, BundleEntity, CompileOptions } from "./bundle.ts";
+export { VERSION } from "./version.ts";
+export { createGuide, DEFAULT_GUIDE_TEMPLATES } from "./guide.ts";
+export type { Guide, GuideOptions, GuideTemplates, NudgePolicy, Reply, ReplyKind, Chip } from "./guide.ts";
 export type { Events, EventsOptions, EventListener, PubbaEvent, GuideVia, VisitSummary } from "./events.ts";
 export { normalize, editDistance, closeTo, hasPhrase, hasPhraseWith, mentions } from "./text.ts";
 
@@ -79,8 +85,17 @@ export interface CreateOptions {
 }
 
 /** Builds the graph for a dataset and config, once, and answers from it. */
-export function createPubba(data: Dataset, config: PubbaConfig = {}, { events }: CreateOptions = {}): Pubba {
-  const graph = buildGraph(data, config);
+export function createPubba(data: Dataset, config: PubbaConfig = {}, options: CreateOptions = {}): Pubba {
+  return pubbaFor(buildGraph(data, config), options);
+}
+
+/** Answers from a compiled bundle (`pubba compile`): the same answers as the content it was compiled from. */
+export function loadBundle(bundle: unknown, options: CreateOptions = {}): Pubba {
+  return pubbaFor(graphFromBundle(bundle), options);
+}
+
+/** Everything asked of a graph, however it was made. */
+export function pubbaFor(graph: Graph, { events }: CreateOptions = {}): Pubba {
   const find = (id: string) => graph.entities.get(id) ?? graph.unlinked.get(id);
   const suggested = <T extends { entity: Entity; reason: Reason }>(source: "next" | "related", out: T[]): T[] => {
     if (events && out.length) {
