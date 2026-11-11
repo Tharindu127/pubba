@@ -24,9 +24,12 @@
 {"op":"match","query":"anything like Deep Learning?","expect":{"intent":"similar","entity":"course:deep","score":113,"tier":1,"by":"name","name":"deep learning","text":"Deep Learning matches “deep learning”.","similar":[{"id":"course:ml-1","weight":0.7,"reason":{"kind":"same-topics","to":"course:deep","direction":"out","via":["Python","Linear Algebra"]},"text":"Machine Learning (Part 1) covers the same ground as Deep Learning (Python, Linear Algebra)."}]}}
 {"op":"match","query":"Ada Mensah","expect":{"intent":"entity","entity":"instructor:ada","score":110,"tier":2,"by":"name","name":"ada mensah","text":"Ada Mensah matches “ada mensah”.","similar":[]}}
 {"op":"match","query":"ada menash","expect":{"intent":"entity","entity":"instructor:ada","score":52,"tier":2,"by":"words","name":"ada mensah","text":"Ada Mensah matches “ada mensah”.","similar":[]}}
+{"op":"match","query":"anything like Ada Mensah?","expect":{"intent":"entity","entity":"instructor:ada","score":110,"tier":2,"by":"name","name":"ada mensah","text":"Ada Mensah matches “ada mensah”.","similar":[]}}
 {"op":"match","query":"Li Wei","expect":{"intent":"entity","entity":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei","text":"Li Wei matches “li wei”.","similar":[]}}
+{"op":"match","query":"anything like Li Wei?","expect":{"intent":"entity","entity":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei","text":"Li Wei matches “li wei”.","similar":[]}}
 {"op":"match","query":"Sam Okafor","expect":{"intent":"entity","entity":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[]}}
 {"op":"match","query":"sam okaofr","expect":{"intent":"entity","entity":"instructor:sam","score":52,"tier":2,"by":"words","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[]}}
+{"op":"match","query":"anything like Sam Okafor?","expect":{"intent":"entity","entity":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[]}}
 {"op":"match","query":"Python","expect":{"intent":"entity","entity":"course:python","score":20,"tier":1,"by":"first-word","name":"python","text":"Python Foundations matches “python”.","similar":[]}}
 {"op":"match","query":"pytohn","expect":{"intent":"entity","entity":"course:python","score":20,"tier":1,"by":"first-word","name":"python","text":"Python Foundations matches “python”.","similar":[]}}
 {"op":"match","query":"Statistics","expect":{"intent":"entity","entity":"course:stats","score":51,"tier":1,"by":"words","name":"stats","text":"Statistics for Data Science matches “stats”.","similar":[]}}
@@ -94,10 +97,10 @@
 {"op":"match","query":"mensahh","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"mexsah","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"tell me about mensahs","expect":{"intent":"none","entity":null,"similar":[]}}
-{"op":"match","query":"something like Ada Mensah","expect":{"intent":"similar","entity":"instructor:ada","score":110,"tier":2,"by":"name","name":"ada mensah","text":"Ada Mensah matches “ada mensah”.","similar":[{"id":"course:ml-1","weight":1,"reason":{"kind":"taught-by","to":"instructor:ada","direction":"out"},"text":"Machine Learning (Part 1) is taught by Ada Mensah."},{"id":"course:ml-2","weight":1,"reason":{"kind":"taught-by","to":"instructor:ada","direction":"out"},"text":"Machine Learning (Part 2) is taught by Ada Mensah."},{"id":"course:deep","weight":1,"reason":{"kind":"taught-by","to":"instructor:ada","direction":"out"},"text":"Deep Learning is taught by Ada Mensah."}]}}
+{"op":"match","query":"something like Ada Mensah","expect":{"intent":"entity","entity":"instructor:ada","score":110,"tier":2,"by":"name","name":"ada mensah","text":"Ada Mensah matches “ada mensah”.","similar":[]}}
 {"op":"match","query":"LI WEI","expect":{"intent":"entity","entity":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei","text":"Li Wei matches “li wei”.","similar":[]}}
 {"op":"match","query":"wei","expect":{"intent":"entity","entity":"instructor:li","score":51,"tier":2,"by":"words","name":"li wei","text":"Li Wei matches “li wei”.","similar":[]}}
-{"op":"match","query":"something like Li Wei","expect":{"intent":"similar","entity":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei","text":"Li Wei matches “li wei”.","similar":[{"id":"course:stats","weight":1,"reason":{"kind":"taught-by","to":"instructor:li","direction":"out"},"text":"Statistics for Data Science is taught by Li Wei."},{"id":"course:sql","weight":1,"reason":{"kind":"taught-by","to":"instructor:li","direction":"out"},"text":"SQL Essentials is taught by Li Wei."},{"id":"course:viz","weight":1,"reason":{"kind":"taught-by","to":"instructor:li","direction":"out"},"text":"Data Visualisation is taught by Li Wei."}]}}
+{"op":"match","query":"something like Li Wei","expect":{"intent":"entity","entity":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei","text":"Li Wei matches “li wei”.","similar":[]}}
 {"op":"match","query":"SAM OKAFOR","expect":{"intent":"entity","entity":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[]}}
 {"op":"match","query":"sam","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"okafor","expect":{"intent":"none","entity":null,"similar":[]}}
@@ -105,7 +108,7 @@
 {"op":"match","query":"okaforr","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"okxfor","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"tell me about okafors","expect":{"intent":"none","entity":null,"similar":[]}}
-{"op":"match","query":"something like Sam Okafor","expect":{"intent":"similar","entity":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[{"id":"course:python","weight":1,"reason":{"kind":"taught-by","to":"instructor:sam","direction":"out"},"text":"Python Foundations is taught by Sam Okafor."},{"id":"course:python-data","weight":1,"reason":{"kind":"taught-by","to":"instructor:sam","direction":"out"},"text":"Python Foundations for Data is taught by Sam Okafor."}]}}
+{"op":"match","query":"something like Sam Okafor","expect":{"intent":"entity","entity":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor","text":"Sam Okafor matches “sam okafor”.","similar":[]}}
 {"op":"match","query":"BEGINNER","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"beginner","expect":{"intent":"none","entity":null,"similar":[]}}
 {"op":"match","query":"eginner","expect":{"intent":"none","entity":null,"similar":[]}}
@@ -189,7 +192,8 @@
 {"op":"search","query":"Data Visualisation","limit":5,"expect":[{"id":"course:viz","score":118,"tier":1,"by":"name","name":"data visualisation"}]}
 {"op":"search","query":"Deep Learning","limit":5,"expect":[{"id":"course:deep","score":113,"tier":1,"by":"name","name":"deep learning"}]}
 {"op":"search","query":"Ada Mensah","limit":5,"expect":[{"id":"instructor:ada","score":110,"tier":2,"by":"name","name":"ada mensah"}]}
-{"op":"search","query":"Sam Okafor","limit":5,"expect":[{"id":"instructor:sam","score":110,"tier":2,"by":"name","name":"sam okafor"}]}
+{"op":"search","query":"Li Wei","limit":5,"expect":[{"id":"instructor:li","score":106,"tier":2,"by":"name","name":"li wei"}]}
+{"op":"search","query":"sam okaofr","limit":5,"expect":[{"id":"instructor:sam","score":52,"tier":2,"by":"words","name":"sam okafor"}]}
 {"op":"search","query":"pytohn","limit":5,"expect":[{"id":"course:python","score":20,"tier":1,"by":"first-word","name":"python"},{"id":"course:python-data","score":20,"tier":1,"by":"first-word","name":"python"},{"id":"topic:python","score":106,"tier":3,"by":"phrase","name":"python"}]}
 {"op":"search","query":"Linear Algebra","limit":5,"expect":[{"id":"topic:linear-algebra","score":114,"tier":3,"by":"phrase","name":"linear algebra"}]}
 {"op":"search","query":"neural netwroks","limit":5,"expect":[{"id":"topic:neural-networks","score":115,"tier":3,"by":"phrase","name":"neural networks"}]}

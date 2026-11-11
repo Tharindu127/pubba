@@ -1,6 +1,6 @@
 {
  "format": 1,
- "compiler": "pubba@0.3.1",
+ "compiler": "pubba@0.3.2",
  "config": {
   "types": {
    "product": {
@@ -20,7 +20,8 @@
     "match": {
      "tier": 2,
      "minLength": 3
-    }
+    },
+    "similar": false
    },
    "category": {
     "label": "Category",
@@ -28,7 +29,8 @@
     "match": {
      "tier": 2,
      "minLength": 3
-    }
+    },
+    "similar": false
    },
    "material": {
     "label": "Material",

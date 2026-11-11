@@ -1,6 +1,6 @@
 {
  "format": 1,
- "compiler": "pubba@0.3.1",
+ "compiler": "pubba@0.3.2",
  "config": {
   "types": {
    "course": {
@@ -22,7 +22,8 @@
      "tier": 2,
      "minLength": 3,
      "firstWord": true
-    }
+    },
+    "similar": false
    },
    "level": {
     "label": "Level",

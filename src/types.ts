@@ -57,8 +57,8 @@ export interface TypeConfig {
   destination?: boolean;
   /** How typed queries match this type. */
   match?: TypeMatchConfig;
-  /** Link kinds that answer "anything like X?" for this type. Defaults to every kind. */
-  similar?: string[];
+  /** Link kinds that answer "anything like X?" for this type. Defaults to every kind; `false`: this type never answers it (the query reads as naming it). */
+  similar?: string[] | false;
 }
 
 export interface TypeMatchConfig {

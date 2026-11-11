@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.2 (11 Nov 2026)
+
+- **`types.<type>.similar: false`**: a type that never answers "anything like
+  X?". The query reads as naming X (`intent: "entity"`), so the guide opens it.
+  A portfolio sets it on everything but projects to keep "anything like" about
+  projects. Kept in bundles; generated eval cases expect it; the conformance
+  catalogue and course list use it.
+
 ## 0.3.1 (11 Nov 2026)
 
 What the portfolio's guide needed to move onto `createGuide` without a visible

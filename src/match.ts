@@ -151,8 +151,8 @@ export function match(g: Graph, query: string, { similarLimit = 3, templates }: 
   }
   if (!best) return { query, intent: "none", entity: null, match: null, similar: [] };
   const similarRe = new RegExp(g.config.match?.similarPattern ?? DEFAULT_SIMILAR);
-  if (similarRe.test(q)) {
-    const kinds = g.config.types?.[best.entity.type]?.similar;
+  const kinds = g.config.types?.[best.entity.type]?.similar;
+  if (kinds !== false && similarRe.test(q)) {
     const similar: Related[] = neighbours(g, best.entity.id, kinds)
       .filter(({ entity }) => isDestination(g, entity))
       .slice(0, similarLimit)

@@ -262,6 +262,9 @@ guide.nudge();                          // a suggestion to show unprompted, or n
   `open.<type>` (and `similar.<type>`, `nudge.<type>`) for wording per kind of
   thing, with `{label}`, `{line}` (from your `line(entity)`), and for similar
   replies `{of}` and `{list}` ("Parcelo Courier (TypeScript, Node.js), …").
+- **"Anything like X?"** answers with X's similar items. To keep it to some
+  types, set `types.<type>.similar: false` on the others in the config: those
+  read as naming X, and the guide opens it.
 - **Site options:** `accept(entity)` keeps things a chip can't lead to out of
   every suggestion; `fallback({ kind, entity })` gives chips when the trail
   suggests nothing (strings become question chips, `{ label, question }`);

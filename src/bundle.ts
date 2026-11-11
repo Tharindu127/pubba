@@ -62,7 +62,7 @@ function runtimeConfig(c: PubbaConfig): Bundle["config"] {
         ...(t.plural !== undefined ? { plural: t.plural } : {}),
         ...(t.destination !== undefined ? { destination: t.destination } : {}),
         ...(t.match ? { match: { ...t.match } } : {}),
-        ...(t.similar ? { similar: [...t.similar] } : {}),
+        ...(t.similar === false ? { similar: false as const } : t.similar ? { similar: [...t.similar] } : {}),
       };
     }
   }

@@ -37,7 +37,7 @@ each section says.
 | --- | --- |
 | `types[t].destination` | true |
 | `types[t].match` | `{ tier: 1, mode: "title", firstWord: false, minLength: 0, minWordsLength: 0, skip: false }` |
-| `types[t].similar` | none (every kind) |
+| `types[t].similar` | none (every kind); `false`: never answers "anything like" |
 | `kinds[k].pull` | 0.5 |
 | `kinds[k].label` | `k` with every `-` replaced by a space |
 | `next.recency` / `secondStep` / `hubDamping` / `sectionBoost` | 0.6 / 0.4 / 3 / 0.08 |
@@ -159,7 +159,8 @@ exactly one entity, minus normalised `notDistinct`.)
    (`reason.name`, else its normalised label): answer
    `{ intent: "none", notHere: <original name> }`.
 3. No `best`: `{ intent: "none" }`.
-4. If `q` matches `similarPattern` (a regular expression; runtimes may treat it
+4. If the best entity's type has `similar: false`, skip to 5. Otherwise, if `q`
+   matches `similarPattern` (a regular expression; runtimes may treat it
    as the word list it contains): `similar` = the best entity's neighbours
    (section 5.1) by its type's `similar` kinds, destinations only, first 3,
    each with its link reason and sentence. If not empty:

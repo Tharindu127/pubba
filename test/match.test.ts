@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { createPubba } from "../src/index.ts";
+import { compileBundle, createPubba, loadBundle } from "../src/index.ts";
 import { examplePubba } from "./fixtures.ts";
 
 const pubba = examplePubba();
@@ -89,4 +89,17 @@ test("match works with no config: one tier, title mode, every type", () => {
   assert.equal(p.match("ml 101").entity?.id, "course:intro-ml");
   assert.equal(p.match("machine lerning course").entity?.id, "topic:ml");
   assert.equal(p.match("gardening").intent, "none");
+});
+
+test("0.3.2 similar: false: a type that never answers 'anything like' reads as naming it", () => {
+  const p = createPubba(
+    { entities: [{ id: "a", type: "project", label: "Alpha" }, { id: "b", type: "project", label: "Beta" }, { id: "s", type: "skill", label: "Swift" }], links: [{ from: "a", kind: "uses", to: "s" }, { from: "b", kind: "uses", to: "s" }, { from: "a", kind: "kin", to: "b" }] },
+    { types: { skill: { similar: false } } }
+  );
+  assert.equal(p.match("anything like Swift").intent, "entity");
+  assert.equal(p.match("anything like Swift").entity?.id, "s");
+  assert.equal(p.match("anything like Alpha").intent, "similar");
+  const bundle = JSON.parse(JSON.stringify(compileBundle(p.graph)));
+  assert.equal(bundle.config.types.skill.similar, false, "kept in the bundle");
+  assert.equal(loadBundle(bundle).match("anything like Swift").intent, "entity");
 });

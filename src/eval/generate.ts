@@ -75,9 +75,13 @@ export function generateCases(pubba: Pubba, o: GenerateOptions = {}): { queries:
       }
     }
     const kinds = g.config.types?.[e.type]?.similar;
-    const alike = neighbours(g, e.id, kinds).filter((n) => isDestination(g, n.entity));
-    if (o.similar !== false && kinds && alike.length && label && unique(label) && !ignored(label)) {
-      queries.push({ query: `anything like ${e.label}?`, expect: e.id, intent: "similar", tags: ["generated", "similar", e.type] });
+    if (o.similar !== false && label && unique(label) && !ignored(label)) {
+      if (kinds === false) {
+        // This type never answers "anything like": the query reads as naming it.
+        queries.push({ query: `anything like ${e.label}?`, expect: e.id, intent: "entity", tags: ["generated", "similar", e.type] });
+      } else if (kinds && neighbours(g, e.id, kinds).some((n) => isDestination(g, n.entity))) {
+        queries.push({ query: `anything like ${e.label}?`, expect: e.id, intent: "similar", tags: ["generated", "similar", e.type] });
+      }
     }
 
     if (o.trails === false || !g.entities.has(e.id)) continue;
