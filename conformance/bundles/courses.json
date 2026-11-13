@@ -1,6 +1,6 @@
 {
  "format": 1,
- "compiler": "pubba@0.3.2",
+ "compiler": "pubba@0.4.0",
  "config": {
   "types": {
    "course": {

@@ -282,8 +282,48 @@ portfolio's bundle is 6.4 KB gzipped.
 This is how pubba reaches other languages: a small runtime per language loads
 the same bundle, implements [spec/SPEC.md](spec/SPEC.md), and must pass the
 [conformance suite](conformance/README.md) (4,657 cases over five sample sites)
-to count as done. The TypeScript runtime passes 100%. Next: Python, then
-Kotlin, Swift, Dart, C# and PHP ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
+to count as done. The TypeScript and Python runtimes both pass 100%. Next: Kotlin, Swift, Dart,
+C# and PHP ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
+
+### Python
+
+```bash
+pip install pubba
+```
+
+```python
+from pubba import load_bundle, create_guide
+
+pubba = load_bundle(open("pubba.bundle.json").read())
+pubba.match("flutr").entity.id   # "tech:Flutter"
+create_guide(pubba).ask("anything like kiri walet?").text
+```
+
+No dependencies, Python 3.9+, the same answers as TypeScript (the conformance
+suite, and 880 cases on the portfolio's live content, with no differences).
+See [packages/python](packages/python/README.md).
+
+### HTTP and MCP: `pubba serve`, `pubba mcp`
+
+For a platform without a runtime yet, or for AI assistants:
+
+```bash
+npx pubba serve pubba.bundle.json --port 8787 --cors https://example.com
+```
+
+```bash
+npx pubba mcp pubba.bundle.json
+```
+
+- `serve`: read-only JSON over HTTP: `GET /match?query=`, `/search?query=`,
+  `/next?trail=a,b`, `/related?id=`, `/autocomplete?query=`, `/ask?query=&trail=`
+  (the guide's reply), `/explain?from=&to=` (how two items connect) and
+  `/health`. Stateless: the trail comes with each request and nothing is kept
+  or logged. It listens on 127.0.0.1 unless you pass `--host`.
+- `mcp`: an MCP server over stdio with read-only tools `search`, `match`,
+  `related`, `next` and `explain`, so an AI assistant can look a site up
+  directly. Add it to an MCP client as the command `npx pubba mcp <bundle>`.
+- In code: `serve`, `serveMcp`, `handleMcp`, `answer` and `connection` from `pubba/serve`.
 
 ## Measurement events
 
@@ -358,6 +398,8 @@ queries, 12 + 35 trails, all passing), and CI runs it with lint on every push.
 
 ```
 pubba compile  <pubba.json> --out <file> [--with-data]  the bundle every runtime loads
+pubba serve    <pubba.json|bundle> [--port 8787] [--host 127.0.0.1] [--cors <origin>]
+pubba mcp      <pubba.json|bundle> [--name <server name>]
 pubba inspect  <pubba.json>
 pubba preview  <pubba.json>                  the mapping as Markdown tables
 pubba match    <pubba.json> "<query>"
@@ -421,8 +463,8 @@ portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 
 **Every platform** (design: [docs/multiplatform-design.md](docs/multiplatform-design.md)).
 0.3.0 laid the foundation: bundles, the spec, the conformance suite and the
-headless guide. Next, runtimes in Python (0.4, with an HTTP and MCP server),
-Kotlin (0.5), Swift (0.6), Dart (0.7), then C# and PHP (0.8).
+headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`.
+Next, Kotlin (0.5), Swift (0.6), Dart (0.7), then C# and PHP (0.8).
 
 **v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 
@@ -454,6 +496,7 @@ Kotlin (0.5), Swift (0.6), Dart (0.7), then C# and PHP (0.8).
 npm test          # unit, parity, conformance and eval tests (node:test, no build needed)
 npm run conformance        # regenerate conformance/ after a behaviour change (review the diff)
 npm run conformance:check  # fails when conformance/ is out of date (CI runs it)
+cd packages/python && python3 -m unittest discover -s tests   # the Python runtime against the same suite
 npm run eval      # the harness on the example; fails below eval/baseline.json
 npm run example
 npm run typecheck

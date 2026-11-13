@@ -155,11 +155,15 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
    off-topic question; follow a chip; check a nudge appears once. Then run lint
    and the evaluation.
 
-**Platforms:** the runtime today is JavaScript/TypeScript (any web framework,
-Node, React Native with an async storage wrapper for the trail, Electron). For
-Python, Kotlin, Swift, Dart, C# or PHP projects, say plainly that their runtime
-isn't released yet (see the library's docs/multiplatform-design.md); you can
-still map the content, compile the bundle and run the evaluation now.
+**Platforms:** runtimes exist for JavaScript/TypeScript (any web framework,
+Node, React Native with an async storage wrapper for the trail, Electron) and
+Python (`pip install pubba`: Django, FastAPI, Flask, scripts; same API in
+snake_case: `load_bundle`, `create_guide`, `guided_to`). For Kotlin, Swift,
+Dart, C# or PHP projects, say plainly that their runtime isn't released yet
+(see the library's docs/multiplatform-design.md); offer `pubba serve` (HTTP)
+as a bridge, and you can still map the content, compile the bundle and run the
+evaluation now. For AI assistants, `pubba mcp <bundle>` serves the site as
+read-only MCP tools.
 
 ## Rules
 

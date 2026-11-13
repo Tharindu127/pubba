@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.4.0 (12 Nov 2026)
+
+- **Python runtime** (`packages/python`, `pip install pubba`): loads a bundle and
+  answers like the TypeScript runtime (match, search, next, related,
+  autocomplete, sentences, trail, events, the guide). No dependencies, Python
+  3.9+. Passes the conformance suite exactly on 3.9 and 3.13, and gives the
+  same answers as TypeScript on the portfolio's live content (880 cases, no
+  differences). CI runs it.
+- **`pubba serve`**: a read-only, stateless JSON API over HTTP (match, search,
+  next, related, autocomplete, the guide's reply, how two items connect).
+- **`pubba mcp`**: an MCP server over stdio with read-only tools `search`,
+  `match`, `related`, `next` and `explain`, for AI assistants.
+- `pubba/serve` exports `serve`, `serveMcp`, `handleMcp`, `answer` and
+  `connection` (the shortest path of links between two items, each as a sentence).
+
 ## 0.3.2 (11 Nov 2026)
 
 - **`types.<type>.similar: false`**: a type that never answers "anything like

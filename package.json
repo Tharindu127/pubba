@@ -1,6 +1,6 @@
 {
   "name": "pubba",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "A knowledge-graph engine for showroom sites: related items with reasons, what-next predictions from a visitor's trail, and typo-tolerant matching. Portfolios first.",
   "license": "MIT",
   "author": "Tharindu Athapaththu",
@@ -33,6 +33,10 @@
     "./exports": {
       "types": "./dist/exports/index.d.ts",
       "default": "./dist/exports/index.js"
+    },
+    "./serve": {
+      "types": "./dist/serve.d.ts",
+      "default": "./dist/serve.js"
     },
     "./package.json": "./package.json"
   },

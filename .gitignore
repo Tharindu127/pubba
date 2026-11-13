@@ -4,3 +4,8 @@ dist
 *.log
 coverage
 local/
+__pycache__/
+*.pyc
+packages/python/dist/
+packages/python/build/
+*.egg-info/

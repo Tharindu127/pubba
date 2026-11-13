@@ -1,0 +1,33 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pubba"
+version = "0.4.0"
+description = "A small brain for showroom sites: related items with reasons, what-next from a visitor's trail, typo-tolerant matching and a headless guide, from a compiled pubba bundle."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Tharindu Athapaththu" }]
+requires-python = ">=3.9"
+dependencies = []
+keywords = ["knowledge-graph", "portfolio", "recommendations", "related-items", "explainable", "fuzzy-search", "guide", "showroom"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent",
+  "Typing :: Typed",
+  "Intended Audience :: Developers",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+]
+
+[project.urls]
+Homepage = "https://github.com/Tharindu127/pubba"
+Repository = "https://github.com/Tharindu127/pubba"
+Issues = "https://github.com/Tharindu127/pubba/issues"
+
+[tool.hatch.build.targets.wheel]
+packages = ["pubba"]
+
+[tool.hatch.build.targets.sdist]
+include = ["pubba", "tests", "README.md", "LICENSE", "pyproject.toml"]

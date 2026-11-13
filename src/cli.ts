@@ -5,12 +5,16 @@ import { documentDataset, fromDocument, type PubbaDocument } from "./document.ts
 import { evaluate, formatLint, formatReport, generateCases, lint, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
 import { toJsonLd, toLlmsTxt, validateJsonLd } from "./exports/index.ts";
 import { compileBundle } from "./bundle.ts";
+import { serve, serveMcp } from "./serve.ts";
+import { VERSION } from "./version.ts";
 import { loadBundle } from "./index.ts";
 
 const HELP = `pubba: a knowledge graph for showroom sites
 
 Usage:
   pubba compile  <pubba.json> --out <file> [--with-data]   the bundle every runtime loads
+  pubba serve    <pubba.json|bundle> [--port 8787] [--host 127.0.0.1] [--cors <origin>]   read-only HTTP API
+  pubba mcp      <pubba.json|bundle> [--name <server name>]   MCP server over stdio, for AI assistants
   pubba inspect  <pubba.json>                    counts of entities and links, by type and kind
   pubba preview  <pubba.json>                    the mapping as Markdown tables, for review before writing
   pubba match    <pubba.json> "<query>"          what a typed query means
@@ -59,6 +63,17 @@ function main(argv: string[]): number {
   }
   const pubba = load(file);
   switch (command) {
+    case "serve": {
+      const port = Number(flag(rest, "--port") ?? 8787);
+      const host = flag(rest, "--host") ?? "127.0.0.1";
+      const cors = flag(rest, "--cors");
+      serve(pubba, { port, host, ...(cors ? { cors } : {}) }).on("listening", () => console.error(`pubba ${VERSION} on http://${host}:${port}  (GET /match?query=… /next?trail=a,b /related?id=… /ask?query=… /explain?from=…&to=…)`));
+      return -1;
+    }
+    case "mcp": {
+      serveMcp(pubba, process.stdin, process.stdout, flag(rest, "--name") ?? "pubba");
+      return -1;
+    }
     case "compile": {
       const out = flag(rest, "--out");
       if (!out) return fail("pubba compile: --out <file> is required");
@@ -172,4 +187,6 @@ function fail(message: string): number {
   return 1;
 }
 
-process.exitCode = main(process.argv.slice(2));
+// Servers keep running (-1); every other command sets the exit code.
+const code = main(process.argv.slice(2));
+if (code >= 0) process.exitCode = code;
