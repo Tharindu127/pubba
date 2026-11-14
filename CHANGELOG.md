@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.0 (14 Nov 2026)
+
+- **Swift runtime** (`packages/swift`, Swift Package `Pubba` from this
+  repository's URL): loads a bundle and answers like the other runtimes
+  (match, search, next, related, autocomplete, sentences, trail, events, the
+  guide). No dependencies beyond Foundation; iOS 13+, macOS 10.15+, tvOS,
+  watchOS, visionOS. Passes the conformance suite exactly (4,698 cases), and a
+  mutation check confirms the suite catches changes. `Sendable` values, and it
+  builds cleanly in Swift 6 language mode. `UserDefaultsTrailStorage` keeps the
+  trail on the device. CI runs it.
+- `Package.swift` sits at the repository root, since Swift Package Manager
+  installs from a Git URL; versions are the repository's git tags.
+- **iOS sample** (`examples/ios`): a SwiftUI app over the example portfolio with
+  a chat-bubble guide: typed questions, chips, the trail in UserDefaults, and
+  nudges, with VoiceOver announcements. It uses the package from this
+  repository. CI builds it.
+- **The skill** covers iOS and SwiftUI.
+- The npm, PyPI and Maven packages are unchanged (0.4.0, 0.4.0, 0.5.0).
+
 ## 0.5.0 (14 Nov 2026)
 
 - **Kotlin runtime** (`packages/kotlin`, Maven `com.tharinduathapaththu:pubba`):

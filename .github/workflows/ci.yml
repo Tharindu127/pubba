@@ -43,3 +43,10 @@ jobs:
         working-directory: packages/kotlin
       - run: gradle :app:assembleDebug --console=plain
         working-directory: examples/android
+
+  swift:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift test
+      - run: xcodebuild -project examples/ios/PubbaSample.xcodeproj -scheme PubbaSample -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO build

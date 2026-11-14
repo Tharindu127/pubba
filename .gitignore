@@ -9,3 +9,8 @@ __pycache__/
 packages/python/dist/
 packages/python/build/
 *.egg-info/
+.build/
+.swiftpm/
+*.xcuserstate
+xcuserdata/
+DerivedData/

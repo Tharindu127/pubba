@@ -159,8 +159,10 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
 Node, React Native with an async storage wrapper for the trail, Electron),
 Python (`pip install pubba`: Django, FastAPI, Flask, scripts; same API in
 snake_case: `load_bundle`, `create_guide`, `guided_to`) and Kotlin/Java
-(`com.tharinduathapaththu:pubba` from Maven Central: Android and JVM servers).
-For Swift, Dart, C# or PHP projects, say plainly that their runtime isn't
+(`com.tharinduathapaththu:pubba` from Maven Central: Android and JVM servers)
+and Swift (the Swift Package at `https://github.com/Tharindu127/pubba`: iOS,
+macOS and every Apple platform).
+For Dart, C# or PHP projects, say plainly that their runtime isn't
 released yet (see the library's docs/multiplatform-design.md); offer
 `pubba serve` (HTTP) as a bridge, and you can still map the content, compile
 the bundle and run the evaluation now. For AI assistants, `pubba mcp <bundle>`
@@ -184,6 +186,27 @@ serves the site as read-only MCP tools.
   on reply text, content descriptions on icon buttons, touch targets of 48dp,
   and TalkBack checked. `examples/android` in the library is a working sample
   (a chat bubble with chips and nudges) to adapt, not to copy as the design.
+
+**iOS (SwiftUI, or UIKit):** add the Swift Package, put the compiled bundle in
+the app target (a build phase that runs `npx pubba compile`, or the backend
+that serves the app's content), then:
+
+- `let pubba = try Pubba.load(Data(contentsOf: Bundle.main.url(forResource: "pubba.bundle", withExtension: "json")!))`
+- `Guide(pubba, trail: Trail(storage: UserDefaultsTrailStorage()), route: { "<app route for it>" })`.
+  Hold it in one `@MainActor @Observable` model above the `NavigationStack`, so
+  it outlives screens.
+- Send every move through one function on that model: `guide.visited(id)` when
+  the visitor chose it, `guide.follow(id, via:)` when the guide sent them; then
+  append to the navigation path. Perform `reply.action` with the app's own
+  navigation.
+- Nudges: `.task(id: path.last) { try? await Task.sleep(for: .milliseconds(Int(guide.nudgePolicy.delayMs))); nudge = guide.nudge() }`.
+  Only write `@Observable` state when it changes: a redundant write in the
+  same frame as a navigation push can cancel the push.
+- Build the form the owner asked for from the app's own design. Accessibility:
+  `UIAccessibility.post(notification: .announcement, ...)` for new replies and
+  nudges, labels on icon buttons, rows combined into one element, Dynamic Type
+  respected, and VoiceOver checked. `examples/ios` in the library is a working
+  sample to adapt.
 
 ## Rules
 
