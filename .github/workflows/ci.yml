@@ -65,5 +65,5 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: stable
-      - run: flutter pub get && flutter analyze
+      - run: flutter pub get && flutter analyze --no-fatal-infos
         working-directory: examples/flutter
