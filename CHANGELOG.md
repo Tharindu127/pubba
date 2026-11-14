@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.5.0 (14 Nov 2026)
+
+- **Kotlin runtime** (`packages/kotlin`, Maven `com.tharinduathapaththu:pubba`):
+  loads a bundle and answers like the TypeScript and Python runtimes (match,
+  search, next, related, autocomplete, sentences, trail, events, the guide).
+  Its only dependency is the Kotlin standard library; Java 8 bytecode, so it
+  runs on Android and any JVM. Passes the conformance suite exactly (4,698
+  cases), and a mutation check confirms the suite catches changes. Usable
+  from Java (`Pubba.load(json)`, `new Guide(pubba, options)`), with a test of
+  the API as Java sees it. CI runs it.
+- **Android sample** (`examples/android`): a Jetpack Compose app over the
+  example portfolio with a chat-bubble guide: typed questions, chips, a trail
+  kept in SharedPreferences, and nudges. It uses the library from source. CI
+  builds it.
+- **The skill** covers Android: where the bundle goes, wiring the guide into
+  Compose navigation, nudges with `LaunchedEffect`, and accessibility.
+- The npm and PyPI packages are unchanged at 0.4.0.
+
 ## 0.4.0 (12 Nov 2026)
 
 - **Python runtime** (`packages/python`, `pip install pubba`): loads a bundle and

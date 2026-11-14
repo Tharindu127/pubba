@@ -1,6 +1,6 @@
 # pubba on every platform: design
 
-Status: **agreed 11 Nov 2026** (decisions in section 10). **0.3.0 built**: bundles, spec/SPEC.md, conformance/ and `createGuide`. **0.4.0 built**: the Python runtime (passes the suite 100%), `pubba serve` (HTTP) and `pubba mcp`.
+Status: **agreed 11 Nov 2026** (decisions in section 10). **0.3.0 built**: bundles, spec/SPEC.md, conformance/ and `createGuide`. **0.4.0 built**: the Python runtime (passes the suite 100%), `pubba serve` (HTTP) and `pubba mcp`. **0.5.0 built**: the Kotlin runtime (passes the suite 100%, usable from Java) and a Jetpack Compose sample app.
 
 Goal: any site or app, in any popular language or framework, can use the same
 pubba brain (related items with reasons, what-next from a trail, typo-tolerant

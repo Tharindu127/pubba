@@ -281,8 +281,8 @@ portfolio's bundle is 6.4 KB gzipped.
 
 This is how pubba reaches other languages: a small runtime per language loads
 the same bundle, implements [spec/SPEC.md](spec/SPEC.md), and must pass the
-[conformance suite](conformance/README.md) (4,657 cases over five sample sites)
-to count as done. The TypeScript and Python runtimes both pass 100%. Next: Kotlin, Swift, Dart,
+[conformance suite](conformance/README.md) (4,698 cases over five sample sites)
+to count as done. The TypeScript, Python and Kotlin runtimes all pass 100%. Next: Swift, Dart,
 C# and PHP ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
 
 ### Python
@@ -302,6 +302,22 @@ create_guide(pubba).ask("anything like kiri walet?").text
 No dependencies, Python 3.9+, the same answers as TypeScript (the conformance
 suite, and 880 cases on the portfolio's live content, with no differences).
 See [packages/python](packages/python/README.md).
+
+### Kotlin and Java (Android, JVM)
+
+```kotlin
+implementation("com.tharinduathapaththu:pubba:0.5.0")
+```
+
+```kotlin
+val pubba = Pubba.load(bundleJson)
+pubba.match("flutr").entity?.id   // "tech:Flutter"
+createGuide(pubba) { route = { "item/${it.id}" } }.ask("anything like kiri walet?").text
+```
+
+Only the Kotlin standard library, Java 8 bytecode, usable from Java too. A
+Jetpack Compose sample app with a guide is in [examples/android](examples/android).
+See [packages/kotlin](packages/kotlin/README.md).
 
 ### HTTP and MCP: `pubba serve`, `pubba mcp`
 
@@ -463,8 +479,9 @@ portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 
 **Every platform** (design: [docs/multiplatform-design.md](docs/multiplatform-design.md)).
 0.3.0 laid the foundation: bundles, the spec, the conformance suite and the
-headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`.
-Next, Kotlin (0.5), Swift (0.6), Dart (0.7), then C# and PHP (0.8).
+headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`;
+0.5.0 the Kotlin runtime and an Android sample. Next, Swift (0.6), Dart (0.7),
+then C# and PHP (0.8).
 
 **v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 
@@ -497,6 +514,7 @@ npm test          # unit, parity, conformance and eval tests (node:test, no buil
 npm run conformance        # regenerate conformance/ after a behaviour change (review the diff)
 npm run conformance:check  # fails when conformance/ is out of date (CI runs it)
 cd packages/python && python3 -m unittest discover -s tests   # the Python runtime against the same suite
+cd packages/kotlin && gradle test                             # the Kotlin runtime against the same suite
 npm run eval      # the harness on the example; fails below eval/baseline.json
 npm run example
 npm run typecheck

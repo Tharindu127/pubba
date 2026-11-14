@@ -156,14 +156,34 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
    and the evaluation.
 
 **Platforms:** runtimes exist for JavaScript/TypeScript (any web framework,
-Node, React Native with an async storage wrapper for the trail, Electron) and
+Node, React Native with an async storage wrapper for the trail, Electron),
 Python (`pip install pubba`: Django, FastAPI, Flask, scripts; same API in
-snake_case: `load_bundle`, `create_guide`, `guided_to`). For Kotlin, Swift,
-Dart, C# or PHP projects, say plainly that their runtime isn't released yet
-(see the library's docs/multiplatform-design.md); offer `pubba serve` (HTTP)
-as a bridge, and you can still map the content, compile the bundle and run the
-evaluation now. For AI assistants, `pubba mcp <bundle>` serves the site as
-read-only MCP tools.
+snake_case: `load_bundle`, `create_guide`, `guided_to`) and Kotlin/Java
+(`com.tharinduathapaththu:pubba` from Maven Central: Android and JVM servers).
+For Swift, Dart, C# or PHP projects, say plainly that their runtime isn't
+released yet (see the library's docs/multiplatform-design.md); offer
+`pubba serve` (HTTP) as a bridge, and you can still map the content, compile
+the bundle and run the evaluation now. For AI assistants, `pubba mcp <bundle>`
+serves the site as read-only MCP tools.
+
+**Android (Jetpack Compose, or Views):** compile the bundle into
+`app/src/main/assets/pubba.bundle.json` (a Gradle task that runs
+`npx pubba compile`, or the backend that serves the app's content), then:
+
+- `val pubba = Pubba.load(assets.open("pubba.bundle.json").bufferedReader().use { it.readText() })`
+- `createGuide(pubba) { trail = Trail(storage = …); route = { "<app route for it>" } }`,
+  with a `TrailStorage` over SharedPreferences or DataStore, and `route`
+  returning the app's own route or deep link. Hold the guide in a ViewModel or
+  `remember` it above the navigation host, so it outlives screens.
+- Call `guide.visited(id)` when a screen for an entity opens, and
+  `guide.follow(id, "typed" | "chip" | "suggestion")` when the guide sent the
+  visitor there; navigate with the app's own navigation from `reply.action`.
+- Nudges: `LaunchedEffect(currentId) { delay(guide.nudgePolicy.delayMs.toLong()); nudge = guide.nudge() }`.
+- Build the form the owner asked for from the app's own theme and components.
+  Accessibility: `Modifier.semantics { liveRegion = LiveRegionMode.Polite }`
+  on reply text, content descriptions on icon buttons, touch targets of 48dp,
+  and TalkBack checked. `examples/android` in the library is a working sample
+  (a chat bubble with chips and nudges) to adapt, not to copy as the design.
 
 ## Rules
 
