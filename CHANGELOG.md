@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.7.0 (14 Nov 2026)
+
+- **Dart runtime** (`packages/dart`, pub.dev `pubba`): loads a bundle and answers
+  like the other runtimes (match, search, next, related, autocomplete,
+  sentences, trail, events, the guide). Pure Dart with no dependencies, Dart
+  3.2+, so it runs in Flutter on every target and on the server. Passes the
+  conformance suite exactly (4,698 cases), and a mutation check confirms the
+  suite catches changes.
+- Dart has no Unicode normalization, so matching folds characters (accents,
+  ligatures, full-width forms) from a table generated from the JavaScript
+  reference (`packages/dart/tool/fold_table.ts`, 1,582 characters). Checked
+  against the reference on 20,000 random mixed strings: no differences.
+- In Dart the guide's chip type is `GuideChip` (with `EntityChip` and
+  `QuestionChip`), since `Chip` is Flutter's Material widget.
+- **Flutter sample** (`examples/flutter`): the example portfolio with a
+  chat-bubble guide, chips, nudges and the trail in shared_preferences. CI
+  analyzes it; the Dart package is analyzed, tested and dry-run published.
+- **The skill** covers Flutter.
+- The npm, PyPI, Maven and Swift packages are unchanged.
+
 ## 0.6.0 (14 Nov 2026)
 
 - **Swift runtime** (`packages/swift`, Swift Package `Pubba` from this

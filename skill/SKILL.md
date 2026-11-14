@@ -160,9 +160,10 @@ Node, React Native with an async storage wrapper for the trail, Electron),
 Python (`pip install pubba`: Django, FastAPI, Flask, scripts; same API in
 snake_case: `load_bundle`, `create_guide`, `guided_to`) and Kotlin/Java
 (`com.tharinduathapaththu:pubba` from Maven Central: Android and JVM servers)
-and Swift (the Swift Package at `https://github.com/Tharindu127/pubba`: iOS,
-macOS and every Apple platform).
-For Dart, C# or PHP projects, say plainly that their runtime isn't
+Swift (the Swift Package at `https://github.com/Tharindu127/pubba`: iOS,
+macOS and every Apple platform) and Dart (`pubba` on pub.dev: Flutter on every
+target, and Dart servers).
+For C# or PHP projects, say plainly that their runtime isn't
 released yet (see the library's docs/multiplatform-design.md); offer
 `pubba serve` (HTTP) as a bridge, and you can still map the content, compile
 the bundle and run the evaluation now. For AI assistants, `pubba mcp <bundle>`
@@ -207,6 +208,25 @@ that serves the app's content), then:
   nudges, labels on icon buttons, rows combined into one element, Dynamic Type
   respected, and VoiceOver checked. `examples/ios` in the library is a working
   sample to adapt.
+
+**Flutter:** `flutter pub add pubba`, list the compiled bundle under `assets:`
+in pubspec.yaml, then:
+
+- `final pubba = loadBundle(await rootBundle.loadString('assets/pubba.bundle.json'));`
+- `TrailStorage` is synchronous: await `SharedPreferences.getInstance()` once
+  in `main`, wrap it, and pass `Trail(storage: ...)` to `createGuide`.
+- Hold one guide above the navigator (a `ChangeNotifier`, or the app's own state
+  management), route every move through one function that calls `visited` or
+  `follow` and then navigates, and draw the guide over every screen with
+  `MaterialApp.builder` if it should float. Anything in that builder sits above
+  the navigator: `Positioned` must be the `Stack`'s direct child, it has no
+  `Overlay` (no tooltips), and it covers sheets unless hidden while one is open.
+- Nudges: restart a `Timer(guide.nudgePolicy.delayMs)` on each step; show
+  `guide.nudge()` if it isn't null.
+- The guide's chip type is `GuideChip` in Dart (Flutter owns `Chip`); `switch`
+  over `EntityChip` / `QuestionChip`. Accessibility: `Semantics(liveRegion: true)`
+  on reply and nudge text, labelled buttons, 48dp targets, TalkBack and
+  VoiceOver checked. `examples/flutter` is a working sample to adapt.
 
 ## Rules
 

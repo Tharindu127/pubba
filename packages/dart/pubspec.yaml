@@ -1,0 +1,18 @@
+name: pubba
+version: 0.7.0
+description: A small brain for showroom sites and apps. Related items with reasons, what-next from a visitor's trail, typo-tolerant matching and a headless guide, from a compiled pubba bundle.
+homepage: https://github.com/Tharindu127/pubba
+repository: https://github.com/Tharindu127/pubba
+issue_tracker: https://github.com/Tharindu127/pubba/issues
+topics:
+  - recommendations
+  - search
+  - knowledge-graph
+  - navigation
+  - flutter
+
+environment:
+  sdk: ^3.2.0
+
+dev_dependencies:
+  test: ^1.24.0
