@@ -187,9 +187,17 @@ final class Harness
             case 'search':
                 return array_map(static fn ($m) => ['id' => $m->entity->id, 'score' => $m->score, 'tier' => $m->tier, 'by' => $m->reason->by, 'name' => $m->reason->name], $pubba->search($c['query'], $c['limit']));
             case 'next':
-                return array_map([self::class, 'scored'], $pubba->next(self::strs($c['trail']), $c['limit'], self::strs($c['exclude'] ?? null)));
+                return array_map([self::class, 'scored'], $pubba->next(self::strs($c['trail']), $c['limit'], self::strs($c['exclude'] ?? null), intent: array_key_exists('intent', $c) ? $c['intent'] : 'auto'));
             case 'related':
-                return array_map([self::class, 'weighted'], $pubba->related($c['id'], isset($c['kinds']) ? self::strs($c['kinds']) : null, $c['limit'] ?? null));
+                return array_map([self::class, 'weighted'], $pubba->related($c['id'], isset($c['kinds']) ? self::strs($c['kinds']) : null, $c['limit'] ?? null, intent: $c['intent'] ?? null));
+            case 'intent':
+                $r = $pubba->intent(self::strs($c['trail']));
+                return [
+                    'likely' => $r->likely,
+                    'confidence' => $r->confidence,
+                    'scores' => $r->scores,
+                    'evidence' => array_map(static fn ($e) => array_filter(['step' => $e->step, 'via' => $e->via, 'weight' => $e->weight], static fn ($v) => $v !== null), $r->evidence),
+                ];
             case 'autocomplete':
                 return array_map(static fn (Suggestion $s) => ['id' => $s->entity->id, 'score' => $s->score, 'by' => $s->reason->by], $pubba->autocomplete($c['typed'], self::strs($c['trail']), $c['limit']));
             case 'explain':

@@ -60,7 +60,8 @@ final guide = createGuide(pubba, trail: Trail(storage: PrefsStorage(prefs)));
 | `loadBundle(json, {events})` | A `Pubba` from a bundle (JSON text, or already decoded) |
 | `pubba.match(query)` | `MatchResult(intent, entity, match, similar, notHere)`; intent is `entity`, `similar` or `none` |
 | `pubba.search(query, {limit, types})` | Every entity a query could mean, best first |
-| `pubba.next(trail, {limit, exclude, accept})` | Predictions: `Suggestion(entity, score, reason, text)` |
+| `pubba.next(trail, {limit, exclude, accept, intent = 'auto'})` | Predictions: `Suggestion(entity, score, reason, text)`, leaning towards the likely intent (`intent: null` turns it off) |
+| `pubba.intent(trail)` | Intent profiles: `IntentReading(likely, confidence, scores, evidence)` |
 | `pubba.related(id, {kinds, limit})` | Neighbours, strongest first: `Related(entity, weight, link, reason, text)` |
 | `pubba.autocomplete(typed, {trail, limit})` | Type-ahead |
 | `pubba.explain(reason, item)` | A reason as a sentence |

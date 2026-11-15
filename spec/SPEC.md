@@ -6,8 +6,8 @@ the conformance suite (`conformance/`) disagree, the suite wins and this text
 is fixed.
 
 A runtime loads a **bundle** (written by `pubba compile`) and answers:
-`match`, `search`, `next`, `related`, `autocomplete`, `explain`, plus the
-**trail**, **events** and the **guide**. Everything that builds the graph
+`match`, `search`, `next`, `related`, `autocomplete`, `explain`, `intent`,
+plus the **trail**, **events** and the **guide**. Everything that builds the graph
 (content, rules, topics, weights) happened at compile time and is not part of a
 runtime.
 
@@ -47,6 +47,11 @@ each section says.
 | `match.distinctWords`, `partialWords`, `precise` | false |
 | `match.ignore`, `notDistinct`, `notHere` | empty |
 | `match.similarPattern` | `\b(like\|similar\|alike\|same stack\|related to\|anything else)\b` |
+| `intents` | none (section 5.7); the id `browsing` is reserved and ignored |
+| `intent.minConfidence` / `minSteps` / `neighbours` | 0.5 / 2 / 0.5 |
+
+A config value of the wrong JSON type counts as missing (a weight that isn't a
+number takes its default).
 
 **Destination**: an entity whose type's `destination` isn't false. Only
 destinations are suggested.
@@ -174,11 +179,17 @@ exactly one entity, minus normalised `notDistinct`.)
 For each link of `adjacent[id]` in order (of the given kinds, when given), the
 entity at the other end if it is linked; sorted by link weight descending.
 
-### 5.2 related(id, kinds, limit)
+### 5.2 related(id, kinds, limit, intent = none)
 
-`neighbours(id, kinds)`, then sorted by weight descending and, on equal
-weights, the link kind's pull descending; destinations only; first `limit`.
+`neighbours(id, kinds)`, destinations only, then sorted by weight descending
+and, on equal weights, the link kind's pull descending; first `limit`.
 Each: `{ entity, weight, link, reason (5.5), text (6) }`. Unknown id: nothing.
+
+With `intent` naming a configured intent (`auto` and unknown ids count as
+none: there is no trail here), sort instead by `weight x boost(intent, entity,
+link)` descending, then pull descending; `weight` stays the link's. An item
+whose boost isn't 1 and whose position differs from its position in the plain
+result (or that isn't in it) gets `reason.intent = { id, boost }`.
 
 ### 5.3 spread(trail)
 
@@ -198,7 +209,7 @@ Each: `{ entity, weight, link, reason (5.5), text (6) }`. Unknown id: nothing.
 - `degree(id)` = number of links in `adjacent[id]`. Scores keep the order in
   which ids first received any.
 
-### 5.4 next(trail, limit = 3, exclude)
+### 5.4 next(trail, limit = 3, exclude, intent = auto)
 
 1. `spread(trail)`.
 2. Candidates, in score order of first receipt: linked entities with a `why` or
@@ -210,6 +221,13 @@ Each: `{ entity, weight, link, reason (5.5), text (6) }`. Unknown id: nothing.
 5. Sort the taken ones by score descending.
 6. Reason: from `why` (5.5, with its link, the candidate's id and the seed), or
    `{ kind: "section" }` when only a section lit it.
+
+**Intent** (option `intent`, default `auto`): resolve it (5.8). With an intent
+`I`, run steps 3–5 a second time with each candidate's score multiplied by
+`boost(I, entity, why.link)` (no link when only a section lit it); those are
+the results, and their `score` is the boosted one. A result whose boost isn't
+1 and whose position differs from its position in the plain result (steps 3–5
+without boosts), or that isn't in it, gets `reason.intent = { id: I, boost }`.
 
 ### 5.5 Reason from a link
 
@@ -227,6 +245,45 @@ scores. For each linked destination in order: `name = normalize(label)`;
 descending; first `limit`. Reason `{ kind: "typed", by: "prefix" | "word-prefix" | "contains" }`;
 the result's `score` is the rank.
 
+### 5.7 intent(trail)
+
+Why the visit is likely happening, from the trail alone. `intents` is an
+ordered map of id to `{ label, signals, boost }`; `signals` and `boost` each
+hold `entities`, `types` and `kinds` maps of numbers. A missing weight is 0 in
+`signals` and 1 in `boost`.
+
+1. **Seeds** as in `spread` (5.3): each distinct step from the last back, with
+   weight `recency ^ (seeds before it)`. `steps` = the number of seeds that are
+   the id of an entity (linked or unlinked).
+2. For each intent, in order, with signal maps `E`, `T`, `K`, and for each seed
+   `s` with weight `w`, in order:
+   - `section:<x>` with `next.sections[x] = type`: `part = w x T[type]`.
+     Unknown sections and ids that aren't entities: skipped.
+   - An entity `e`: `self = E[e.id] + T[e.type]`. For each link `l` of
+     `adjacent[e.id]` in order, with `n` its other end:
+     `v = l.weight x (E[n] + K[l.kind])`; `best` is the largest `v` (0 if none
+     is above 0), and `bestVia` the first `n` that gave it.
+     `near = neighbours x best`; `part = w x (self + near)`.
+   - Add `part` to the intent's sum. When `part > 0`, add evidence
+     `{ step: s, via: bestVia (only when near > self), weight: part }`.
+   The intent's `raw` is `max(0, sum)`.
+3. `total = 1 + sum of raw` (the 1 is browsing). `scores[id] = raw / total` for
+   each intent in order, then `scores.browsing = 1 / total`.
+4. `top` = the intent with the largest `raw` (the first on ties); `confidence`
+   = its share (0 with no intents). `likely` = `top` when its `raw > 0`,
+   `confidence >= minConfidence` and `steps >= minSteps`; else null.
+5. Answer `{ likely, confidence, scores, evidence }`, `evidence` being `top`'s
+   (empty with no intents).
+
+### 5.8 Resolving and boosting
+
+- `resolve(option)`: none (`null`) stays none; with no intents configured,
+  none; `auto` (or the option missing) is `intent(trail).likely`; a configured
+  id is itself; anything else is none.
+- `boost(I, e, link)` = `B.types[e.type] x B.entities[e.id] x B.kinds[link.kind]`
+  (the kinds factor only with a link), clamped to `[0.5, 2]`, where `B` is
+  `I`'s `boost`.
+
 ## 6. Sentences
 
 `explain(reason, item)`:
@@ -234,7 +291,9 @@ the result's `score` is the rank.
 1. Templates = built-in (`section`: "{item} is worth a look.", `typed`:
    "{item} matches what you typed.", `match`: "{item} matches “{name}”."),
    overlaid by the bundle's `config.templates`.
-2. `t` = template `"<kind>.<item type>"`, else `"<kind>"`.
+2. `t` = template `"<kind>.<item type>"`, else `"<kind>"`. When the reason
+   has an `intent`, first try `"intent.<id>.<item type>"`, else
+   `"intent.<id>"`; a found template that isn't empty is used instead.
 3. Text from `t`:
    - a string: itself;
    - an object: the first of `cases` whose `item`, `other` and `direction`
@@ -252,6 +311,8 @@ the result's `score` is the rank.
    - `via`: the first three `via` entries joined with ", "
    - `kind`: the kind's label
    - `name`: the reason's `name`
+   - `intent`: the label of the reason's intent (its id without a label;
+     empty without an intent)
    - unknown tokens: empty
 
 ## 7. Trail
@@ -267,7 +328,7 @@ Emitted only when an events sink is attached; never stored or sent by pubba.
 
 | Event | When | Fields |
 | --- | --- | --- |
-| `suggested` | `next` or `related` returns at least one item | `source` ("next" or "related"), `ids`, `reasonKinds` (distinct, in order) |
+| `suggested` | `next` or `related` returns at least one item | `source` ("next" or "related"), `ids`, `reasonKinds` (distinct, in order); `intent` when one was applied (5.8) |
 | `matched` | every `match` | `intent`; `entityType` and `by` when matched |
 | `guide-opened` | `track.guideOpened()` | |
 | `guided-to` | `track.guidedTo(id, via)` with a known id (linked or unlinked) and `via` one of suggestion, chip, typed, match, related | `to`, `entityType`, `via` |

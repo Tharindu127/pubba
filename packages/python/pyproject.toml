@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pubba"
-version = "0.4.0"
+version = "0.9.0"
 description = "A small brain for showroom sites: related items with reasons, what-next from a visitor's trail, typo-tolerant matching and a headless guide, from a compiled pubba bundle."
 readme = "README.md"
 license = "MIT"

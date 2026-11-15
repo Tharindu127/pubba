@@ -74,3 +74,12 @@ test("MCP over stdio: the CLI answers line by line", async () => {
   assert.equal(lines[1].error.code, -32700);
   assert.equal(lines[2].result.structuredContent.result.entity.id, "market:LK");
 });
+
+test("intent over HTTP: the reading for a trail, and next with it on or off", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { loadBundle } = await import("../src/index.ts");
+  const shop = loadBundle(JSON.parse(readFileSync(new URL("../conformance/bundles/catalogue.json", import.meta.url), "utf8")));
+  const reading = answer(shop, "intent", { trail: "category:office,product:oak-desk" }) as { likely: string | null };
+  assert.equal(reading.likely, "home-office");
+  assert.deepEqual(answer(shop, "next", { trail: "category:office,product:oak-desk", intent: "none" }), answer(shop, "next", { trail: "category:office,product:oak-desk", intent: "nope" }));
+});

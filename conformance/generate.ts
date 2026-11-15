@@ -121,6 +121,60 @@ function cases(pubba: Pubba, name: string): Case[] {
   };
   for (const steps of scripts) out.push({ op: "guide", steps, options });
   out.push({ op: "guide", options, steps: destinations.slice(0, 6).flatMap((e): GuideStep[] => [{ op: "visited", id: e.id }, { op: "tick", ms: 70000 }, { op: "nudge" }, { op: "ask", question: e.label }, { op: "chips" }]) });
+  return [...out, ...intentCases(pubba, name)];
+}
+
+/** Intent profiles: reading the trail, and leaning next, related and sentences towards it. */
+function intentCases(pubba: Pubba, name: string): Case[] {
+  const g = pubba.graph;
+  const rand = lcg([...`${name}:intent`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7));
+  const pick = <T,>(xs: T[]) => xs[Math.floor(rand() * xs.length)]!;
+  const out: Case[] = [];
+  const destinations = [...g.entities.values()].filter((e) => g.config.types?.[e.type]?.destination !== false);
+  const ids = destinations.map((e) => e.id);
+  const sections = Object.keys(g.config.next?.sections ?? {}).map((s) => `section:${s}`);
+  const intents = Object.keys(g.config.intents ?? {});
+
+  // Trails that lean towards each intent: its signal entities and their neighbours, plus noise.
+  const leaning = intents.map((id) => {
+    const signals = Object.keys(g.config.intents![id]!.signals?.entities ?? {}).filter((e) => g.entities.has(e));
+    const near = signals.flatMap((s) => (g.adjacent.get(s) ?? []).map((l) => (l.from === s ? l.to : l.from)));
+    return [...signals, ...near];
+  });
+  const trails: string[][] = [[], ...ids.slice(0, 10).map((id) => [id]), ...sections.map((s) => [s])];
+  for (let i = 0; i < 30; i++) {
+    const pool = leaning.length && i % 3 !== 0 ? pick(leaning) : ids;
+    if (!pool.length) continue;
+    trails.push(Array.from({ length: 1 + Math.floor(rand() * 5) }, () => (rand() < 0.08 ? "unknown:id" : rand() < 0.1 && sections.length ? pick(sections) : pick(pool))));
+  }
+  for (const trail of trails) out.push({ op: "intent", trail });
+
+  if (!intents.length) {
+    out.push({ op: "next", trail: [pick(ids), pick(ids)], limit: 3, intent: "anything" });
+    out.push({ op: "related", id: pick(ids), intent: "anything" });
+    return out;
+  }
+  // Next with the intent worked out (the default), named, unknown and turned off.
+  for (const trail of trails.slice(1)) out.push({ op: "next", trail, limit: 1 + Math.floor(rand() * 5) });
+  for (const option of [...intents, "nope", null]) {
+    for (let i = 0; i < 6; i++) out.push({ op: "next", trail: pick(trails.slice(1)), limit: 1 + Math.floor(rand() * 5), intent: option });
+  }
+  // Related leaning towards a named intent.
+  for (const option of [...intents, "auto", null]) {
+    for (let i = 0; i < 6; i++) out.push({ op: "related", id: pick(ids), intent: option, ...(i % 2 ? { limit: 3 } : {}) });
+  }
+  // Sentences for a suggestion an intent moved.
+  for (const e of destinations.slice(0, 8)) {
+    for (const id of [...intents, "nope"]) out.push({ op: "explain", reason: { kind: "section", intent: { id, boost: 1.5 } }, item: e.id });
+  }
+  // A visit that settles into each intent: chips and nudges lean with it.
+  for (const pool of leaning) {
+    if (!pool.length) continue;
+    const steps: GuideStep[] = [];
+    for (let k = 0; k < 4; k++) steps.push({ op: "visited", id: pick(pool) }, { op: "chips" }, { op: "tick", ms: 70000 }, { op: "nudge" });
+    steps.push({ op: "ask", question: "" });
+    out.push({ op: "guide", steps });
+  }
   return out;
 }
 

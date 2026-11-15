@@ -95,7 +95,9 @@ final class Reasons
     {
         $every = array_replace(self::DEFAULT_TEMPLATES, Text::obj($g->config['templates'] ?? null), $templates ?? []);
         $other = $reason->to === null || $reason->to === '' ? null : ($g->entities[$reason->to] ?? null);
-        $t = $every[$reason->kind . '.' . $item->type] ?? $every[$reason->kind] ?? null;
+        // A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+        $it = $reason->intent === null ? null : ($every['intent.' . $reason->intent->id . '.' . $item->type] ?? $every['intent.' . $reason->intent->id] ?? null);
+        $t = $it !== null && Text::truthy($it) ? $it : ($every[$reason->kind . '.' . $item->type] ?? $every[$reason->kind] ?? null);
         $text = $t !== null && Text::truthy($t) ? self::pick($t, $reason, $item, $other) : null;
         $text ??= $other !== null
             ? ($reason->direction === 'in' ? '{other}: {kind} {item}[ ({via})].' : '{item}: {kind} {other}[ ({via})].')
@@ -111,6 +113,7 @@ final class Reasons
             'via' => implode(', ', array_slice($reason->via ?? [], 0, 3)),
             'kind' => $g->kindLabel($reason->kind),
             'name' => $reason->name ?? '',
+            'intent' => $reason->intent === null ? '' : Intents::label($g, $reason->intent->id),
         ]);
     }
 }

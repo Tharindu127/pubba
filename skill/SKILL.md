@@ -119,7 +119,20 @@ there as the content grows.
      floods the results;
    - a sentence reads badly: override its template.
 5. Show the fixes as a diff, apply them once the user agrees, and rerun.
-6. When the scores are where the user wants them, write the baseline with
+6. **Intent profiles (optional).** When the site has distinct kinds of visitor
+   (a recruiter hiring for mobile, a web client, a collaborator), ask whether
+   they want suggestions to lean towards the likely one. If so, define
+   `config.intents` from the site's own ids: `signals` (entities, types and link
+   kinds that point to the intent) and `boost` (multipliers, 0.5–2, for what to
+   show more of). For a portfolio, start from `presetOptions: { "intents": true }`
+   (`PORTFOLIO_INTENTS`) and swap in the site's platform and skill ids; lint
+   lists the ones it doesn't have. Add 10 to 15 trail cases with `"intent"`
+   (and some with `"intent": null` for browsing), run the eval, and show intent
+   accuracy and the suggestion score with and without intents: keep them only
+   if they help. Never word the intent to visitors ("looks like you're hiring")
+   unless the owner asks for it (an `intent.<id>` template); the intent is a
+   guess about the visit, worked out from the trail and never stored or sent.
+7. When the scores are where the user wants them, write the baseline with
    `--baseline eval/baseline.json --update-baseline`, and add the eval command to
    CI with `lint`, so a drop or a name collision fails the build (example in
    `references/evaluation.md`). Every content publish then re-runs it, and the

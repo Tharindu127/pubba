@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from typing import Any, Callable, Dict, List, Optional, Sequence, Set, Tuple, Union
 
 from .events import GUIDE_VIAS, Events
+from .intent import IntentReading, intent_boost, intent_label, read_intent, resolve_intent
 from .text import contains_name, has_phrase, normalize
 
 BUNDLE_FORMAT = 1
@@ -203,13 +204,34 @@ def _pick(t: Any, reason: Reason, item: Entity, other: Optional[Entity]) -> Opti
     return None
 
 
+def _truthy(v: Any) -> bool:
+    # JavaScript truthiness: an empty object or list counts, an empty string doesn't.
+    if v is None or v is False:
+        return False
+    if isinstance(v, (int, float)):
+        return v != 0 and v == v
+    if isinstance(v, str):
+        return v != ""
+    return True
+
+
 def render_reason(g: Graph, reason: Reason, item: Entity, templates: Optional[Dict[str, Any]] = None) -> str:
     """A reason as one sentence."""
     every = {**DEFAULT_TEMPLATES, **(g.config.get("templates") or {}), **(templates or {})}
     other = g.entities.get(reason["to"]) if reason.get("to") else None
-    t = every.get(f"{reason['kind']}.{item.type}")
-    if t is None:
-        t = every.get(reason["kind"])
+    # A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+    intent = reason.get("intent")
+    it = None
+    if intent:
+        it = every.get(f"intent.{intent['id']}.{item.type}")
+        if it is None:
+            it = every.get(f"intent.{intent['id']}")
+    if it is not None and _truthy(it):
+        t = it
+    else:
+        t = every.get(f"{reason['kind']}.{item.type}")
+        if t is None:
+            t = every.get(reason["kind"])
     text = _pick(t, reason, item, other) if t else None
     if text is None:
         if other is not None:
@@ -228,6 +250,7 @@ def render_reason(g: Graph, reason: Reason, item: Entity, templates: Optional[Di
             "via": ", ".join((reason.get("via") or [])[:3]),
             "kind": g.kind_label(reason["kind"]),
             "name": reason.get("name") or "",
+            "intent": intent_label(g, intent["id"]) if intent else "",
         },
     )
 
@@ -317,13 +340,16 @@ class Pubba:
         """The same graph, reporting to these events."""
         return Pubba(self.graph, events)
 
-    def _suggested(self, source: str, out: Sequence[Union[Suggestion, Related]]) -> None:
+    def _suggested(self, source: str, out: Sequence[Union[Suggestion, Related]], intent: Optional[str] = None) -> None:
         if self._events and out:
             kinds: List[str] = []
             for x in out:
                 if x.reason["kind"] not in kinds:
                     kinds.append(x.reason["kind"])
-            self._events.emit({"type": "suggested", "source": source, "ids": [x.entity.id for x in out], "reasonKinds": kinds})
+            event: Dict[str, Any] = {"type": "suggested", "source": source, "ids": [x.entity.id for x in out], "reasonKinds": kinds}
+            if intent is not None:
+                event["intent"] = intent
+            self._events.emit(event)
 
     # --- matching
 
@@ -417,18 +443,25 @@ class Pubba:
                 out.append((e, l))
         return sorted(out, key=lambda x: -x[1].weight)
 
-    def related(self, id: str, kinds: Optional[Sequence[str]] = None, limit: Optional[int] = None, destinations_only: bool = True, accept: Optional[Callable[[Entity], bool]] = None, templates: Optional[Dict[str, Any]] = None) -> List[Related]:
-        """What is related to one entity, strongest link first, each with why."""
+    def related(self, id: str, kinds: Optional[Sequence[str]] = None, limit: Optional[int] = None, destinations_only: bool = True, accept: Optional[Callable[[Entity], bool]] = None, templates: Optional[Dict[str, Any]] = None, intent: Optional[str] = None) -> List[Related]:
+        """What is related to one entity, strongest link first, each with why. With a named
+        intent, links rank by weight times its boost; `weight` stays the link's."""
         g = self.graph
-        pairs = sorted(self._neighbours(id, kinds), key=lambda x: (-x[1].weight, -g.pull(x[1].kind)))
-        pairs = [(e, l) for e, l in pairs if (not destinations_only or g.is_destination(e)) and (accept is None or accept(e))]
+        resolved = None if intent == "auto" else resolve_intent(g, [], intent)
+        pairs = [(e, l) for e, l in self._neighbours(id, kinds) if (not destinations_only or g.is_destination(e)) and (accept is None or accept(e))]
+        boosts = [1.0 if resolved is None else intent_boost(g, resolved, e, l) for e, l in pairs]
+        plain = sorted(range(len(pairs)), key=lambda k: (-pairs[k][1].weight, -g.pull(pairs[k][1].kind)))
+        chosen = plain if resolved is None else sorted(range(len(pairs)), key=lambda k: (-(pairs[k][1].weight * boosts[k]), -g.pull(pairs[k][1].kind)))
         if limit is not None:
-            pairs = pairs[:limit]
+            plain, chosen = plain[:limit], chosen[:limit]
         out = []
-        for e, l in pairs:
+        for i, k in enumerate(chosen):
+            e, l = pairs[k]
             reason = reason_from_link(l, e.id)
+            if resolved is not None and boosts[k] != 1 and (plain.index(k) if k in plain else -1) != i:
+                reason["intent"] = {"id": resolved, "boost": boosts[k]}
             out.append(Related(e, l.weight, l, reason, render_reason(g, reason, e, templates)))
-        self._suggested("related", out)
+        self._suggested("related", out, resolved)
         return out
 
     def spread(self, trail: Sequence[str]) -> Tuple[Dict[str, float], Dict[str, Tuple[Link, str, str, float]], Dict[str, float], Set[str]]:
@@ -476,18 +509,14 @@ class Pubba:
                     give(far, carry * l2.weight * g.pull(l2.kind), l2, mid, seed)
         return score, why, seeds, section_only
 
-    def next(self, trail: Sequence[str], limit: int = 3, exclude: Sequence[str] = (), accept: Optional[Callable[[Entity], bool]] = None, templates: Optional[Dict[str, Any]] = None) -> List[Suggestion]:
-        """The next things to suggest after this trail: unseen, worth going to, and mixed."""
-        g = self.graph
-        score, why, seeds, section_only = self.spread(trail)
-        skip = set(seeds) | set(exclude)
-        ranked = []
-        for id, s in score.items():
-            e = g.entities.get(id)
-            if e is None or not (id in why or id in section_only) or not g.is_destination(e) or id in skip or (accept is not None and not accept(e)):
-                continue
-            ranked.append((e, s, why.get(id)))
-        ranked.sort(key=lambda r: -r[1])
+    def intent(self, trail: Sequence[str]) -> IntentReading:
+        """Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent."""
+        return read_intent(self.graph, trail)
+
+    @staticmethod
+    def _mix(candidates: List[Tuple[Entity, float, Any, float]], limit: int) -> List[Tuple[Entity, float, Any, float]]:
+        """Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't."""
+        ranked = sorted(candidates, key=lambda r: -r[1])
         cap = max(1, limit - 1)
         taken: List[int] = []
         per_type: Dict[str, int] = {}
@@ -501,12 +530,38 @@ class Pubba:
         for i in range(len(ranked)):
             if len(taken) < limit and i not in taken:
                 taken.append(i)
-        chosen = sorted((ranked[i] for i in taken), key=lambda r: -r[1])
+        return sorted((ranked[i] for i in taken), key=lambda r: -r[1])
+
+    def next(self, trail: Sequence[str], limit: int = 3, exclude: Sequence[str] = (), accept: Optional[Callable[[Entity], bool]] = None, templates: Optional[Dict[str, Any]] = None, intent: Optional[str] = "auto") -> List[Suggestion]:
+        """The next things to suggest after this trail: unseen, worth going to, and mixed.
+        `intent`: "auto" (the default) leans towards the visitor's likely intent when
+        intents are configured; an id names one; None turns it off."""
+        g = self.graph
+        score, why, seeds, section_only = self.spread(trail)
+        skip = set(seeds) | set(exclude)
+        candidates = []
+        for id, s in score.items():
+            e = g.entities.get(id)
+            if e is None or not (id in why or id in section_only) or not g.is_destination(e) or id in skip or (accept is not None and not accept(e)):
+                continue
+            candidates.append((e, s, why.get(id), 1.0))
+        resolved = resolve_intent(g, trail, intent)
+        plain = self._mix(candidates, limit)
+        chosen = plain
+        if resolved is not None:
+            boosted = []
+            for e, s, w, _ in candidates:
+                b = intent_boost(g, resolved, e, w[0] if w else None)
+                boosted.append((e, s * b, w, b))
+            chosen = self._mix(boosted, limit)
+        plain_ids = [c[0].id for c in plain]
         out = []
-        for e, s, w in chosen:
+        for i, (e, s, w, b) in enumerate(chosen):
             reason = reason_from_link(w[0], e.id, w[2]) if w else {"kind": "section"}
+            if resolved is not None and b != 1 and (plain_ids.index(e.id) if e.id in plain_ids else -1) != i:
+                reason["intent"] = {"id": resolved, "boost": b}
             out.append(Suggestion(e, s, reason, render_reason(g, reason, e, templates)))
-        self._suggested("next", out)
+        self._suggested("next", out, resolved)
         return out
 
     def autocomplete(self, typed: str, trail: Sequence[str] = (), limit: int = 3, accept: Optional[Callable[[Entity], bool]] = None, templates: Optional[Dict[str, Any]] = None) -> List[Suggestion]:

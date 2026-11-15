@@ -71,9 +71,11 @@ public class Pubba @JvmOverloads constructor(public val graph: Graph, private va
     /** The same graph, reporting to these events. */
     public fun withEvents(events: Events?): Pubba = Pubba(graph, events)
 
-    private fun suggested(source: String, ids: List<String>, kinds: List<String>) {
+    private fun suggested(source: String, ids: List<String>, kinds: List<String>, intent: String?) {
         if (events != null && ids.isNotEmpty()) {
-            events.emit(mapOf("type" to "suggested", "source" to source, "ids" to ids, "reasonKinds" to kinds.distinct()))
+            val event = linkedMapOf<String, Any?>("type" to "suggested", "source" to source, "ids" to ids, "reasonKinds" to kinds.distinct())
+            if (intent != null) event["intent"] = intent
+            events.emit(event)
         }
     }
 
@@ -165,7 +167,10 @@ public class Pubba @JvmOverloads constructor(public val graph: Graph, private va
         return out.sortedBy { -it.second.weight }
     }
 
-    /** What is related to one entity, strongest link first, each with why. */
+    /**
+     * What is related to one entity, strongest link first, each with why. With a named
+     * [intent], links rank by weight times its boost; `weight` stays the link's.
+     */
     @JvmOverloads
     public fun related(
         id: String,
@@ -174,13 +179,26 @@ public class Pubba @JvmOverloads constructor(public val graph: Graph, private va
         destinationsOnly: Boolean = true,
         accept: ((Entity) -> Boolean)? = null,
         templates: Map<String, Any>? = null,
+        intent: String? = null,
     ): List<Related> {
-        var pairs = neighbours(id, kinds)
-            .sortedWith(compareBy({ -it.second.weight }, { -graph.pull(it.second.kind) }))
-            .filter { (e, _) -> (!destinationsOnly || graph.isDestination(e)) && (accept == null || accept(e)) }
-        if (limit != null) pairs = pairs.take(limit)
-        val out = pairs.map { (e, l) -> reasonFromLink(l, e.id).let { r -> Related(e, l.weight, l, r, renderReason(graph, r, e, templates)) } }
-        suggested("related", out.map { it.entity.id }, out.map { it.reason.kind })
+        val resolved = if (intent == "auto") null else resolveIntent(graph, emptyList(), intent)
+        val pairs = neighbours(id, kinds).filter { (e, _) -> (!destinationsOnly || graph.isDestination(e)) && (accept == null || accept(e)) }
+        val boosts = pairs.map { (e, l) -> if (resolved == null) 1.0 else intentBoost(graph, resolved, e, l) }
+        fun order(boosted: Boolean): List<Int> {
+            val sorted = pairs.indices.sortedWith(
+                compareBy({ if (boosted) -(pairs[it].second.weight * boosts[it]) else -pairs[it].second.weight }, { -graph.pull(pairs[it].second.kind) }),
+            )
+            return if (limit != null) sorted.take(limit) else sorted
+        }
+        val plain = order(false)
+        val chosen = if (resolved == null) plain else order(true)
+        val out = chosen.mapIndexed { i, k ->
+            val (e, l) = pairs[k]
+            var r = reasonFromLink(l, e.id)
+            if (resolved != null && boosts[k] != 1.0 && plain.indexOf(k) != i) r = r.copy(intent = ReasonIntent(resolved, boosts[k]))
+            Related(e, l.weight, l, r, renderReason(graph, r, e, templates))
+        }
+        suggested("related", out.map { it.entity.id }, out.map { it.reason.kind }, resolved)
         return out
     }
 
@@ -229,7 +247,32 @@ public class Pubba @JvmOverloads constructor(public val graph: Graph, private va
         return Spread(score, why, seeds, sectionOnly)
     }
 
-    /** The next things to suggest after this trail: unseen, worth going to, and mixed. */
+    /** Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent. */
+    public fun intent(trail: List<String>): IntentReading = readIntent(graph, trail)
+
+    private class Candidate(val entity: Entity, val score: Double, val why: Why?, val boost: Double)
+
+    /** Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't. */
+    private fun mix(candidates: List<Candidate>, limit: Int): List<Candidate> {
+        val byScore = candidates.sortedBy { -it.score }
+        val cap = maxOf(1, limit - 1)
+        val taken = ArrayList<Int>()
+        val perType = HashMap<String, Int>()
+        for ((i, r) in byScore.withIndex()) {
+            if (taken.size == limit) break
+            if ((perType[r.entity.type] ?: 0) >= cap) continue
+            perType[r.entity.type] = (perType[r.entity.type] ?: 0) + 1
+            taken.add(i)
+        }
+        for (i in byScore.indices) if (taken.size < limit && i !in taken) taken.add(i)
+        return taken.map { byScore[it] }.sortedBy { -it.score }
+    }
+
+    /**
+     * The next things to suggest after this trail: unseen, worth going to, and mixed.
+     * [intent]: "auto" (the default) leans towards the visitor's likely intent when
+     * intents are configured; an id names one; null turns it off.
+     */
     @JvmOverloads
     public fun next(
         trail: List<String>,
@@ -237,31 +280,29 @@ public class Pubba @JvmOverloads constructor(public val graph: Graph, private va
         exclude: Collection<String> = emptyList(),
         accept: ((Entity) -> Boolean)? = null,
         templates: Map<String, Any>? = null,
+        intent: String? = "auto",
     ): List<Suggestion> {
         val sp = spread(trail)
         val skip = sp.seeds.keys + exclude
-        val ranked = ArrayList<Triple<Entity, Double, Why?>>()
+        val candidates = ArrayList<Candidate>()
         for ((id, s) in sp.score) {
             val e = graph.entities[id] ?: continue
             if (!(id in sp.why || id in sp.sectionOnly) || !graph.isDestination(e) || id in skip || (accept != null && !accept(e))) continue
-            ranked.add(Triple(e, s, sp.why[id]))
+            candidates.add(Candidate(e, s, sp.why[id], 1.0))
         }
-        val byScore = ranked.sortedBy { -it.second }
-        val cap = maxOf(1, limit - 1)
-        val taken = ArrayList<Int>()
-        val perType = HashMap<String, Int>()
-        for ((i, r) in byScore.withIndex()) {
-            if (taken.size == limit) break
-            if ((perType[r.first.type] ?: 0) >= cap) continue
-            perType[r.first.type] = (perType[r.first.type] ?: 0) + 1
-            taken.add(i)
+        val resolved = resolveIntent(graph, trail, intent)
+        val plain = mix(candidates, limit)
+        val chosen = if (resolved == null) plain else mix(
+            candidates.map { c -> intentBoost(graph, resolved, c.entity, c.why?.link).let { b -> Candidate(c.entity, c.score * b, c.why, b) } },
+            limit,
+        )
+        val plainIds = plain.map { it.entity.id }
+        val out = chosen.mapIndexed { i, c ->
+            var reason = if (c.why != null) reasonFromLink(c.why.link, c.entity.id, c.why.seed) else Reason("section")
+            if (resolved != null && c.boost != 1.0 && plainIds.indexOf(c.entity.id) != i) reason = reason.copy(intent = ReasonIntent(resolved, c.boost))
+            Suggestion(c.entity, c.score, reason, renderReason(graph, reason, c.entity, templates))
         }
-        for (i in byScore.indices) if (taken.size < limit && i !in taken) taken.add(i)
-        val out = taken.map { byScore[it] }.sortedBy { -it.second }.map { (e, s, w) ->
-            val reason = if (w != null) reasonFromLink(w.link, e.id, w.seed) else Reason("section")
-            Suggestion(e, s, reason, renderReason(graph, reason, e, templates))
-        }
-        suggested("next", out.map { it.entity.id }, out.map { it.reason.kind })
+        suggested("next", out.map { it.entity.id }, out.map { it.reason.kind }, resolved)
         return out
     }
 

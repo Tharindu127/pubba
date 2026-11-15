@@ -241,12 +241,41 @@ export interface ReasonContext {
 
 /**
  * How a reason becomes a sentence. Strings use `{item}`, `{other}`, `{otherLower}`,
- * `{via}`, `{kind}` and `{name}`; a `[...]` part is dropped when a token in it is empty.
+ * `{via}`, `{kind}`, `{name}` and `{intent}` (the intent's label); a `[...]` part is dropped when a token in it is empty.
  */
 export type Template =
   | string
   | { cases?: TemplateCase[]; out?: string; in?: string; default?: string }
   | ((ctx: ReasonContext) => string);
+
+/** Weights by entity id, entity type and link kind. */
+export interface IntentWeights {
+  entities?: Record<string, number>;
+  types?: Record<string, number>;
+  kinds?: Record<string, number>;
+}
+
+/**
+ * Why a visit might be happening ("hiring for mobile"), read from the trail:
+ * `signals` say how much each step points to it, `boost` what to lean towards
+ * once it's likely (multipliers, clamped to 0.5–2, so nothing is ever hidden).
+ */
+export interface IntentConfig {
+  label?: string;
+  /** Entities and types count for a step itself; entities and link kinds also count through its neighbours, at `intent.neighbours` strength. */
+  signals?: IntentWeights;
+  /** Multipliers for a suggestion's entity, type and the kind of link that led to it. */
+  boost?: IntentWeights;
+}
+
+export interface IntentSettings {
+  /** The top intent's share needed to count as likely. Default 0.5. */
+  minConfidence?: number;
+  /** Real (entity) steps needed in the trail. Default 2. */
+  minSteps?: number;
+  /** How much a step's strongest neighbour counts. Default 0.5. */
+  neighbours?: number;
+}
 
 export interface PubbaConfig {
   types?: Record<string, TypeConfig>;
@@ -256,8 +285,11 @@ export interface PubbaConfig {
   extraRules?: Rule[];
   next?: NextConfig;
   match?: MatchConfig;
-  /** Keyed by reason kind: a link kind, `section`, `typed` or `match`. */
+  /** Keyed by reason kind: a link kind, `section`, `typed` or `match`; and `intent.<id>` for a suggestion the intent moved. */
   templates?: Record<string, Template>;
+  /** Intent profiles, by id ("browsing" is reserved). Without them, suggestions are as before. */
+  intents?: Record<string, IntentConfig>;
+  intent?: IntentSettings;
 }
 
 /**
@@ -276,6 +308,8 @@ export interface Reason {
   by?: "name" | "alias" | "words" | "first-word" | "distinct-word" | "phrase" | "prefix" | "word-prefix" | "contains";
   /** For `match`: the name or alias that matched. */
   name?: string;
+  /** Set when the visitor's likely intent moved this suggestion: which intent, and its boost. */
+  intent?: { id: string; boost: number };
 }
 
 export interface Graph {

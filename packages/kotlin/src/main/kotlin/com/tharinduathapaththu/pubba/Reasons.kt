@@ -59,7 +59,9 @@ public fun renderReason(g: Graph, reason: Reason, item: Entity, templates: Map<S
     every.putAll(g.config.obj("templates"))
     templates?.let { every.putAll(it) }
     val other = reason.to?.takeIf { it.isNotEmpty() }?.let { g.entities[it] }
-    val t = every["${reason.kind}.${item.type}"] ?: every[reason.kind]
+    // A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+    val it = reason.intent?.let { i -> every["intent.${i.id}.${item.type}"] ?: every["intent.${i.id}"] }
+    val t = if (it != null && truthy(it)) it else every["${reason.kind}.${item.type}"] ?: every[reason.kind]
     var text = if (t != null && truthy(t)) pick(t, reason, item, other) else null
     if (text == null) {
         text = if (other != null) {
@@ -77,6 +79,7 @@ public fun renderReason(g: Graph, reason: Reason, item: Entity, templates: Map<S
             "via" to (reason.via ?: emptyList()).take(3).joinToString(", "),
             "kind" to g.kindLabel(reason.kind),
             "name" to (reason.name ?: ""),
+            "intent" to (reason.intent?.let { intentLabel(g, it.id) } ?: ""),
         ),
     )
 }

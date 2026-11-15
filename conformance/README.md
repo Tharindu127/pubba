@@ -36,13 +36,14 @@ absent must be absent (no nulls in its place).
 | --- | --- | --- |
 | `match` | `query` | `{ intent, entity (id or null), score, tier, by, name, text, similar: [{ id, weight, reason, text }], notHere }`; `score` to `text` only when matched, `notHere` only when set |
 | `search` | `query`, `limit` | `[{ id, score, tier, by, name }]` |
-| `next` | `trail`, `limit`, optional `exclude` | `[{ id, score, reason, text }]` |
-| `related` | `id`, optional `limit`, `kinds` | `[{ id, weight, reason, text }]` |
+| `next` | `trail`, `limit`, optional `exclude`, `intent` (absent: auto; null: none; or an id) | `[{ id, score, reason, text }]` |
+| `related` | `id`, optional `limit`, `kinds`, `intent` | `[{ id, weight, reason, text }]` |
+| `intent` | `trail` | `{ likely (id or null), confidence, scores: { <id>..., browsing }, evidence: [{ step, via?, weight }] }` |
 | `autocomplete` | `typed`, `trail`, `limit` | `[{ id, score, by }]` (score is the rank) |
 | `explain` | `reason`, `item` (an id) | the sentence |
 | `guide` | `steps` | `{ answers, trail, events }` |
 
-A `reason` is `{ kind, to?, direction?, via?, seed?, by?, name? }`, keys present
+A `reason` is `{ kind, to?, direction?, via?, seed?, by?, name?, intent?: { id, boost } }`, keys present
 only when set.
 
 ### Guide scripts

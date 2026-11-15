@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'events.dart';
+import 'intent.dart';
 import 'model.dart';
 import 'reasons.dart';
 import 'text.dart';
@@ -95,9 +96,9 @@ class Pubba {
   /// The same graph, reporting to these events.
   Pubba withEvents(Events? events) => Pubba(graph, events);
 
-  void _suggested(String source, List<String> ids, List<String> kinds) {
+  void _suggested(String source, List<String> ids, List<String> kinds, String? intent) {
     if (_events == null || ids.isEmpty) return;
-    _events.emit({'type': 'suggested', 'source': source, 'ids': ids, 'reasonKinds': kinds.toSet().toList()});
+    _events.emit({'type': 'suggested', 'source': source, 'ids': ids, 'reasonKinds': kinds.toSet().toList(), if (intent != null) 'intent': intent});
   }
 
   // --- matching
@@ -193,19 +194,40 @@ class Pubba {
     return stableSorted(out, ((Entity, Link) a, (Entity, Link) b) => _cmp(b.$2.weight, a.$2.weight));
   }
 
-  /// What is related to one entity, strongest link first, each with why.
+  /// What is related to one entity, strongest link first, each with why. With a named
+  /// [intent], links rank by weight times its boost; `weight` stays the link's.
   List<Related> related(String id,
-      {List<String>? kinds, int? limit, bool destinationsOnly = true, bool Function(Entity)? accept, Map<String, Object>? templates}) {
-    var pairs = stableSorted(_neighbours(id, kinds), ((Entity, Link) a, (Entity, Link) b) {
-      final w = _cmp(b.$2.weight, a.$2.weight);
-      return w != 0 ? w : _cmp(graph.pull(b.$2.kind), graph.pull(a.$2.kind));
-    }).where((p) => (!destinationsOnly || graph.isDestination(p.$1)) && (accept == null || accept(p.$1))).toList();
-    if (limit != null) pairs = pairs.take(limit).toList();
-    final out = pairs.map((p) {
-      final r = reasonFromLink(p.$2, p.$1.id);
-      return Related(p.$1, p.$2.weight, p.$2, r, renderReason(graph, r, p.$1, templates));
-    }).toList();
-    _suggested('related', [for (final x in out) x.entity.id], [for (final x in out) x.reason.kind]);
+      {List<String>? kinds,
+      int? limit,
+      bool destinationsOnly = true,
+      bool Function(Entity)? accept,
+      Map<String, Object>? templates,
+      String? intent}) {
+    final resolved = intent == 'auto' ? null : resolveIntent(graph, const [], intent);
+    final pairs = <(Entity, Link, int, double)>[];
+    for (final (e, l) in _neighbours(id, kinds)) {
+      if ((!destinationsOnly || graph.isDestination(e)) && (accept == null || accept(e))) {
+        pairs.add((e, l, pairs.length, resolved == null ? 1.0 : intentBoost(graph, resolved, e, l)));
+      }
+    }
+    List<(Entity, Link, int, double)> order(bool boosted) {
+      final sorted = stableSorted(pairs, ((Entity, Link, int, double) a, (Entity, Link, int, double) b) {
+        final w = boosted ? _cmp(b.$2.weight * b.$4, a.$2.weight * a.$4) : _cmp(b.$2.weight, a.$2.weight);
+        return w != 0 ? w : _cmp(graph.pull(b.$2.kind), graph.pull(a.$2.kind));
+      });
+      return limit == null ? sorted : sorted.take(limit).toList();
+    }
+
+    final plain = [for (final p in order(false)) p.$3];
+    final chosen = resolved == null ? order(false) : order(true);
+    final out = <Related>[];
+    for (var i = 0; i < chosen.length; i++) {
+      final (e, l, k, b) = chosen[i];
+      var r = reasonFromLink(l, e.id);
+      if (resolved != null && b != 1 && plain.indexOf(k) != i) r = r.withIntent(ReasonIntent(resolved, b));
+      out.add(Related(e, l.weight, l, r, renderReason(graph, r, e, templates)));
+    }
+    _suggested('related', [for (final x in out) x.entity.id], [for (final x in out) x.reason.kind], resolved);
     return out;
   }
 
@@ -256,41 +278,64 @@ class Pubba {
     return Spread(score, why, seeds, sectionOnly);
   }
 
-  /// The next things to suggest after this trail: unseen, worth going to, and mixed.
-  List<Suggestion> next(List<String> trail,
-      {int limit = 3, List<String> exclude = const [], bool Function(Entity)? accept, Map<String, Object>? templates}) {
-    final sp = spread(trail);
-    final skip = {...sp.seeds.keys, ...exclude};
-    final ranked = <(Entity, double, Why?)>[];
-    for (final MapEntry(key: id, value: s) in sp.score.entries) {
-      final e = graph.entities[id];
-      if (e == null) continue;
-      if (!(sp.why.containsKey(id) || sp.sectionOnly.contains(id)) || !graph.isDestination(e) || skip.contains(id) || (accept != null && !accept(e))) continue;
-      ranked.add((e, s, sp.why[id]));
-    }
-    final byScore = stableSorted(ranked, ((Entity, double, Why?) a, (Entity, double, Why?) b) => _cmp(b.$2, a.$2));
+  /// Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent.
+  IntentReading intent(List<String> trail) => readIntent(graph, trail);
+
+  /// Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't.
+  static List<(Entity, double, Why?, double)> _mix(List<(Entity, double, Why?, double)> candidates, int limit) {
+    int byScore((Entity, double, Why?, double) a, (Entity, double, Why?, double) b) => _cmp(b.$2, a.$2);
+    final sorted = stableSorted(candidates, byScore);
     final cap = math.max(1, limit - 1);
     final taken = <int>[];
     final perType = <String, int>{};
-    for (var i = 0; i < byScore.length; i++) {
+    for (var i = 0; i < sorted.length; i++) {
       if (taken.length == limit) break;
-      final t = byScore[i].$1.type;
+      final t = sorted[i].$1.type;
       if ((perType[t] ?? 0) >= cap) continue;
       perType[t] = (perType[t] ?? 0) + 1;
       taken.add(i);
     }
-    for (var i = 0; i < byScore.length; i++) {
+    for (var i = 0; i < sorted.length; i++) {
       if (taken.length < limit && !taken.contains(i)) taken.add(i);
     }
-    final chosen = stableSorted([for (final i in taken) byScore[i]], ((Entity, double, Why?) a, (Entity, double, Why?) b) => _cmp(b.$2, a.$2));
-    final out = [
-      for (final (e, s, w) in chosen)
-        () {
-          final reason = w != null ? reasonFromLink(w.link, e.id, w.seed) : const Reason('section');
-          return Suggestion(e, s, reason, renderReason(graph, reason, e, templates));
-        }(),
-    ];
-    _suggested('next', [for (final x in out) x.entity.id], [for (final x in out) x.reason.kind]);
+    return stableSorted([for (final i in taken) sorted[i]], byScore);
+  }
+
+  /// The next things to suggest after this trail: unseen, worth going to, and mixed.
+  /// [intent]: "auto" (the default) leans towards the visitor's likely intent when
+  /// intents are configured; an id names one; null turns it off.
+  List<Suggestion> next(List<String> trail,
+      {int limit = 3, List<String> exclude = const [], bool Function(Entity)? accept, Map<String, Object>? templates, String? intent = 'auto'}) {
+    final sp = spread(trail);
+    final skip = {...sp.seeds.keys, ...exclude};
+    final candidates = <(Entity, double, Why?, double)>[];
+    for (final MapEntry(key: id, value: s) in sp.score.entries) {
+      final e = graph.entities[id];
+      if (e == null) continue;
+      if (!(sp.why.containsKey(id) || sp.sectionOnly.contains(id)) || !graph.isDestination(e) || skip.contains(id) || (accept != null && !accept(e))) continue;
+      candidates.add((e, s, sp.why[id], 1.0));
+    }
+    final resolved = resolveIntent(graph, trail, intent);
+    final plain = _mix(candidates, limit);
+    var chosen = plain;
+    if (resolved != null) {
+      chosen = _mix([
+        for (final (e, s, w, _) in candidates)
+          () {
+            final b = intentBoost(graph, resolved, e, w?.link);
+            return (e, s * b, w, b);
+          }(),
+      ], limit);
+    }
+    final plainIds = [for (final c in plain) c.$1.id];
+    final out = <Suggestion>[];
+    for (var i = 0; i < chosen.length; i++) {
+      final (e, s, w, b) = chosen[i];
+      var reason = w != null ? reasonFromLink(w.link, e.id, w.seed) : const Reason('section');
+      if (resolved != null && b != 1 && plainIds.indexOf(e.id) != i) reason = reason.withIntent(ReasonIntent(resolved, b));
+      out.add(Suggestion(e, s, reason, renderReason(graph, reason, e, templates)));
+    }
+    _suggested('next', [for (final x in out) x.entity.id], [for (final x in out) x.reason.kind], resolved);
     return out;
   }
 

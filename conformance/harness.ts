@@ -22,8 +22,9 @@ export type GuideStep =
 export type Case =
   | { op: "match"; query: string }
   | { op: "search"; query: string; limit: number }
-  | { op: "next"; trail: string[]; limit: number; exclude?: string[] }
-  | { op: "related"; id: string; limit?: number; kinds?: string[] }
+  | { op: "next"; trail: string[]; limit: number; exclude?: string[]; intent?: string | null }
+  | { op: "related"; id: string; limit?: number; kinds?: string[]; intent?: string | null }
+  | { op: "intent"; trail: string[] }
   | { op: "autocomplete"; typed: string; trail: string[]; limit: number }
   | { op: "explain"; reason: Reason; item: string }
   | { op: "guide"; steps: GuideStep[]; options?: GuideCaseOptions };
@@ -95,9 +96,11 @@ export function run(pubba: Pubba, c: Case): unknown {
     case "search":
       return pubba.search(c.query, { limit: c.limit }).map((m) => ({ id: m.entity.id, score: m.score, tier: m.tier, by: m.reason.by, name: m.reason.name }));
     case "next":
-      return pubba.next(c.trail, { limit: c.limit, ...(c.exclude ? { exclude: c.exclude } : {}) }).map(scored);
+      return pubba.next(c.trail, { limit: c.limit, ...(c.exclude ? { exclude: c.exclude } : {}), ...("intent" in c ? { intent: c.intent } : {}) }).map(scored);
     case "related":
-      return pubba.related(c.id, { ...(c.limit !== undefined ? { limit: c.limit } : {}), ...(c.kinds ? { kinds: c.kinds } : {}) }).map(weighted);
+      return pubba.related(c.id, { ...(c.limit !== undefined ? { limit: c.limit } : {}), ...(c.kinds ? { kinds: c.kinds } : {}), ...("intent" in c ? { intent: c.intent } : {}) }).map(weighted);
+    case "intent":
+      return JSON.parse(JSON.stringify(pubba.intent(c.trail))) as unknown;
     case "autocomplete":
       return pubba.autocomplete(c.typed, c.trail, { limit: c.limit }).map((s) => ({ id: s.entity.id, score: s.score, by: s.reason.by }));
     case "explain":

@@ -121,9 +121,11 @@ def run(pubba: Pubba, c: Dict[str, Any]) -> Any:
     if op == "search":
         return [{"id": m.entity.id, "score": m.score, "tier": m.tier, "by": m.reason.get("by"), "name": m.reason.get("name")} for m in pubba.search(c["query"], limit=c["limit"])]
     if op == "next":
-        return [_scored(x) for x in pubba.next(c["trail"], limit=c["limit"], exclude=c.get("exclude", ()))]
+        return [_scored(x) for x in pubba.next(c["trail"], limit=c["limit"], exclude=c.get("exclude", ()), intent=c["intent"] if "intent" in c else "auto")]
     if op == "related":
-        return [_weighted(x) for x in pubba.related(c["id"], kinds=c.get("kinds"), limit=c.get("limit"))]
+        return [_weighted(x) for x in pubba.related(c["id"], kinds=c.get("kinds"), limit=c.get("limit"), intent=c.get("intent"))]
+    if op == "intent":
+        return pubba.intent(c["trail"]).to_json()
     if op == "autocomplete":
         return [{"id": s.entity.id, "score": s.score, "by": s.reason.get("by")} for s in pubba.autocomplete(c["typed"], c["trail"], limit=c["limit"])]
     if op == "explain":

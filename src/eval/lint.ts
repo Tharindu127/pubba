@@ -1,7 +1,8 @@
 import { isDestination } from "../graph.ts";
 import type { Pubba } from "../index.ts";
 import { normalize } from "../text.ts";
-import type { Dataset, SharedRule } from "../types.ts";
+import { intentsOf } from "../intent.ts";
+import type { Dataset, IntentConfig, SharedRule } from "../types.ts";
 import { nameOwners } from "./generate.ts";
 
 /*
@@ -12,7 +13,7 @@ import { nameOwners } from "./generate.ts";
 
 export interface LintIssue {
   level: "error" | "warning" | "info";
-  code: "duplicate-name" | "shared-first-word" | "short-name-typos" | "heavy-core" | "dead-end" | "dropped" | "no-url";
+  code: "duplicate-name" | "shared-first-word" | "short-name-typos" | "heavy-core" | "dead-end" | "dropped" | "no-url" | "intent-unknown-id" | "intent-overlap";
   message: string;
   ids: string[];
   fix?: string;
@@ -102,6 +103,61 @@ export function lint(pubba: Pubba, dataset?: Dataset): LintIssue[] {
   const missing = noUrl.filter((e) => typesWithUrls.has(e.type));
   if (missing.length) {
     issues.push({ level: "info", code: "no-url", message: `No url, where others of their type have one: ${list(missing.map((e) => e.label))}.`, ids: missing.map((e) => e.id) });
+  }
+  issues.push(...lintIntents(pubba));
+  return issues;
+}
+
+/** Signals as one vector, so two intents can be compared. */
+function signalVector(i: IntentConfig): Map<string, number> {
+  const v = new Map<string, number>();
+  for (const [prefix, weights] of [["entity", i.signals?.entities], ["type", i.signals?.types], ["kind", i.signals?.kinds]] as const) {
+    for (const [k, w] of Object.entries(weights ?? {})) if (typeof w === "number" && w > 0) v.set(`${prefix}:${k}`, w);
+  }
+  return v;
+}
+
+function cosine(a: Map<string, number>, b: Map<string, number>): number {
+  let dot = 0;
+  for (const [k, w] of a) dot += w * (b.get(k) ?? 0);
+  const norm = (m: Map<string, number>) => Math.sqrt([...m.values()].reduce((s, w) => s + w * w, 0));
+  return dot ? dot / (norm(a) * norm(b)) : 0;
+}
+
+/** Intents that name ids the site doesn't have, and intents too alike to tell apart. */
+function lintIntents(pubba: Pubba): LintIssue[] {
+  const g = pubba.graph;
+  const issues: LintIssue[] = [];
+  const intents = intentsOf(g);
+  for (const [id, i] of intents) {
+    const named = [...Object.keys(i.signals?.entities ?? {}), ...Object.keys(i.boost?.entities ?? {})];
+    const unknown = [...new Set(named.filter((e) => !g.entities.has(e) && !g.unlinked.has(e)))];
+    if (unknown.length) {
+      // An unknown id only does nothing; it matters when nothing is left for the intent to read.
+      const left = signalVector(i);
+      for (const e of unknown) left.delete(`entity:${e}`);
+      issues.push({
+        level: left.size ? "info" : "warning",
+        code: "intent-unknown-id",
+        message: left.size ? `The "${id}" intent names ids this site doesn't have: ${list(unknown)}.` : `The "${id}" intent can never be read: every id it names is missing (${list(unknown)}).`,
+        ids: unknown,
+        fix: "Use this site's own ids (its platforms and skills), or remove them.",
+      });
+    }
+  }
+  for (let a = 0; a < intents.length; a++) {
+    for (let b = a + 1; b < intents.length; b++) {
+      const similarity = cosine(signalVector(intents[a]![1]), signalVector(intents[b]![1]));
+      if (similarity >= 0.8) {
+        issues.push({
+          level: "warning",
+          code: "intent-overlap",
+          message: `The "${intents[a]![0]}" and "${intents[b]![0]}" intents read the same steps (${Math.round(similarity * 100)}% alike), so a trail can't tell them apart.`,
+          ids: [],
+          fix: "Give each its own signals, or merge them.",
+        });
+      }
+    }
   }
   return issues;
 }

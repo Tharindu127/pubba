@@ -44,10 +44,12 @@ public struct Reason: Sendable, Equatable {
     public var seed: String?
     public var by: String?
     public var name: String?
+    /// Set when the visitor's likely intent moved this suggestion.
+    public var intent: ReasonIntent?
 
-    public init(kind: String, to: String? = nil, direction: String? = nil, via: [String]? = nil, seed: String? = nil, by: String? = nil, name: String? = nil) {
+    public init(kind: String, to: String? = nil, direction: String? = nil, via: [String]? = nil, seed: String? = nil, by: String? = nil, name: String? = nil, intent: ReasonIntent? = nil) {
         self.kind = kind; self.to = to; self.direction = direction; self.via = via
-        self.seed = seed; self.by = by; self.name = name
+        self.seed = seed; self.by = by; self.name = name; self.intent = intent
     }
 
     /// The reason as JSON, absent fields left out.
@@ -60,12 +62,14 @@ public struct Reason: Sendable, Equatable {
         if let seed = seed { o["seed"] = .string(seed) }
         if let by = by { o["by"] = .string(by) }
         if let name = name { o["name"] = .string(name) }
+        if let intent = intent { o["intent"] = .object(JSONObject([("id", .string(intent.id)), ("boost", .number(intent.boost))])) }
         return o
     }
 
     public init?(json o: JSONObject) {
         guard let kind = o["kind"].str else { return nil }
-        self.init(kind: kind, to: o["to"].str, direction: o["direction"].str, via: o["via"]?.strings, seed: o["seed"].str, by: o["by"].str, name: o["name"].str)
+        let intent = o["intent"].obj["id"].str.map { ReasonIntent(id: $0, boost: o["intent"].obj["boost"].num(1)) }
+        self.init(kind: kind, to: o["to"].str, direction: o["direction"].str, via: o["via"]?.strings, seed: o["seed"].str, by: o["by"].str, name: o["name"].str, intent: intent)
     }
 }
 

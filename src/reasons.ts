@@ -1,3 +1,4 @@
+import { intentLabel } from "./intent.ts";
 import type { Entity, Graph, GraphLink, Reason, ReasonContext, Template, TemplateCase } from "./types.ts";
 
 /** How an entity reads inside a sentence. */
@@ -58,7 +59,9 @@ export function renderReason(g: Graph, reason: Reason, item: Entity, templates: 
     otherLabel: other ? shortLabel(other) : "",
     via: reason.via?.slice(0, 3).join(", ") ?? "",
   };
-  const t = all[`${reason.kind}.${item.type}`] ?? all[reason.kind];
+  // A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+  const it = reason.intent ? (all[`intent.${reason.intent.id}.${item.type}`] ?? all[`intent.${reason.intent.id}`]) : undefined;
+  const t = it || (all[`${reason.kind}.${item.type}`] ?? all[reason.kind]);
   const label = kindLabel(g, reason.kind);
   const text =
     (t && pick(t, ctx)) ??
@@ -71,5 +74,6 @@ export function renderReason(g: Graph, reason: Reason, item: Entity, templates: 
     via: ctx.via,
     kind: label,
     name: reason.name ?? "",
+    intent: reason.intent ? intentLabel(g, reason.intent.id) : "",
   });
 }

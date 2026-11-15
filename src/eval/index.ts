@@ -28,6 +28,15 @@ export interface TrailCase {
   expectAny?: string[];
   /** How many suggestions count. Default 3. */
   top?: number;
+  /** The intent this trail should read as (null: still browsing). Checked only when given. */
+  intent?: string | null;
+}
+
+export interface IntentOutcome {
+  case: TrailCase;
+  got: string | null;
+  confidence: number;
+  pass: boolean;
 }
 
 export interface QueryOutcome {
@@ -48,12 +57,15 @@ export interface TrailOutcome {
 
 export interface EvalReport {
   matching: { score: number; passed: number; total: number; byTag: Record<string, { passed: number; total: number }>; failures: QueryOutcome[] };
-  suggestions: { score: number; hitRate: number; passed: number; total: number; failures: TrailOutcome[] };
+  suggestions: { score: number; hitRate: number; passed: number; total: number; failures: TrailOutcome[]; withoutIntents?: number };
+  /** When trails say which intent they should read as: how many did. */
+  intents?: { score: number; passed: number; total: number; failures: IntentOutcome[] };
 }
 
 export interface Baseline {
   matching: number;
   suggestions: number;
+  intents?: number;
 }
 
 export function evaluateQueries(pubba: Pubba, cases: QueryCase[]): EvalReport["matching"] {
@@ -74,9 +86,10 @@ export function evaluateQueries(pubba: Pubba, cases: QueryCase[]): EvalReport["m
   return { score: cases.length ? passed / cases.length : 1, passed, total: cases.length, byTag, failures: outcomes.filter((o) => !o.pass) };
 }
 
-export function evaluateTrails(pubba: Pubba, cases: TrailCase[]): EvalReport["suggestions"] {
+/** Suggestions against trail cases. `intent: null` scores them as if no intents were configured. */
+export function evaluateTrails(pubba: Pubba, cases: TrailCase[], { intent }: { intent?: null } = {}): EvalReport["suggestions"] {
   const outcomes: TrailOutcome[] = cases.map((c) => {
-    const got = pubba.next(c.trail, { limit: c.top ?? 3 }).map((s) => s.entity.id);
+    const got = pubba.next(c.trail, { limit: c.top ?? 3, ...(intent === null ? { intent: null } : {}) }).map((s) => s.entity.id);
     const all = c.expect ?? [];
     const any = c.expectAny ?? [];
     const found = [...all, ...any].filter((id) => got.includes(id));
@@ -97,8 +110,24 @@ export function evaluateTrails(pubba: Pubba, cases: TrailCase[]): EvalReport["su
   };
 }
 
+/** Does each trail read as the intent it should (null: still browsing)? Only cases that say. */
+export function evaluateIntents(pubba: Pubba, cases: TrailCase[]): NonNullable<EvalReport["intents"]> {
+  const outcomes: IntentOutcome[] = cases
+    .filter((c) => c.intent !== undefined)
+    .map((c) => {
+      const r = pubba.intent(c.trail);
+      return { case: c, got: r.likely, confidence: r.confidence, pass: r.likely === (c.intent ?? null) };
+    });
+  const passed = outcomes.filter((o) => o.pass).length;
+  return { score: outcomes.length ? passed / outcomes.length : 1, passed, total: outcomes.length, failures: outcomes.filter((o) => !o.pass) };
+}
+
 export function evaluate(pubba: Pubba, { queries = [], trails = [] }: { queries?: QueryCase[]; trails?: TrailCase[] }): EvalReport {
-  return { matching: evaluateQueries(pubba, queries), suggestions: evaluateTrails(pubba, trails) };
+  const report: EvalReport = { matching: evaluateQueries(pubba, queries), suggestions: evaluateTrails(pubba, trails) };
+  // With intents configured, show whether they help: the same trails scored without them.
+  if (Object.keys(pubba.graph.config.intents ?? {}).length) report.suggestions.withoutIntents = evaluateTrails(pubba, trails, { intent: null }).score;
+  if (trails.some((c) => c.intent !== undefined)) report.intents = evaluateIntents(pubba, trails);
+  return report;
 }
 
 /** What dropped below the baseline (less a tolerance). Empty when nothing did. */
@@ -107,6 +136,7 @@ export function regressions(report: EvalReport, baseline: Baseline, tolerance = 
   const round = (x: number) => Math.round(x * 1000) / 1000;
   if (round(report.matching.score) < round(baseline.matching - tolerance)) out.push(`matching ${pct(report.matching.score)} is below the baseline ${pct(baseline.matching)}`);
   if (round(report.suggestions.score) < round(baseline.suggestions - tolerance)) out.push(`suggestions ${pct(report.suggestions.score)} is below the baseline ${pct(baseline.suggestions)}`);
+  if (baseline.intents !== undefined && report.intents && round(report.intents.score) < round(baseline.intents - tolerance)) out.push(`intents ${pct(report.intents.score)} is below the baseline ${pct(baseline.intents)}`);
   return out;
 }
 
@@ -118,6 +148,8 @@ export function formatReport(r: EvalReport): string {
   lines.push(`Matching     ${pct(r.matching.score)}  (${r.matching.passed}/${r.matching.total} queries)`);
   for (const [tag, b] of Object.entries(r.matching.byTag).sort()) lines.push(`  ${tag.padEnd(12)} ${b.passed}/${b.total}`);
   lines.push(`Suggestions  ${pct(r.suggestions.score)}  (${r.suggestions.passed}/${r.suggestions.total} trails fully right, ${pct(r.suggestions.hitRate)} with at least one)`);
+  if (r.suggestions.withoutIntents !== undefined) lines.push(`  without intents ${pct(r.suggestions.withoutIntents)}`);
+  if (r.intents) lines.push(`Intents      ${pct(r.intents.score)}  (${r.intents.passed}/${r.intents.total} trails read as expected)`);
   if (r.matching.failures.length) {
     lines.push("", "Query failures:");
     for (const f of r.matching.failures) lines.push(`  "${f.case.query}": expected ${f.case.expect ?? "none"}${f.case.intent ? ` (${f.case.intent})` : ""}, got ${f.got ?? "none"} (${f.intent})`);
@@ -125,6 +157,10 @@ export function formatReport(r: EvalReport): string {
   if (r.suggestions.failures.length) {
     lines.push("", "Trail failures:");
     for (const f of r.suggestions.failures) lines.push(`  ${f.case.name ?? f.case.trail.join(" > ")}: missing ${f.missing.join(", ")}; top was ${f.got.join(", ") || "nothing"}`);
+  }
+  if (r.intents?.failures.length) {
+    lines.push("", "Intent failures:");
+    for (const f of r.intents.failures) lines.push(`  ${f.case.name ?? f.case.trail.join(" > ")}: expected ${f.case.intent ?? "browsing"}, read as ${f.got ?? "browsing"} (${pct(f.confidence)})`);
   }
   return lines.join("\n");
 }

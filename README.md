@@ -175,7 +175,8 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | --- | --- |
 | `createPubba(dataset, config?)` | Builds the graph once; returns the object below |
 | `pubba.related(id, { kinds?, limit?, destinationsOnly?, accept? })` | Neighbours, strongest first, each `{ entity, weight, link, reason, text }` |
-| `pubba.next(trail, { limit?, exclude?, accept? })` | Predictions `{ entity, score, reason, text }` |
+| `pubba.next(trail, { limit?, exclude?, accept?, intent? })` | Predictions `{ entity, score, reason, text }`, leaning towards the visitor's likely intent when intents are configured |
+| `pubba.intent(trail)` | Why the visit is likely happening: `{ likely, confidence, scores, evidence }` ([intent profiles](#intent-profiles)) |
 | `pubba.autocomplete(typed, trail?, { limit?, accept? })` | Type-ahead suggestions |
 | `pubba.search(query, { limit?, types? })` | Every entity a query could mean, best first |
 | `pubba.match(query)` | `{ intent: "entity" \| "similar" \| "none", entity, match, similar }` |
@@ -188,8 +189,8 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
 | `pubba.graph.unlinked` | Entities with no links: never suggested, but `match` and `search` still find them |
-| `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `APP_CATEGORY`, `skillWeight`, `callName` |
-| `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
+| `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `PORTFOLIO_INTENTS`, `APP_CATEGORY`, `skillWeight`, `callName` |
+| `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `evaluateIntents`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
 | `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt` |
 
 ### Matching options (`config.match`)
@@ -306,7 +307,7 @@ See [packages/python](packages/python/README.md).
 ### Kotlin and Java (Android, JVM)
 
 ```kotlin
-implementation("com.tharinduathapaththu:pubba:0.5.0")
+implementation("com.tharinduathapaththu:pubba:0.9.0")
 ```
 
 ```kotlin
@@ -388,6 +389,63 @@ npx pubba mcp pubba.bundle.json
   directly. Add it to an MCP client as the command `npx pubba mcp <bundle>`.
 - In code: `serve`, `serveMcp`, `handleMcp`, `answer` and `connection` from `pubba/serve`.
 
+## Intent profiles
+
+`next` treats every visitor alike unless the site says why people come. A
+recruiter hiring for mobile who opens two iOS apps and a role should be led to
+the other shipped apps; a web client who opens two web builds, to the web work.
+Intent profiles describe those reasons in config, and pubba reads the likely
+one from the trail alone:
+
+```jsonc
+"intents": {
+  "mobile-hiring": {
+    "label": "Hiring for mobile",
+    // What a step says about it: the entity itself, its type, and (at half
+    // strength, through its strongest link) its neighbours and link kinds.
+    "signals": { "entities": { "area:mobile": 2, "tech:SwiftUI": 1 }, "types": { "role": 0.8 }, "kinds": { "shipped-in": 0.4 } },
+    // What to lean towards once it's likely: multipliers, clamped to 0.5–2.
+    "boost": { "types": { "project": 1.3, "role": 1.2, "tech": 0.8 }, "kinds": { "made-at": 1.2 } }
+  }
+},
+"intent": { "minConfidence": 0.5, "minSteps": 2 }
+```
+
+```ts
+pubba.intent(["project:kiri-wallet", "role:0"]);
+// With the portfolio preset's intents, on the example portfolio:
+// { likely: "mobile-hiring", confidence: 0.61,
+//   scores: { "mobile-hiring": 0.61, "web-client": 0.02, collaborator: 0, browsing: 0.37 },
+//   evidence: [{ step: "role:0", weight: 1.3 }, { step: "project:kiri-wallet", via: "area:mobile", weight: 0.36 }] }
+
+pubba.next(trail);                    // leans towards the likely intent (the default, "auto")
+pubba.next(trail, { intent: null });  // as if no intents were configured
+pubba.next(trail, { intent: "web-client" });
+pubba.related(id, { intent: "web-client" });
+```
+
+- **Cautious by design.** A fixed "browsing" share means a short or mixed trail
+  stays browsing and nothing is boosted. An intent needs at least half the
+  share and two real steps (both configurable).
+- **It reorders, never hides.** Boosts are clamped to 0.5–2x, and `next` still
+  mixes types. A suggestion the intent moved carries `reason.intent = { id, boost }`.
+- **Never said unless the site opts in.** Wording stays the same unless the
+  site writes an `intent.<id>` (or `intent.<id>.<type>`) template, which can use
+  `{intent}` for the intent's label.
+- **Private.** The intent is worked out from the trail each time, in the
+  visitor's browser or app; pubba never stores or sends it. A `suggested` event
+  names the intent that was applied, nothing more.
+- **Measured.** A trail case can say which intent it should read as
+  (`"intent": "mobile-hiring"`, or `null` for browsing); the eval report adds
+  intent accuracy and the suggestion score with intents turned off, so a site
+  can see whether they help. Lint flags intents that can never be read and
+  intents too alike to tell apart.
+
+The portfolio preset ships three as a worked example (`PORTFOLIO_INTENTS`:
+hiring for mobile, a web build, the creative work), off unless
+`presetOptions: { "intents": true }`. Every runtime reads intents from the
+bundle and gives the same answers.
+
 ## Measurement events
 
 pubba can tell a site how its guide is used, without tracking anyone. It only
@@ -403,7 +461,7 @@ const visit: PubbaEvent[] = [];
 events.on((e) => visit.push(e)); // or forward to the site's own anonymous log
 
 const pubba = createPubba(data, config, { events });
-pubba.next(trail);                        // emits { type: "suggested", source: "next", ids, reasonKinds }
+pubba.next(trail);                        // emits { type: "suggested", source: "next", ids, reasonKinds, intent? }
 pubba.match("anything like Kiri Wallet?"); // emits { type: "matched", intent: "similar", entityType: "project", by: "name" }
 pubba.track.guideOpened();
 pubba.track.guidedTo("project:kiri-wallet", "chip"); // unknown ids are dropped
@@ -429,7 +487,8 @@ it. Three parts:
   phrasing, and the trails a person would expect.
 - **Lint** (`pubba lint`): content problems that cost accuracy, caught before a
   visitor does. Two items sharing a name fail the build; heavy "core" weights,
-  shared first words and dead ends are warnings.
+  shared first words, dead ends, intents that can't be read and intents too
+  alike to tell apart are warnings.
 
 ```bash
 npx pubba lint pubba.json
@@ -529,7 +588,7 @@ portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`;
 0.5.0 the Kotlin runtime and an Android sample; 0.6.0 the Swift runtime and an
 iOS sample; 0.7.0 the Dart runtime and a Flutter sample; 0.8.0 the PHP runtime
-and a WordPress plugin. C# comes later.
+and a WordPress plugin; 0.9.0 intent profiles in every runtime at once. C# comes later.
 
 **v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 

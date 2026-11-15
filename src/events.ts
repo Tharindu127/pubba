@@ -16,7 +16,7 @@ export type PubbaEvent =
   /** The site's guide (chat, panel, robot) was opened. */
   | { type: "guide-opened" }
   /** pubba suggested these entities (from `next` or `related`). */
-  | { type: "suggested"; source: "next" | "related"; ids: string[]; reasonKinds: string[] }
+  | { type: "suggested"; source: "next" | "related"; ids: string[]; reasonKinds: string[]; intent?: string }
   /** A typed query resolved: to what kind of thing, never what was asked. */
   | { type: "matched"; intent: MatchResult["intent"]; entityType?: string; by?: NonNullable<Reason["by"]> }
   /** The visitor followed the guide to an entity. */

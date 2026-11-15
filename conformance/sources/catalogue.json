@@ -181,6 +181,71 @@
         "shop": "product",
         "brands": "brand"
       }
+    },
+    "intents": {
+      "kids-room": {
+        "label": "Furnishing a kids' room",
+        "signals": {
+          "entities": {
+            "category:kids": 1,
+            "topic:kids": 0.8,
+            "brand:little": 0.6,
+            "material:pine": 0.3
+          },
+          "kinds": {
+            "in-category": 0.2
+          }
+        },
+        "boost": {
+          "entities": {
+            "category:kids": 1.5,
+            "brand:little": 1.3,
+            "material:glue": 0.3
+          },
+          "types": {
+            "product": 1.2,
+            "material": 0.5
+          },
+          "kinds": {
+            "goes-with": 1.4,
+            "paired": 1.2
+          }
+        }
+      },
+      "home-office": {
+        "label": "Setting up a home office",
+        "signals": {
+          "entities": {
+            "category:office": 1,
+            "product:oak-desk": 0.7,
+            "product:oak-desk-xl": 0.7,
+            "product:brass-lamp": 0.4
+          }
+        },
+        "boost": {
+          "entities": {
+            "category:office": 1.6,
+            "category:lighting": 1.3,
+            "product:oak-chair": 2.5
+          },
+          "types": {
+            "brand": 0.9
+          }
+        }
+      },
+      "browsing": {
+        "label": "reserved, ignored",
+        "signals": {
+          "types": {
+            "product": 5
+          }
+        }
+      }
+    },
+    "intent": {
+      "minConfidence": 0.4,
+      "minSteps": 1,
+      "neighbours": 0.75
     }
   },
   "entities": [

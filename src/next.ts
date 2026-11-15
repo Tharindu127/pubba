@@ -1,6 +1,7 @@
 import { degree, isDestination, neighbours, otherEnd } from "./graph.ts";
 import { normalize } from "./text.ts";
 import { reasonFromLink, renderReason } from "./reasons.ts";
+import { intentBoost, resolveIntent, type IntentOption } from "./intent.ts";
 import type { Entity, Graph, GraphLink, Reason, Related, Suggestion, Template } from "./types.ts";
 
 /*
@@ -75,37 +76,62 @@ export interface NextOptions {
   exclude?: string[];
   accept?: (e: Entity) => boolean;
   templates?: Record<string, Template>;
+  /** Lean towards the visitor's likely intent: worked out from the trail (`"auto"`, the default when intents are configured), a named one, or `null` for none. */
+  intent?: IntentOption;
 }
 
-/**
- * The next things to suggest after this trail: unseen, worth going to, and
- * mixed (never all of one type when there's a choice).
- */
-export function predictNext(g: Graph, trail: string[], { limit = 3, exclude = [], accept, templates }: NextOptions = {}): Suggestion[] {
-  const { score, why, seeds, sectionOnly } = spread(g, trail);
-  const skip = new Set([...seeds.keys(), ...exclude]);
-  const ranked = [...score.entries()]
-    .map(([id, s]) => ({ entity: g.entities.get(id)!, s, w: why.get(id) }))
-    .filter((x) => x.entity && (x.w || sectionOnly.has(x.entity.id)) && isDestination(g, x.entity) && !skip.has(x.entity.id) && (!accept || accept(x.entity)))
-    .sort((a, b) => b.s - a.s);
+interface Candidate {
+  entity: Entity;
+  s: number;
+  w: ReturnType<typeof spread>["why"] extends Map<string, infer W> ? W | undefined : never;
+}
 
-  // Mixed when there's a choice, filled up when there isn't.
-  const out: typeof ranked = [];
+/** Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't. */
+function mix(ranked: Candidate[], limit: number): Candidate[] {
+  const sorted = [...ranked].sort((a, b) => b.s - a.s);
+  const out: Candidate[] = [];
   const perType = new Map<string, number>();
   const cap = Math.max(1, limit - 1);
-  for (const r of ranked) {
+  for (const r of sorted) {
     if (out.length === limit) break;
     if ((perType.get(r.entity.type) ?? 0) >= cap) continue;
     perType.set(r.entity.type, (perType.get(r.entity.type) ?? 0) + 1);
     out.push(r);
   }
-  for (const r of ranked) if (out.length < limit && !out.includes(r)) out.push(r);
-  return out
-    .sort((a, b) => b.s - a.s)
-    .map((r) => {
-      const reason: Reason = r.w ? reasonFromLink(r.w.link, r.entity.id, r.w.seed) : { kind: "section" };
-      return { entity: r.entity, score: r.s, reason, text: renderReason(g, reason, r.entity, templates) };
+  for (const r of sorted) if (out.length < limit && !out.includes(r)) out.push(r);
+  return out.sort((a, b) => b.s - a.s);
+}
+
+/**
+ * The next things to suggest after this trail: unseen, worth going to, and
+ * mixed. With a likely intent, each score is multiplied by the intent's boost
+ * first; a suggestion the boost moved says so in `reason.intent`.
+ */
+export function predictNext(g: Graph, trail: string[], { limit = 3, exclude = [], accept, templates, intent: option }: NextOptions = {}): Suggestion[] {
+  const { score, why, seeds, sectionOnly } = spread(g, trail);
+  const skip = new Set([...seeds.keys(), ...exclude]);
+  const candidates: Candidate[] = [...score.entries()]
+    .map(([id, s]) => ({ entity: g.entities.get(id)!, s, w: why.get(id) }))
+    .filter((x) => x.entity && (x.w || sectionOnly.has(x.entity.id)) && isDestination(g, x.entity) && !skip.has(x.entity.id) && (!accept || accept(x.entity)));
+  const intent = resolveIntent(g, trail, option);
+  const plain = mix(candidates, limit);
+  const boosts = new Map<Candidate, number>();
+  let chosen = plain;
+  if (intent !== null) {
+    const boosted = candidates.map((c) => {
+      const b = intentBoost(g, intent, c.entity, c.w?.link);
+      const x: Candidate = { ...c, s: c.s * b };
+      boosts.set(x, b);
+      return x;
     });
+    chosen = mix(boosted, limit);
+  }
+  return chosen.map((r, i) => {
+    const reason: Reason = r.w ? reasonFromLink(r.w.link, r.entity.id, r.w.seed) : { kind: "section" };
+    const b = boosts.get(r);
+    if (intent !== null && b !== undefined && b !== 1 && plain.findIndex((p) => p.entity === r.entity) !== i) reason.intent = { id: intent, boost: b };
+    return { entity: r.entity, score: r.s, reason, text: renderReason(g, reason, r.entity, templates) };
+  });
 }
 
 export interface AutocompleteOptions {
@@ -147,17 +173,26 @@ export interface RelatedOptions {
   destinationsOnly?: boolean;
   accept?: (e: Entity) => boolean;
   templates?: Record<string, Template>;
+  /** Lean towards a named intent (there's no trail here to work one out). Default none. */
+  intent?: string | null;
 }
 
-/** What is related to one entity, strongest link first, each with why. */
-export function related(g: Graph, id: string, { kinds, limit = Infinity, destinationsOnly = true, accept, templates }: RelatedOptions = {}): Related[] {
+/**
+ * What is related to one entity, strongest link first, each with why. With an
+ * intent, links are ranked by weight times the intent's boost; `weight` stays
+ * the link's own.
+ */
+export function related(g: Graph, id: string, { kinds, limit = Infinity, destinationsOnly = true, accept, templates, intent: option = null }: RelatedOptions = {}): Related[] {
+  const intent = option === "auto" ? null : resolveIntent(g, [], option);
+  const pairs = neighbours(g, id, kinds).filter(({ entity }) => (!destinationsOnly || isDestination(g, entity)) && (!accept || accept(entity)));
   // Equal weights: the kind that pulls harder first.
-  return neighbours(g, id, kinds)
-    .sort((a, b) => b.link.weight - a.link.weight || pullOf(g, b.link.kind) - pullOf(g, a.link.kind))
-    .filter(({ entity }) => (!destinationsOnly || isDestination(g, entity)) && (!accept || accept(entity)))
-    .slice(0, limit)
-    .map(({ entity, link }) => {
-      const reason = reasonFromLink(link, entity.id);
-      return { entity, link, weight: link.weight, reason, text: renderReason(g, reason, entity, templates) };
-    });
+  const plain = [...pairs].sort((a, b) => b.link.weight - a.link.weight || pullOf(g, b.link.kind) - pullOf(g, a.link.kind)).slice(0, limit);
+  const boost = new Map(pairs.map((p) => [p, intent === null ? 1 : intentBoost(g, intent, p.entity, p.link)]));
+  const chosen = intent === null ? plain : [...pairs].sort((a, b) => b.link.weight * boost.get(b)! - a.link.weight * boost.get(a)! || pullOf(g, b.link.kind) - pullOf(g, a.link.kind)).slice(0, limit);
+  return chosen.map((p, i) => {
+    const reason = reasonFromLink(p.link, p.entity.id);
+    const b = boost.get(p)!;
+    if (intent !== null && b !== 1 && plain.indexOf(p) !== i) reason.intent = { id: intent, boost: b };
+    return { entity: p.entity, link: p.link, weight: p.link.weight, reason, text: renderReason(g, reason, p.entity, templates) };
+  });
 }

@@ -38,7 +38,43 @@ export interface PortfolioOptions {
    * and measurably more accurate).
    */
   legacyMatching?: boolean;
+  /** Lean suggestions towards why a visitor seems to be here ({@link PORTFOLIO_INTENTS}). Default false. */
+  intents?: boolean;
 }
+
+/**
+ * Three reasons people visit a portfolio, as intent profiles: hiring for mobile,
+ * a web build, and collaborating on the creative and founded work. A worked
+ * example to adapt (a site's own area and skill ids make them sharper); off
+ * unless `intents: true` is passed.
+ */
+export const PORTFOLIO_INTENTS: NonNullable<PubbaConfig["intents"]> = {
+  "mobile-hiring": {
+    label: "Hiring for mobile",
+    signals: {
+      entities: {
+        "area:mobile": 2, "area:ios": 2, "area:android": 2,
+        "tech:Swift": 1, "tech:SwiftUI": 1, "tech:Kotlin": 1, "tech:Jetpack Compose": 1, "tech:Flutter": 1, "tech:React Native": 1, "tech:Dart": 0.6,
+      },
+      types: { role: 0.8 },
+      kinds: { "shipped-in": 0.4 },
+    },
+    boost: { types: { project: 1.3, role: 1.2, tech: 0.8, game: 0.7, creative: 0.7 }, kinds: { "made-at": 1.2, "shipped-in": 1.1 } },
+  },
+  "web-client": {
+    label: "Looking for a web build",
+    signals: {
+      entities: { "area:web": 2, "area:website": 2, "tech:React": 1, "tech:Next.js": 1, "tech:Vue": 1, "tech:Angular": 1, "tech:Node.js": 0.6, "tech:TypeScript": 0.6 },
+      kinds: { "built-with": 0.2 },
+    },
+    boost: { types: { project: 1.3, role: 1.1, tech: 0.85, game: 0.7, creative: 0.7 }, kinds: { "same-stack": 1.2 } },
+  },
+  collaborator: {
+    label: "Here for the creative work",
+    signals: { entities: { "area:founded": 1.5 }, types: { game: 1.2, creative: 1.2 }, kinds: { founded: 0.6 } },
+    boost: { types: { game: 1.4, creative: 1.4, project: 1.1, role: 0.6, tech: 0.85, market: 0.8 }, kinds: { founded: 1.3, "same-series": 1.2 } },
+  },
+};
 
 /** How much a skill says by its category: languages and frameworks define a stack, tools are on everything. */
 export const SKILL_WEIGHT: Record<string, number> = { languages: 1, frameworks: 1, platforms: 0.7, design: 0.4, tools: 0.4 };
@@ -109,7 +145,7 @@ export function portfolioTemplates(pronoun: Pronoun = "they"): NonNullable<Pubba
 }
 
 /** The whole portfolio config. Layer site changes over it with `mergeConfig`. */
-export function portfolioConfig({ pronoun = "they", owner, legacyMatching = false }: PortfolioOptions = {}): PubbaConfig {
+export function portfolioConfig({ pronoun = "they", owner, legacyMatching = false, intents = false }: PortfolioOptions = {}): PubbaConfig {
   const item = { tier: 2, minLength: 3, minWordsLength: 4 };
   return {
     types: {
@@ -157,6 +193,7 @@ export function portfolioConfig({ pronoun = "they", owner, legacyMatching = fals
       ...(legacyMatching ? {} : { typoMinLength: 5, distinctWords: true, partialWords: true, precise: true, notDistinct: Object.values(KIND_WORD) }),
     },
     templates: portfolioTemplates(pronoun),
+    ...(intents ? { intents: PORTFOLIO_INTENTS } : {}),
   };
 }
 

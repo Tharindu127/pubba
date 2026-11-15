@@ -3,12 +3,15 @@ import { graphFromBundle } from "./bundle.ts";
 import { autocomplete, predictNext, related, type AutocompleteOptions, type NextOptions, type RelatedOptions } from "./next.ts";
 import { match, search, type MatchOptions, type SearchOptions } from "./match.ts";
 import { renderReason } from "./reasons.ts";
+import { readIntent, resolveIntent, type IntentReading } from "./intent.ts";
 import { GUIDE_VIAS, type Events, type GuideVia } from "./events.ts";
 import type { Dataset, Entity, Graph, MatchResult, Match, PubbaConfig, Reason, Related, Suggestion, Template } from "./types.ts";
 
 export * from "./types.ts";
 export { buildGraph, assembleGraph, neighbours, degree, isDestination } from "./graph.ts";
 export { predictNext, autocomplete, related, spread } from "./next.ts";
+export { readIntent, resolveIntent, intentBoost, intentsOf } from "./intent.ts";
+export type { IntentReading, IntentEvidence, IntentOption } from "./intent.ts";
 export type { NextOptions, AutocompleteOptions, RelatedOptions } from "./next.ts";
 export { match, search, DEFAULT_STOP_WORDS, DEFAULT_SIMILAR } from "./match.ts";
 export type { MatchOptions, SearchOptions } from "./match.ts";
@@ -46,6 +49,8 @@ export function mergeConfig(...configs: (PubbaConfig | undefined)[]): PubbaConfi
     if (c.next) out.next = { ...out.next, ...c.next, ...(c.next.sections ? { sections: { ...out.next?.sections, ...c.next.sections } } : {}) };
     if (c.match) out.match = { ...out.match, ...c.match };
     if (c.templates) out.templates = { ...out.templates, ...c.templates };
+    if (c.intents) out.intents = { ...out.intents, ...c.intents };
+    if (c.intent) out.intent = { ...out.intent, ...c.intent };
   }
   return out;
 }
@@ -65,8 +70,10 @@ export interface Pubba {
   get(id: string): Entity | undefined;
   /** What is related to one entity, strongest first, each with why. */
   related(id: string, options?: RelatedOptions): Related[];
-  /** The likeliest next things after a trail. */
+  /** The likeliest next things after a trail, leaning towards the visitor's likely intent when intents are configured. */
   next(trail: string[], options?: NextOptions): Suggestion[];
+  /** Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent. */
+  intent(trail: string[]): IntentReading;
   /** Type-ahead, nearest the trail first. */
   autocomplete(typed: string, trail?: string[], options?: AutocompleteOptions): Suggestion[];
   /** Every entity a query could mean, best first. */
@@ -97,17 +104,24 @@ export function loadBundle(bundle: unknown, options: CreateOptions = {}): Pubba 
 /** Everything asked of a graph, however it was made. */
 export function pubbaFor(graph: Graph, { events }: CreateOptions = {}): Pubba {
   const find = (id: string) => graph.entities.get(id) ?? graph.unlinked.get(id);
-  const suggested = <T extends { entity: Entity; reason: Reason }>(source: "next" | "related", out: T[]): T[] => {
+  const suggested = <T extends { entity: Entity; reason: Reason }>(source: "next" | "related", out: T[], intent: string | null): T[] => {
     if (events && out.length) {
-      events.emit({ type: "suggested", source, ids: out.map((x) => x.entity.id), reasonKinds: [...new Set(out.map((x) => x.reason.kind))] });
+      events.emit({ type: "suggested", source, ids: out.map((x) => x.entity.id), reasonKinds: [...new Set(out.map((x) => x.reason.kind))], ...(intent !== null ? { intent } : {}) });
     }
     return out;
   };
   return {
     graph,
     get: (id) => graph.entities.get(id),
-    related: (id, o) => suggested("related", related(graph, id, o)),
-    next: (trail, o) => suggested("next", predictNext(graph, trail, o)),
+    related: (id, o) => {
+      const intent = o?.intent === "auto" ? null : resolveIntent(graph, [], o?.intent ?? null);
+      return suggested("related", related(graph, id, { ...o, intent }), intent);
+    },
+    next: (trail, o) => {
+      const intent = resolveIntent(graph, trail, o?.intent);
+      return suggested("next", predictNext(graph, trail, { ...o, intent }), intent);
+    },
+    intent: (trail) => readIntent(graph, trail),
     autocomplete: (typed, trail = [], o) => autocomplete(graph, typed, trail, o),
     search: (q, o) => search(graph, q, o),
     match: (q, o) => {

@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.9.0 (15 Nov 2026)
+
+- **Intent profiles, in every runtime at once** (TypeScript, Python, Kotlin,
+  Swift, Dart, PHP). A site describes why people visit in `config.intents`
+  (`signals` that point to each intent, `boost` for what to show more of), and
+  `pubba.intent(trail)` reads the likely one from the trail alone:
+  `{ likely, confidence, scores, evidence }`. A fixed "browsing" share keeps
+  short or mixed trails from counting; an intent needs half the share and two
+  real steps (`config.intent`).
+- `next` leans towards the likely intent by default (`intent: "auto"`; `null`
+  turns it off, or name one); `related` takes a named intent. Boosts are
+  clamped to 0.5–2x and `next` still mixes types, so an intent reorders but
+  never hides. A suggestion the intent moved carries `reason.intent = { id, boost }`;
+  wording only changes when a site writes an `intent.<id>` template (with an
+  `{intent}` token for the label). `suggested` events name the intent applied.
+  Without `intents` configured, every answer is exactly as before.
+- Bundles carry `intents` and `intent`; the format stays 1 (older runtimes
+  ignore them and answer without intents).
+- **The spec** defines intents exactly (SPEC 5.7, 5.8), and the conformance
+  suite grows to 5,182 cases (intent readings, boosted `next` and `related`,
+  intent sentences, guided visits that settle into an intent). Every runtime
+  passes it; mutation checks confirm the suite catches changes to the new code.
+- **Eval:** a trail case can say which intent it should read as (`null` for
+  browsing); the report adds intent accuracy and the suggestion score with
+  intents off. **Lint:** intents that can never be read, and intents too alike
+  to tell apart.
+- **Portfolio preset:** `PORTFOLIO_INTENTS` (hiring for mobile, a web build,
+  the creative work) as a worked example, off unless `intents: true`.
+- `pubba serve`: `/intent?trail=` and an `intent` parameter on `/next`.
+- **The skill** covers defining and measuring intents.
+- Every package is 0.9.0: npm, PyPI, Maven Central, the Swift Package, pub.dev
+  and Packagist.
+
 ## 0.8.0 (15 Nov 2026)
 
 - **PHP runtime** (`packages/php`, Packagist `tharindu127/pubba`): loads a

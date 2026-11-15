@@ -1,3 +1,4 @@
+import 'intent.dart';
 import 'model.dart';
 import 'text.dart';
 
@@ -56,7 +57,9 @@ String? _pick(Object t, Reason reason, Entity item, Entity? other) {
 String renderReason(Graph g, Reason reason, Entity item, [Map<String, Object>? templates]) {
   final every = <String, Object?>{...defaultTemplates, ...obj(g.config['templates']), ...?templates};
   final other = (reason.to == null || reason.to!.isEmpty) ? null : g.entities[reason.to!];
-  final t = every['${reason.kind}.${item.type}'] ?? every[reason.kind];
+  // A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+  final it = reason.intent == null ? null : (every['intent.${reason.intent!.id}.${item.type}'] ?? every['intent.${reason.intent!.id}']);
+  final t = (it != null && truthy(it)) ? it : (every['${reason.kind}.${item.type}'] ?? every[reason.kind]);
   var text = (t != null && truthy(t)) ? _pick(t, reason, item, other) : null;
   text ??= other != null
       ? (reason.direction == 'in' ? '{other}: {kind} {item}[ ({via})].' : '{item}: {kind} {other}[ ({via})].')
@@ -70,5 +73,6 @@ String renderReason(Graph g, Reason reason, Entity item, [Map<String, Object>? t
     'via': (reason.via ?? const []).take(3).join(', '),
     'kind': g.kindLabel(reason.kind),
     'name': reason.name ?? '',
+    'intent': reason.intent == null ? '' : intentLabel(g, reason.intent!.id),
   });
 }

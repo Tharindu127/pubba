@@ -64,7 +64,7 @@ const num = (s: string | null | undefined, fallback: number) => {
   return Number.isFinite(n) && n > 0 ? Math.min(Math.floor(n), 50) : fallback;
 };
 
-export const OPERATIONS = ["match", "search", "next", "related", "autocomplete", "ask", "explain"];
+export const OPERATIONS = ["match", "search", "next", "related", "autocomplete", "ask", "explain", "intent"];
 
 /** The answers every transport shares, by operation name. Unknown operations throw. */
 export function answer(pubba: Pubba, op: string, p: Record<string, unknown>): unknown {
@@ -85,7 +85,12 @@ export function answer(pubba: Pubba, op: string, p: Record<string, unknown>): un
     case "search":
       return pubba.search(str("query").slice(0, 300), { limit: lim(10), ...(arr("types").length ? { types: arr("types") } : {}) }).map((m) => ({ ...entityOut(pubba, m.entity.id), score: m.score, by: m.reason.by, text: m.text }));
     case "next":
-      return pubba.next(arr("trail").slice(-24), { limit: lim(3) }).map((s) => ({ ...entityOut(pubba, s.entity.id), score: s.score, reason: s.reason, text: s.text }));
+      // intent: an id, "none" to turn it off, or missing to work it out from the trail.
+      return pubba
+        .next(arr("trail").slice(-24), { limit: lim(3), ...(str("intent") ? { intent: str("intent") === "none" ? null : str("intent") } : {}) })
+        .map((s) => ({ ...entityOut(pubba, s.entity.id), score: s.score, reason: s.reason, text: s.text }));
+    case "intent":
+      return pubba.intent(arr("trail").slice(-24));
     case "related":
       return pubba.related(str("id"), { limit: lim(10), ...(arr("kinds").length ? { kinds: arr("kinds") } : {}) }).map((r) => ({ ...entityOut(pubba, r.entity.id), weight: r.weight, reason: r.reason, text: r.text }));
     case "autocomplete":
@@ -113,8 +118,8 @@ export interface ServeOptions {
 }
 
 /**
- * GET /match?query=… /search?query=…&limit=&types= /next?trail=a,b&limit= /related?id=…&kinds=&limit=
- * /autocomplete?query=…&trail= /ask?query=…&trail= /explain?from=…&to= /health
+ * GET /match?query=… /search?query=…&limit=&types= /next?trail=a,b&limit=&intent= /related?id=…&kinds=&limit=
+ * /autocomplete?query=…&trail= /ask?query=…&trail= /explain?from=…&to= /intent?trail=a,b /health
  */
 export function serve(pubba: Pubba, { port = 8787, host = "127.0.0.1", cors }: ServeOptions = {}): Server {
   const reply = (res: ServerResponse, status: number, body: unknown) => {

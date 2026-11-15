@@ -331,5 +331,98 @@
         "description": "Short clips of synth music made in Synthpad."
       }
     ]
+  },
+  "config": {
+    "intents": {
+      "mobile-hiring": {
+        "label": "Hiring for mobile",
+        "signals": {
+          "entities": {
+            "area:mobile": 1,
+            "tech:Flutter": 0.8,
+            "tech:SwiftUI": 0.8,
+            "tech:Swift": 0.6,
+            "tech:Dart": 0.5
+          },
+          "types": {
+            "role": 0.6
+          },
+          "kinds": {
+            "shipped-in": 0.4
+          }
+        },
+        "boost": {
+          "types": {
+            "project": 1.3,
+            "role": 1.2,
+            "game": 0.7
+          },
+          "entities": {
+            "area:mobile": 1.4,
+            "tech:Flutter": 1.2
+          },
+          "kinds": {
+            "made-at": 1.2,
+            "worked-as": 1.1
+          }
+        }
+      },
+      "web-client": {
+        "label": "Looking for a web build",
+        "signals": {
+          "entities": {
+            "area:web": 1,
+            "tech:React": 0.8,
+            "tech:Next.js": 0.8,
+            "tech:TypeScript": 0.5,
+            "tech:Node.js": 0.5
+          },
+          "kinds": {
+            "built-with": 0.2
+          }
+        },
+        "boost": {
+          "types": {
+            "project": 1.4,
+            "tech": 0.8
+          },
+          "entities": {
+            "area:web": 1.5,
+            "tech:React": 1.3
+          },
+          "kinds": {
+            "same-stack": 1.3
+          }
+        }
+      },
+      "creative": {
+        "label": "Here for the creative work",
+        "signals": {
+          "types": {
+            "creative": 1.5,
+            "game": 1.3
+          },
+          "entities": {
+            "tech:Web Audio": 0.7,
+            "topic:music": 0.6
+          }
+        },
+        "boost": {
+          "types": {
+            "creative": 1.6,
+            "game": 1.5,
+            "project": 0.6,
+            "role": 0.4
+          }
+        }
+      }
+    },
+    "intent": {
+      "minSteps": 2
+    },
+    "templates": {
+      "intent.mobile-hiring": "{item} is more of the mobile work ({intent}).",
+      "intent.creative.game": "{item}, another game."
+    }
   }
 }

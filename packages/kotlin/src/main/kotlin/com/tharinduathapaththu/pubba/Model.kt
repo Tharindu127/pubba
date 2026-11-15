@@ -43,6 +43,8 @@ public data class Reason @JvmOverloads constructor(
     val seed: String? = null,
     val by: String? = null,
     val name: String? = null,
+    /** Set when the visitor's likely intent moved this suggestion. */
+    val intent: ReasonIntent? = null,
 ) {
     /** The reason as plain JSON-shaped data, absent fields left out. */
     public fun toMap(): Map<String, Any> = buildMap {
@@ -53,6 +55,7 @@ public data class Reason @JvmOverloads constructor(
         seed?.let { put("seed", it) }
         by?.let { put("by", it) }
         name?.let { put("name", it) }
+        intent?.let { put("intent", mapOf("id" to it.id, "boost" to it.boost)) }
     }
 
     public companion object {
@@ -65,6 +68,7 @@ public data class Reason @JvmOverloads constructor(
             seed = m.str("seed"),
             by = m.str("by"),
             name = m.str("name"),
+            intent = m["intent"].asObj()?.let { i -> i.str("id")?.let { ReasonIntent(it, i.num("boost", 1.0)) } },
         )
     }
 }

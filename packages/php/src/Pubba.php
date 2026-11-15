@@ -9,7 +9,7 @@ use InvalidArgumentException;
 /** Answers from one graph: related items, what next, matching, sentences, measurement. */
 final class Pubba
 {
-    public const VERSION = '0.8.0';
+    public const VERSION = '0.9.0';
 
     private const DEFAULT_STOP_WORDS = ['the', 'app', 'and', 'for', 'web', 'application', 'mobile', 'portal', 'site', 'website'];
     private const DEFAULT_SIMILAR = '\b(like|similar|alike|same stack|related to|anything else)\b';
@@ -50,12 +50,16 @@ final class Pubba
      * @param list<string> $ids
      * @param list<string> $kinds
      */
-    private function suggested(string $source, array $ids, array $kinds): void
+    private function suggested(string $source, array $ids, array $kinds, ?string $intent): void
     {
         if ($this->events === null || $ids === []) {
             return;
         }
-        $this->events->emit(['type' => 'suggested', 'source' => $source, 'ids' => $ids, 'reasonKinds' => array_values(array_unique($kinds))]);
+        $event = ['type' => 'suggested', 'source' => $source, 'ids' => $ids, 'reasonKinds' => array_values(array_unique($kinds))];
+        if ($intent !== null) {
+            $event['intent'] = $intent;
+        }
+        $this->events->emit($event);
     }
 
     /** Compares numbers as JavaScript's `a - b` does (so -0 and 0 tie). */
@@ -295,30 +299,42 @@ final class Pubba
     }
 
     /**
-     * What is related to one entity, strongest link first, each with why.
+     * What is related to one entity, strongest link first, each with why. With a
+     * named intent, links rank by weight times its boost; `weight` stays the link's.
      *
      * @param list<string>|null $kinds
      * @param (callable(Entity): bool)|null $accept
      * @param array<string, mixed>|null $templates
      * @return list<Related>
      */
-    public function related(string $id, ?array $kinds = null, ?int $limit = null, bool $destinationsOnly = true, ?callable $accept = null, ?array $templates = null): array
+    public function related(string $id, ?array $kinds = null, ?int $limit = null, bool $destinationsOnly = true, ?callable $accept = null, ?array $templates = null, ?string $intent = null): array
     {
         $g = $this->graph;
-        $pairs = Text::stableSorted($this->neighbours($id, $kinds), static function (array $a, array $b) use ($g): int {
-            $w = self::cmp($b[1]->weight, $a[1]->weight);
-            return $w !== 0 ? $w : self::cmp($g->pull($b[1]->kind), $g->pull($a[1]->kind));
-        });
-        $pairs = array_values(array_filter($pairs, static fn (array $p) => (!$destinationsOnly || $g->isDestination($p[0])) && ($accept === null || $accept($p[0]))));
-        if ($limit !== null) {
-            $pairs = array_slice($pairs, 0, max(0, $limit));
+        $intent = $intent === 'auto' ? null : Intents::resolve($g, [], $intent);
+        $pairs = [];
+        foreach ($this->neighbours($id, $kinds) as [$e, $l]) {
+            if ((!$destinationsOnly || $g->isDestination($e)) && ($accept === null || $accept($e))) {
+                $pairs[] = [$e, $l, count($pairs), $intent === null ? 1.0 : Intents::boost($g, $intent, $e, $l)];
+            }
         }
+        $order = static function (bool $boosted) use ($pairs, $g, $limit): array {
+            $sorted = Text::stableSorted($pairs, static function (array $a, array $b) use ($g, $boosted): int {
+                $w = $boosted ? self::cmp($b[1]->weight * $b[3], $a[1]->weight * $a[3]) : self::cmp($b[1]->weight, $a[1]->weight);
+                return $w !== 0 ? $w : self::cmp($g->pull($b[1]->kind), $g->pull($a[1]->kind));
+            });
+            return $limit === null ? $sorted : array_slice($sorted, 0, max(0, $limit));
+        };
+        $plain = array_map(static fn (array $p) => $p[2], $order(false));
+        $chosen = $intent === null ? $order(false) : $order(true);
         $out = [];
-        foreach ($pairs as [$e, $l]) {
+        foreach ($chosen as $i => [$e, $l, $k, $b]) {
             $r = Reasons::fromLink($l, $e->id);
+            if ($intent !== null && $b != 1 && array_search($k, $plain, true) !== $i) {
+                $r = $r->withIntent(new ReasonIntent($intent, $b));
+            }
             $out[] = new Related($e, $l->weight, $l, $r, Reasons::render($g, $r, $e, $templates));
         }
-        $this->suggested('related', array_map(static fn (Related $x) => $x->entity->id, $out), array_map(static fn (Related $x) => $x->reason->kind, $out));
+        $this->suggested('related', array_map(static fn (Related $x) => $x->entity->id, $out), array_map(static fn (Related $x) => $x->reason->kind, $out), $intent);
         return $out;
     }
 
@@ -387,35 +403,24 @@ final class Pubba
     }
 
     /**
-     * The next things to suggest after this trail: unseen, worth going to, and mixed.
+     * Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent.
      *
      * @param list<string> $trail
-     * @param list<string> $exclude
-     * @param (callable(Entity): bool)|null $accept
-     * @param array<string, mixed>|null $templates
-     * @return list<Suggestion>
      */
-    public function next(array $trail, int $limit = 3, array $exclude = [], ?callable $accept = null, ?array $templates = null): array
+    public function intent(array $trail): IntentReading
     {
-        $g = $this->graph;
-        $sp = $this->spread($trail);
-        $skip = $sp->seeds;
-        foreach ($exclude as $x) {
-            $skip[$x] = true;
-        }
-        $ranked = [];
-        foreach ($sp->score as $id => $s) {
-            $id = (string) $id;
-            $e = $g->entities[$id] ?? null;
-            if ($e === null) {
-                continue;
-            }
-            if (!(isset($sp->why[$id]) || isset($sp->sectionOnly[$id])) || !$g->isDestination($e) || array_key_exists($id, $skip) || ($accept !== null && !$accept($e))) {
-                continue;
-            }
-            $ranked[] = [$e, $s, $sp->why[$id] ?? null];
-        }
-        $byScore = Text::stableSorted($ranked, static fn (array $a, array $b): int => self::cmp($b[1], $a[1]));
+        return Intents::read($this->graph, $trail);
+    }
+
+    /**
+     * Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't.
+     *
+     * @param list<array{Entity, float, ?Why, float}> $candidates
+     * @return list<array{Entity, float, ?Why, float}>
+     */
+    private static function mix(array $candidates, int $limit): array
+    {
+        $byScore = Text::stableSorted($candidates, static fn (array $a, array $b): int => self::cmp($b[1], $a[1]));
         $cap = max(1, $limit - 1);
         $taken = [];
         $perType = [];
@@ -434,13 +439,61 @@ final class Pubba
                 $taken[] = $i;
             }
         }
-        $chosen = Text::stableSorted(array_map(static fn (int $i) => $byScore[$i], $taken), static fn (array $a, array $b): int => self::cmp($b[1], $a[1]));
+        return Text::stableSorted(array_map(static fn (int $i) => $byScore[$i], $taken), static fn (array $a, array $b): int => self::cmp($b[1], $a[1]));
+    }
+
+    /**
+     * The next things to suggest after this trail: unseen, worth going to, and mixed.
+     * $intent: "auto" (the default) leans towards the visitor's likely intent when
+     * intents are configured; an id names one; null turns it off.
+     *
+     * @param list<string> $trail
+     * @param list<string> $exclude
+     * @param (callable(Entity): bool)|null $accept
+     * @param array<string, mixed>|null $templates
+     * @return list<Suggestion>
+     */
+    public function next(array $trail, int $limit = 3, array $exclude = [], ?callable $accept = null, ?array $templates = null, ?string $intent = 'auto'): array
+    {
+        $g = $this->graph;
+        $sp = $this->spread($trail);
+        $skip = $sp->seeds;
+        foreach ($exclude as $x) {
+            $skip[$x] = true;
+        }
+        $candidates = [];
+        foreach ($sp->score as $id => $s) {
+            $id = (string) $id;
+            $e = $g->entities[$id] ?? null;
+            if ($e === null) {
+                continue;
+            }
+            if (!(isset($sp->why[$id]) || isset($sp->sectionOnly[$id])) || !$g->isDestination($e) || array_key_exists($id, $skip) || ($accept !== null && !$accept($e))) {
+                continue;
+            }
+            $candidates[] = [$e, $s, $sp->why[$id] ?? null, 1.0];
+        }
+        $intent = Intents::resolve($g, $trail, $intent);
+        $plain = self::mix($candidates, $limit);
+        $chosen = $plain;
+        if ($intent !== null) {
+            $boosted = [];
+            foreach ($candidates as [$e, $s, $w]) {
+                $b = Intents::boost($g, $intent, $e, $w?->link);
+                $boosted[] = [$e, $s * $b, $w, $b];
+            }
+            $chosen = self::mix($boosted, $limit);
+        }
+        $plainIds = array_map(static fn (array $c) => $c[0]->id, $plain);
         $out = [];
-        foreach ($chosen as [$e, $s, $w]) {
+        foreach ($chosen as $i => [$e, $s, $w, $b]) {
             $reason = $w !== null ? Reasons::fromLink($w->link, $e->id, $w->seed) : new Reason('section');
+            if ($intent !== null && $b != 1 && array_search($e->id, $plainIds, true) !== $i) {
+                $reason = $reason->withIntent(new ReasonIntent($intent, $b));
+            }
             $out[] = new Suggestion($e, $s, $reason, Reasons::render($g, $reason, $e, $templates));
         }
-        $this->suggested('next', array_map(static fn (Suggestion $x) => $x->entity->id, $out), array_map(static fn (Suggestion $x) => $x->reason->kind, $out));
+        $this->suggested('next', array_map(static fn (Suggestion $x) => $x->entity->id, $out), array_map(static fn (Suggestion $x) => $x->reason->kind, $out), $intent);
         return $out;
     }
 

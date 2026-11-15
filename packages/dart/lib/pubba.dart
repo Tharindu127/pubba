@@ -8,6 +8,7 @@ library;
 
 export 'src/events.dart' show Events, PubbaEvent, Summary, Track, createEvents, guideVias, summarise;
 export 'src/guide.dart';
+export 'src/intent.dart' show IntentEvidence, IntentReading, intentBoost, intentsOf, readIntent, resolveIntent;
 export 'src/model.dart';
 export 'src/pubba.dart' show Pubba, Spread, Why, loadBundle;
 export 'src/reasons.dart' show defaultTemplates, reasonFromLink, renderReason;
@@ -15,4 +16,4 @@ export 'src/text.dart' show closeTo, containsName, editDistance, hasPhrase, norm
 export 'src/trail.dart';
 
 /// This runtime's version.
-const String version = '0.7.0';
+const String version = '0.9.0';

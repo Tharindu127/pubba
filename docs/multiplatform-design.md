@@ -1,6 +1,6 @@
 # pubba on every platform: design
 
-Status: **agreed 11 Nov 2026** (decisions in section 10). **0.3.0 built**: bundles, spec/SPEC.md, conformance/ and `createGuide`. **0.4.0 built**: the Python runtime (passes the suite 100%), `pubba serve` (HTTP) and `pubba mcp`. **0.5.0 built**: the Kotlin runtime (passes the suite 100%, usable from Java) and a Jetpack Compose sample app. **0.6.0 built**: the Swift runtime (passes the suite 100%, Swift 6 clean) and a SwiftUI sample app. **0.7.0 built**: the Dart runtime (passes the suite 100%, no dependencies) and a Flutter sample app. **0.8.0 built**: the PHP runtime (passes the suite 100%, PHP 8.1+) and a WordPress plugin sample. C# is deferred.
+Status: **agreed 11 Nov 2026** (decisions in section 10). **0.3.0 built**: bundles, spec/SPEC.md, conformance/ and `createGuide`. **0.4.0 built**: the Python runtime (passes the suite 100%), `pubba serve` (HTTP) and `pubba mcp`. **0.5.0 built**: the Kotlin runtime (passes the suite 100%, usable from Java) and a Jetpack Compose sample app. **0.6.0 built**: the Swift runtime (passes the suite 100%, Swift 6 clean) and a SwiftUI sample app. **0.7.0 built**: the Dart runtime (passes the suite 100%, no dependencies) and a Flutter sample app. **0.8.0 built**: the PHP runtime (passes the suite 100%, PHP 8.1+) and a WordPress plugin sample. C# is deferred. **0.9.0 built**: intent profiles in all six runtimes at once (5,182 conformance cases).
 
 Goal: any site or app, in any popular language or framework, can use the same
 pubba brain (related items with reasons, what-next from a trail, typo-tolerant
@@ -202,6 +202,7 @@ one pull request. Each package publishes to its own registry from CI.
 | 0.6.0 | Swift runtime + SwiftUI guide | Same, on iOS |
 | 0.7.0 | Dart runtime + Flutter guide | Same, on Flutter |
 | 0.8.0 | PHP runtime + WordPress guide | Same, on WordPress |
+| 0.9.0 | Intent profiles, every runtime at once | All runtimes pass the grown suite |
 | later | C# runtime + MAUI guide | Same, on .NET |
 | then | Intent profiles (all runtimes at once), the rest of the exports, AI adapters (v3) | |
 | 1.0.0 | After real use on at least three platforms | No format or API change needed |

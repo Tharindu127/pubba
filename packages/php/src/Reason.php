@@ -16,7 +16,14 @@ final class Reason
         public readonly ?string $seed = null,
         public readonly ?string $by = null,
         public readonly ?string $name = null,
+        public readonly ?ReasonIntent $intent = null,
     ) {
+    }
+
+    /** The same reason, marked as moved by an intent. */
+    public function withIntent(ReasonIntent $intent): self
+    {
+        return new self($this->kind, $this->to, $this->direction, $this->via, $this->seed, $this->by, $this->name, $intent);
     }
 
     /** @return array<string, mixed> The reason as JSON data, absent fields left out. */
@@ -30,6 +37,7 @@ final class Reason
             'seed' => $this->seed,
             'by' => $this->by,
             'name' => $this->name,
+            'intent' => $this->intent === null ? null : ['id' => $this->intent->id, 'boost' => $this->intent->boost],
         ], static fn ($v) => $v !== null);
     }
 
@@ -44,6 +52,9 @@ final class Reason
             Text::str($m['seed'] ?? null),
             Text::str($m['by'] ?? null),
             Text::str($m['name'] ?? null),
+            is_array($m['intent'] ?? null) && is_string($m['intent']['id'] ?? null)
+                ? new ReasonIntent($m['intent']['id'], Text::num($m['intent']['boost'] ?? null, 1))
+                : null,
         );
     }
 }

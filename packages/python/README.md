@@ -39,7 +39,8 @@ npx pubba compile pubba.json --out pubba.bundle.json
 | `load_bundle(json, events=None)` | A `Pubba` from a bundle (a JSON string, bytes or dict) |
 | `pubba.match(query)` | `MatchResult(intent, entity, match, similar, not_here)`; intent is `entity`, `similar` or `none` |
 | `pubba.search(query, limit=10, types=None)` | Every entity a query could mean, best first |
-| `pubba.next(trail, limit=3, exclude=(), accept=None)` | Predictions: `Suggestion(entity, score, reason, text)` |
+| `pubba.next(trail, limit=3, exclude=(), accept=None, intent="auto")` | Predictions: `Suggestion(entity, score, reason, text)`, leaning towards the likely intent (`intent=None` turns it off) |
+| `pubba.intent(trail)` | Intent profiles: `IntentReading(likely, confidence, scores, evidence)` |
 | `pubba.related(id, kinds=None, limit=None)` | Neighbours, strongest first: `Related(entity, weight, link, reason, text)` |
 | `pubba.autocomplete(typed, trail=(), limit=3)` | Type-ahead |
 | `pubba.explain(reason, item)` | A reason as a sentence |

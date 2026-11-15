@@ -109,9 +109,13 @@ enum Harness {
                 obj([("id", .string(m.entity.id)), ("score", n(m.score)), ("tier", n(Double(m.tier))), ("by", s(m.reason.by)), ("name", s(m.reason.name))])
             })
         case "next":
-            return .array(pubba.next(c["trail"]!.strings!, limit: Int(c["limit"]!.number!), exclude: c["exclude"]?.strings ?? []).map(scored))
+            // A missing intent is "auto"; null turns it off.
+            let intent: String? = c["intent"] == nil ? "auto" : c["intent"].str
+            return .array(pubba.next(c["trail"]!.strings!, limit: Int(c["limit"]!.number!), exclude: c["exclude"]?.strings ?? [], intent: intent).map(scored))
         case "related":
-            return .array(pubba.related(c["id"].str!, kinds: c["kinds"]?.strings, limit: c["limit"]?.number.map { Int($0) }).map(weighted))
+            return .array(pubba.related(c["id"].str!, kinds: c["kinds"]?.strings, limit: c["limit"]?.number.map { Int($0) }, intent: c["intent"].str).map(weighted))
+        case "intent":
+            return .object(pubba.intent(c["trail"]!.strings!).json)
         case "autocomplete":
             return .array(pubba.autocomplete(c["typed"].str!, trail: c["trail"]!.strings!, limit: Int(c["limit"]!.number!)).map { x in
                 obj([("id", .string(x.entity.id)), ("score", n(x.score)), ("by", s(x.reason.by))])

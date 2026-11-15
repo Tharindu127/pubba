@@ -94,7 +94,10 @@ public func renderReason(_ g: Graph, _ reason: Reason, _ item: Entity, templates
     for (k, v) in g.config["templates"].obj.pairs { every[k] = Template(v) }
     for (k, v) in templates ?? [:] { every[k] = v }
     let other = (reason.to?.isEmpty ?? true) ? nil : g.entities[reason.to!]
-    let t = every["\(reason.kind).\(item.type)"] ?? every[reason.kind]
+    // A suggestion the visitor's intent moved can say so, when the site wrote the words for it.
+    let it = reason.intent.flatMap { every["intent.\($0.id).\(item.type)"] ?? every["intent.\($0.id)"] }
+    let t: Template?
+    if let it = it, it.truthy { t = it } else { t = every["\(reason.kind).\(item.type)"] ?? every[reason.kind] }
     var text: String? = nil
     if let t = t, t.truthy { text = pick(t, reason, item, other) }
     if text == nil {
@@ -113,5 +116,6 @@ public func renderReason(_ g: Graph, _ reason: Reason, _ item: Entity, templates
         "via": (reason.via ?? []).prefix(3).joined(separator: ", "),
         "kind": g.kindLabel(reason.kind),
         "name": reason.name ?? "",
+        "intent": reason.intent.map { intentLabel(g, $0.id) } ?? "",
     ])
 }

@@ -89,8 +89,12 @@ object Harness {
         "search" -> pubba.search(c.str("query")!!, (c["limit"] as Number).toInt()).map { m ->
             mapOf("id" to m.entity.id, "score" to m.score, "tier" to m.tier, "by" to m.reason.by, "name" to m.reason.name)
         }
-        "next" -> pubba.next(c.strings("trail")!!, (c["limit"] as Number).toInt(), c.strings("exclude") ?: emptyList()).map(::scored)
-        "related" -> pubba.related(c.str("id")!!, c.strings("kinds"), (c["limit"] as? Number)?.toInt()).map(::weighted)
+        "next" -> pubba.next(
+            c.strings("trail")!!, (c["limit"] as Number).toInt(), c.strings("exclude") ?: emptyList(),
+            intent = if (c.containsKey("intent")) c.str("intent") else "auto",
+        ).map(::scored)
+        "related" -> pubba.related(c.str("id")!!, c.strings("kinds"), (c["limit"] as? Number)?.toInt(), intent = c.str("intent")).map(::weighted)
+        "intent" -> pubba.intent(c.strings("trail")!!).toMap()
         "autocomplete" -> pubba.autocomplete(c.str("typed")!!, c.strings("trail")!!, (c["limit"] as Number).toInt()).map { s ->
             mapOf("id" to s.entity.id, "score" to s.score, "by" to s.reason.by)
         }

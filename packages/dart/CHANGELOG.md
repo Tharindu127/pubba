@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.0
+
+- Intent profiles: `pubba.intent(trail)` reads why a visit is likely happening
+  from the bundle's `intents`; `next` leans towards the likely intent by
+  default (`intent: null` turns it off), `related` towards a named one, and
+  `Reason.intent` marks a suggestion the intent moved. Same answers as every
+  other runtime (5,182 conformance cases).
+
 ## 0.7.0
 
 - First release of the Dart runtime: loads a pubba bundle and answers like the

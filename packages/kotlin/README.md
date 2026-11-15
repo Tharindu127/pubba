@@ -12,7 +12,7 @@ conformance suite (4,698 cases) exactly.
 
 ```kotlin
 dependencies {
-    implementation("com.tharinduathapaththu:pubba:0.5.0")
+    implementation("com.tharinduathapaththu:pubba:0.9.0")
 }
 ```
 
@@ -56,7 +56,8 @@ npx pubba compile pubba.json --out app/src/main/assets/pubba.bundle.json
 | `Pubba.load(json, events?)`, `loadBundle(json \| map, events?)` | A `Pubba` from a bundle |
 | `pubba.match(query)` | `MatchResult(intent, entity, match, similar, notHere)`; intent is `entity`, `similar` or `none` |
 | `pubba.search(query, limit = 10, types = null)` | Every entity a query could mean, best first |
-| `pubba.next(trail, limit = 3, exclude, accept)` | Predictions: `Suggestion(entity, score, reason, text)` |
+| `pubba.next(trail, limit = 3, exclude, accept, intent = "auto")` | Predictions: `Suggestion(entity, score, reason, text)`, leaning towards the likely intent (`intent = null` turns it off) |
+| `pubba.intent(trail)` | Intent profiles: `IntentReading(likely, confidence, scores, evidence)` |
 | `pubba.related(id, kinds, limit)` | Neighbours, strongest first: `Related(entity, weight, link, reason, text)` |
 | `pubba.autocomplete(typed, trail, limit = 3)` | Type-ahead |
 | `pubba.explain(reason, item)` | A reason as a sentence |

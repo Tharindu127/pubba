@@ -99,11 +99,13 @@ public final class Pubba: Sendable {
     /// The same graph, reporting to these events.
     public func with(events: Events?) -> Pubba { Pubba(graph: graph, events: events) }
 
-    private func suggested(_ source: String, _ ids: [String], _ kinds: [String]) {
+    private func suggested(_ source: String, _ ids: [String], _ kinds: [String], _ intent: String?) {
         guard let events = events, !ids.isEmpty else { return }
         var distinct: [String] = []
         for k in kinds where !distinct.contains(k) { distinct.append(k) }
-        events.emit(JSONObject([("type", .string("suggested")), ("source", .string(source)), ("ids", .array(ids.map { .string($0) })), ("reasonKinds", .array(distinct.map { .string($0) }))]))
+        var event = JSONObject([("type", .string("suggested")), ("source", .string(source)), ("ids", .array(ids.map { .string($0) })), ("reasonKinds", .array(distinct.map { .string($0) }))])
+        if let intent = intent { event["intent"] = .string(intent) }
+        events.emit(event)
     }
 
     // MARK: - Matching
@@ -196,17 +198,29 @@ public final class Pubba: Sendable {
         return out.stableSorted { $0.1.weight > $1.1.weight }
     }
 
-    /// What is related to one entity, strongest link first, each with why.
-    public func related(_ id: String, kinds: [String]? = nil, limit: Int? = nil, destinationsOnly: Bool = true, accept: ((Entity) -> Bool)? = nil, templates: [String: Template]? = nil) -> [Related] {
-        var pairs = neighbours(id, kinds)
-            .stableSorted { a, b in a.1.weight != b.1.weight ? a.1.weight > b.1.weight : graph.pull(a.1.kind) > graph.pull(b.1.kind) }
-            .filter { e, _ in (!destinationsOnly || graph.isDestination(e)) && (accept?(e) ?? true) }
-        if let limit = limit { pairs = Array(pairs.prefix(limit)) }
-        let out = pairs.map { e, l -> Related in
-            let r = reasonFromLink(l, itemId: e.id)
+    /// What is related to one entity, strongest link first, each with why. With a named
+    /// `intent`, links rank by weight times its boost; `weight` stays the link's.
+    public func related(_ id: String, kinds: [String]? = nil, limit: Int? = nil, destinationsOnly: Bool = true, accept: ((Entity) -> Bool)? = nil, templates: [String: Template]? = nil, intent: String? = nil) -> [Related] {
+        let resolved = intent == "auto" ? nil : resolveIntent(graph, [], intent)
+        let pairs = neighbours(id, kinds).filter { e, _ in (!destinationsOnly || graph.isDestination(e)) && (accept?(e) ?? true) }
+        let boosts = pairs.map { e, l in resolved.map { intentBoost(graph, $0, e, l) } ?? 1 }
+        func order(_ boosted: Bool) -> [Int] {
+            let sorted = Array(pairs.indices).stableSorted { a, b in
+                let wa = boosted ? pairs[a].1.weight * boosts[a] : pairs[a].1.weight
+                let wb = boosted ? pairs[b].1.weight * boosts[b] : pairs[b].1.weight
+                return wa != wb ? wa > wb : graph.pull(pairs[a].1.kind) > graph.pull(pairs[b].1.kind)
+            }
+            return limit.map { Array(sorted.prefix($0)) } ?? sorted
+        }
+        let plain = order(false)
+        let chosen = resolved == nil ? plain : order(true)
+        let out = chosen.enumerated().map { i, k -> Related in
+            let (e, l) = pairs[k]
+            var r = reasonFromLink(l, itemId: e.id)
+            if let resolved = resolved, boosts[k] != 1, plain.firstIndex(of: k) != i { r.intent = ReasonIntent(id: resolved, boost: boosts[k]) }
             return Related(entity: e, weight: l.weight, link: l, reason: r, text: renderReason(graph, r, e, templates: templates))
         }
-        suggested("related", out.map(\.entity.id), out.map(\.reason.kind))
+        suggested("related", out.map(\.entity.id), out.map(\.reason.kind), resolved)
         return out
     }
 
@@ -263,32 +277,55 @@ public final class Pubba: Sendable {
         return Spread(score: score, order: order, why: why, seeds: seeds, sectionOnly: sectionOnly)
     }
 
-    /// The next things to suggest after this trail: unseen, worth going to, and mixed.
-    public func next(_ trail: [String], limit: Int = 3, exclude: [String] = [], accept: ((Entity) -> Bool)? = nil, templates: [String: Template]? = nil) -> [Suggestion] {
-        let sp = spread(trail)
-        let skip = Set(sp.seeds.keys).union(exclude)
-        var ranked: [(Entity, Double, Why?)] = []
-        for id in sp.order {
-            guard let e = graph.entities[id] else { continue }
-            if !(sp.why[id] != nil || sp.sectionOnly.contains(id)) || !graph.isDestination(e) || skip.contains(id) || !(accept?(e) ?? true) { continue }
-            ranked.append((e, sp.score[id]!, sp.why[id]))
-        }
-        let byScore = ranked.stableSorted { $0.1 > $1.1 }
+    /// Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent.
+    public func intent(_ trail: [String]) -> IntentReading { readIntent(graph, trail) }
+
+    private typealias Candidate = (entity: Entity, score: Double, why: Why?, boost: Double)
+
+    /// Ranked by score, then mixed: never all of one type when there's a choice, filled up when there isn't.
+    private func mix(_ candidates: [Candidate], _ limit: Int) -> [Candidate] {
+        let byScore = candidates.stableSorted { $0.score > $1.score }
         let cap = max(1, limit - 1)
         var taken: [Int] = []
         var perType: [String: Int] = [:]
         for (i, r) in byScore.enumerated() {
             if taken.count == limit { break }
-            if perType[r.0.type, default: 0] >= cap { continue }
-            perType[r.0.type, default: 0] += 1
+            if perType[r.entity.type, default: 0] >= cap { continue }
+            perType[r.entity.type, default: 0] += 1
             taken.append(i)
         }
         for i in byScore.indices where taken.count < limit && !taken.contains(i) { taken.append(i) }
-        let out = taken.map { byScore[$0] }.stableSorted { $0.1 > $1.1 }.map { e, s, w -> Suggestion in
-            let reason = w.map { reasonFromLink($0.link, itemId: e.id, seed: $0.seed) } ?? Reason(kind: "section")
-            return Suggestion(entity: e, score: s, reason: reason, text: renderReason(graph, reason, e, templates: templates))
+        return taken.map { byScore[$0] }.stableSorted { $0.score > $1.score }
+    }
+
+    /// The next things to suggest after this trail: unseen, worth going to, and mixed.
+    /// `intent`: "auto" (the default) leans towards the visitor's likely intent when
+    /// intents are configured; an id names one; nil turns it off.
+    public func next(_ trail: [String], limit: Int = 3, exclude: [String] = [], accept: ((Entity) -> Bool)? = nil, templates: [String: Template]? = nil, intent: String? = "auto") -> [Suggestion] {
+        let sp = spread(trail)
+        let skip = Set(sp.seeds.keys).union(exclude)
+        var candidates: [Candidate] = []
+        for id in sp.order {
+            guard let e = graph.entities[id] else { continue }
+            if !(sp.why[id] != nil || sp.sectionOnly.contains(id)) || !graph.isDestination(e) || skip.contains(id) || !(accept?(e) ?? true) { continue }
+            candidates.append((e, sp.score[id]!, sp.why[id], 1))
         }
-        suggested("next", out.map(\.entity.id), out.map(\.reason.kind))
+        let resolved = resolveIntent(graph, trail, intent)
+        let plain = mix(candidates, limit)
+        var chosen = plain
+        if let resolved = resolved {
+            chosen = mix(candidates.map { c in
+                let b = intentBoost(graph, resolved, c.entity, c.why?.link)
+                return (c.entity, c.score * b, c.why, b)
+            }, limit)
+        }
+        let plainIds = plain.map(\.entity.id)
+        let out = chosen.enumerated().map { i, c -> Suggestion in
+            var reason = c.why.map { reasonFromLink($0.link, itemId: c.entity.id, seed: $0.seed) } ?? Reason(kind: "section")
+            if let resolved = resolved, c.boost != 1, plainIds.firstIndex(of: c.entity.id) != i { reason.intent = ReasonIntent(id: resolved, boost: c.boost) }
+            return Suggestion(entity: c.entity, score: c.score, reason: reason, text: renderReason(graph, reason, c.entity, templates: templates))
+        }
+        suggested("next", out.map(\.entity.id), out.map(\.reason.kind), resolved)
         return out
     }
 

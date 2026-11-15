@@ -49,7 +49,13 @@ class Reason {
   final String? by;
   final String? name;
 
-  const Reason(this.kind, {this.to, this.direction, this.via, this.seed, this.by, this.name});
+  /// Set when the visitor's likely intent moved this suggestion.
+  final ReasonIntent? intent;
+
+  const Reason(this.kind, {this.to, this.direction, this.via, this.seed, this.by, this.name, this.intent});
+
+  /// The same reason, marked as moved by an intent.
+  Reason withIntent(ReasonIntent intent) => Reason(kind, to: to, direction: direction, via: via, seed: seed, by: by, name: name, intent: intent);
 
   /// The reason as JSON, absent fields left out.
   Json toJson() => {
@@ -60,13 +66,30 @@ class Reason {
         if (seed != null) 'seed': seed,
         if (by != null) 'by': by,
         if (name != null) 'name': name,
+        if (intent != null) 'intent': {'id': intent!.id, 'boost': intent!.boost},
       };
 
-  factory Reason.fromJson(Json m) => Reason(m['kind'] as String,
-      to: str(m['to']), direction: str(m['direction']), via: strings(m['via']), seed: str(m['seed']), by: str(m['by']), name: str(m['name']));
+  factory Reason.fromJson(Json m) {
+    final i = m['intent'];
+    return Reason(m['kind'] as String,
+        to: str(m['to']),
+        direction: str(m['direction']),
+        via: strings(m['via']),
+        seed: str(m['seed']),
+        by: str(m['by']),
+        name: str(m['name']),
+        intent: i is Map && i['id'] is String ? ReasonIntent(i['id'] as String, numOr(i['boost'], 1)) : null);
+  }
 
   @override
   String toString() => 'Reason(${jsonEncode(toJson())})';
+}
+
+/// The visitor's likely intent moved this suggestion: which intent, and its boost.
+class ReasonIntent {
+  final String id;
+  final double boost;
+  const ReasonIntent(this.id, this.boost);
 }
 
 class Suggestion {

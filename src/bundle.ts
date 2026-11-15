@@ -18,7 +18,7 @@ export type BundleEntity = Pick<Entity, "id" | "type" | "label" | "short" | "ali
 export interface Bundle {
   format: number;
   compiler: string;
-  config: Pick<PubbaConfig, "types" | "kinds" | "next" | "match" | "templates">;
+  config: Pick<PubbaConfig, "types" | "kinds" | "next" | "match" | "templates" | "intents" | "intent">;
   entities: BundleEntity[];
   unlinked: BundleEntity[];
   links: GraphLink[];
@@ -74,6 +74,8 @@ function runtimeConfig(c: PubbaConfig): Bundle["config"] {
   if (c.match) out.match = { ...c.match };
   const templates = portableTemplates(c.templates);
   if (templates) out.templates = templates;
+  if (c.intents) out.intents = c.intents;
+  if (c.intent) out.intent = c.intent;
   return JSON.parse(JSON.stringify(out)) as Bundle["config"];
 }
 

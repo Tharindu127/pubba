@@ -8,16 +8,18 @@ runtime: the conformance suite holds them to it.
 
 from .core import BUNDLE_FORMAT, Entity, Graph, Link, Match, MatchResult, Pubba, Related, Suggestion, graph_from_bundle, load_bundle, reason_from_link, render_reason
 from .events import GUIDE_VIAS, Events, create_events, summarise
+from .intent import IntentEvidence, IntentReading, intent_boost, intents_of, read_intent, resolve_intent
 from .guide import DEFAULT_GUIDE_TEMPLATES, EntityChip, Guide, NudgePolicy, QuestionChip, Reply, create_guide
 from .text import close_to, contains_name, edit_distance, has_phrase, normalize
 from .trail import Trail, create_trail, section_step
 
-__version__ = "0.4.0"
+__version__ = "0.9.0"
 
 __all__ = [
     "BUNDLE_FORMAT", "Entity", "Graph", "Link", "Match", "MatchResult", "Pubba", "Related", "Suggestion",
     "graph_from_bundle", "load_bundle", "reason_from_link", "render_reason",
     "GUIDE_VIAS", "Events", "create_events", "summarise",
+    "IntentEvidence", "IntentReading", "intent_boost", "intents_of", "read_intent", "resolve_intent",
     "DEFAULT_GUIDE_TEMPLATES", "EntityChip", "Guide", "NudgePolicy", "QuestionChip", "Reply", "create_guide",
     "close_to", "contains_name", "edit_distance", "has_phrase", "normalize",
     "Trail", "create_trail", "section_step", "__version__",

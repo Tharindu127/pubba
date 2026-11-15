@@ -110,9 +110,18 @@ dynamic run(Pubba pubba, Map c) {
           {'id': m.entity.id, 'score': m.score, 'tier': m.tier, 'by': m.reason.by, 'name': m.reason.name},
       ];
     case 'next':
-      return pubba.next(_strs(c['trail'])!, limit: (c['limit'] as num).toInt(), exclude: _strs(c['exclude']) ?? const []).map(_scored).toList();
+      return pubba
+          .next(_strs(c['trail'])!,
+              limit: (c['limit'] as num).toInt(), exclude: _strs(c['exclude']) ?? const [], intent: c.containsKey('intent') ? c['intent'] as String? : 'auto')
+          .map(_scored)
+          .toList();
     case 'related':
-      return pubba.related(c['id'], kinds: _strs(c['kinds']), limit: c['limit'] is num ? (c['limit'] as num).toInt() : null).map(_weighted).toList();
+      return pubba
+          .related(c['id'], kinds: _strs(c['kinds']), limit: c['limit'] is num ? (c['limit'] as num).toInt() : null, intent: c['intent'] as String?)
+          .map(_weighted)
+          .toList();
+    case 'intent':
+      return pubba.intent(_strs(c['trail'])!).toJson();
     case 'autocomplete':
       return [
         for (final s in pubba.autocomplete(c['typed'], trail: _strs(c['trail'])!, limit: (c['limit'] as num).toInt()))
