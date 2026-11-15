@@ -307,7 +307,7 @@ See [packages/python](packages/python/README.md).
 ### Kotlin and Java (Android, JVM)
 
 ```kotlin
-implementation("com.tharinduathapaththu:pubba:0.9.0")
+implementation("com.tharinduathapaththu:pubba:1.0.0")
 ```
 
 ```kotlin
@@ -589,6 +589,10 @@ headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`;
 0.5.0 the Kotlin runtime and an Android sample; 0.6.0 the Swift runtime and an
 iOS sample; 0.7.0 the Dart runtime and a Flutter sample; 0.8.0 the PHP runtime
 and a WordPress plugin; 0.9.0 intent profiles in every runtime at once. C# comes later.
+
+**1.0.0: stable.** The bundle format and every runtime's public API are covered
+by semantic versioning: see [STABILITY.md](STABILITY.md) for what that
+promises, including when answers may change.
 
 **v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 

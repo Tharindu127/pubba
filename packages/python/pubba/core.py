@@ -96,6 +96,24 @@ class MatchResult:
     not_here: Optional[str] = None
 
 
+@dataclass(frozen=True)
+class Why:
+    """The strongest reason an entity lit up: the link, the entity it came from, the trail step it started at, and its share."""
+    link: "Link"
+    from_: str
+    seed: str
+    part: float
+
+
+@dataclass(frozen=True)
+class Spread:
+    """How brightly each entity lights up for a trail (`score`), why (`why`), the trail's own steps (`seeds`) and entities lit only by a section step (`section_only`)."""
+    score: Dict[str, float]
+    why: Dict[str, Why]
+    seeds: Dict[str, float]
+    section_only: Set[str]
+
+
 @dataclass
 class Graph:
     entities: Dict[str, Entity]
@@ -464,7 +482,7 @@ class Pubba:
         self._suggested("related", out, resolved)
         return out
 
-    def spread(self, trail: Sequence[str]) -> Tuple[Dict[str, float], Dict[str, Tuple[Link, str, str, float]], Dict[str, float], Set[str]]:
+    def spread(self, trail: Sequence[str]) -> Spread:
         """How brightly each entity lights up for this trail, with the strongest reason for each."""
         g = self.graph
         cfg = g.config.get("next") or {}
@@ -474,13 +492,13 @@ class Pubba:
         boost = cfg.get("sectionBoost", 0.08)
         sections = cfg.get("sections") or {}
         score: Dict[str, float] = {}
-        why: Dict[str, Tuple[Link, str, str, float]] = {}
+        why: Dict[str, Why] = {}
         section_only: Set[str] = set()
 
         def give(id: str, part: float, link: Link, src: str, seed: str) -> None:
             score[id] = score.get(id, 0) + part
-            if part > (why[id][3] if id in why else 0):
-                why[id] = (link, src, seed, part)
+            if part > (why[id].part if id in why else 0):
+                why[id] = Why(link, src, seed, part)
 
         seeds: Dict[str, float] = {}
         for id in reversed(list(trail)):
@@ -507,7 +525,7 @@ class Pubba:
                     if far == seed:
                         continue
                     give(far, carry * l2.weight * g.pull(l2.kind), l2, mid, seed)
-        return score, why, seeds, section_only
+        return Spread(score, why, seeds, section_only)
 
     def intent(self, trail: Sequence[str]) -> IntentReading:
         """Why this visit is likely happening, from the trail alone (config `intents`). Never stored or sent."""
@@ -537,7 +555,8 @@ class Pubba:
         `intent`: "auto" (the default) leans towards the visitor's likely intent when
         intents are configured; an id names one; None turns it off."""
         g = self.graph
-        score, why, seeds, section_only = self.spread(trail)
+        lit = self.spread(trail)
+        score, why, seeds, section_only = lit.score, lit.why, lit.seeds, lit.section_only
         skip = set(seeds) | set(exclude)
         candidates = []
         for id, s in score.items():
@@ -551,13 +570,13 @@ class Pubba:
         if resolved is not None:
             boosted = []
             for e, s, w, _ in candidates:
-                b = intent_boost(g, resolved, e, w[0] if w else None)
+                b = intent_boost(g, resolved, e, w.link if w else None)
                 boosted.append((e, s * b, w, b))
             chosen = self._mix(boosted, limit)
         plain_ids = [c[0].id for c in plain]
         out = []
         for i, (e, s, w, b) in enumerate(chosen):
-            reason = reason_from_link(w[0], e.id, w[2]) if w else {"kind": "section"}
+            reason = reason_from_link(w.link, e.id, w.seed) if w else {"kind": "section"}
             if resolved is not None and b != 1 and (plain_ids.index(e.id) if e.id in plain_ids else -1) != i:
                 reason["intent"] = {"id": resolved, "boost": b}
             out.append(Suggestion(e, s, reason, render_reason(g, reason, e, templates)))
@@ -570,7 +589,7 @@ class Pubba:
         q = normalize(typed)
         if len(q) < 2:
             return []
-        near = self.spread(trail)[0]
+        near = self.spread(trail).score
         hits = []
         for e in g.entities.values():
             if not g.is_destination(e) or (accept is not None and not accept(e)):

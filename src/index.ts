@@ -12,7 +12,7 @@ export { buildGraph, assembleGraph, neighbours, degree, isDestination } from "./
 export { predictNext, autocomplete, related, spread } from "./next.ts";
 export { readIntent, resolveIntent, intentBoost, intentsOf } from "./intent.ts";
 export type { IntentReading, IntentEvidence, IntentOption } from "./intent.ts";
-export type { NextOptions, AutocompleteOptions, RelatedOptions } from "./next.ts";
+export type { NextOptions, AutocompleteOptions, RelatedOptions, Spread } from "./next.ts";
 export { match, search, DEFAULT_STOP_WORDS, DEFAULT_SIMILAR } from "./match.ts";
 export type { MatchOptions, SearchOptions } from "./match.ts";
 export { renderReason, reasonFromLink, shortLabel, DEFAULT_TEMPLATES } from "./reasons.ts";

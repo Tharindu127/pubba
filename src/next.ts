@@ -17,7 +17,7 @@ import type { Entity, Graph, GraphLink, Reason, Related, Suggestion, Template } 
 
 const pullOf = (g: Graph, kind: string) => g.config.kinds?.[kind]?.pull ?? 0.5;
 
-interface Spread {
+export interface Spread {
   score: Map<string, number>;
   why: Map<string, { link: GraphLink; from: string; seed: string; part: number }>;
   seeds: Map<string, number>;

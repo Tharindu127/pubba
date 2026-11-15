@@ -13,7 +13,7 @@ In Xcode: **File → Add Package Dependencies…** and enter
 `https://github.com/Tharindu127/pubba`. Or in `Package.swift`:
 
 ```swift
-.package(url: "https://github.com/Tharindu127/pubba", from: "0.6.0")
+.package(url: "https://github.com/Tharindu127/pubba", from: "1.0.0")
 // and in the target: .product(name: "Pubba", package: "pubba")
 ```
 

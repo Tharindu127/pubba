@@ -203,7 +203,7 @@ the parity and eval baselines must not move. That's a test.
 | 0.2.0 | Measurement events + `summarise` | Portfolio visit log fills both "not tracked" funnel rows |
 | 0.3.0 | Intent profiles + eval support | Portfolio eval: intent accuracy ≥ 90% on 15+ hand-written intent trails; suggestions with intents ≥ without, measured against the 0.2 baseline |
 | 0.4.0 | Exports: knowledge file, llms-full, list/breadcrumb JSON-LD, sitemap entries | The site's `pubbaKnowledge.ts` is replaced; Rich Results / Schema.org validators clean |
-| 1.0.0 | Stable API, after the portfolio has run on 0.4 for a few weeks | No API change needed by real use |
+| 1.0.0 | Stable API (released 15 Nov 2026; STABILITY.md) | No API change needed by real use |
 
 Each is a separate release, so the portfolio can adopt them one at a time.
 

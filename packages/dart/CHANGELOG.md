@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.0
+
+- First stable release: the public API and bundle format 1 are covered by
+  semantic versioning from now on (STABILITY.md in the repository). No API or
+  answer changes from 0.9.0.
+
 ## 0.9.0
 
 - Intent profiles: `pubba.intent(trail)` reads why a visit is likely happening

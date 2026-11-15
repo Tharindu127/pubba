@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.0.0 (15 Nov 2026)
+
+The first stable release. No new features, and no answer changes: every
+runtime gives exactly the answers 0.9.0 gave (5,182 conformance cases).
+
+- **[STABILITY.md](STABILITY.md)** says what semantic versioning covers from
+  now on: the bundle format, each runtime's public API, config, reasons,
+  events, the CLI, `pubba serve` and `pubba mcp`, and the evaluation files.
+  Patch releases never change an answer. Minor releases may change answers,
+  and the changelog lists each such change under "Changed answers".
+- **Bundle format 1 is frozen.** Later 1.x releases may only add optional
+  fields. The spec now says a runtime ignores fields it doesn't know, which
+  every runtime already did (checked in all six).
+- **Python:** `Pubba.spread()` returns a `Spread` (`score`, `why`, `seeds`,
+  `section_only`) with `Why` entries (`link`, `from_`, `seed`, `part`), like
+  the other runtimes, instead of a bare tuple. Both are exported.
+- **TypeScript:** the `Spread` type is exported, since `spread()` already was.
+- **PHP:** helpers that are only there for the runtime itself (`Text::obj`,
+  `Text::truthy`, `Text::stableSorted` and the like) are tagged `@internal`.
+  They are not part of the stable API.
+- **Fix:** `pubba eval --update-baseline` now records the intents score too.
+  Before, an intent regression couldn't fail CI unless the baseline was
+  edited by hand.
+- The Swift README's install line asked for `from: "0.6.0"`, which SwiftPM
+  caps below 1.0. It now asks for `from: "1.0.0"`.
+- Every package is 1.0.0: npm, PyPI, Maven Central, the Swift Package, pub.dev
+  and Packagist.
+
 ## 0.9.0 (15 Nov 2026)
 
 - **Intent profiles, in every runtime at once** (TypeScript, Python, Kotlin,

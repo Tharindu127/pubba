@@ -5,6 +5,10 @@ in any language. The TypeScript package is the reference; where this text and
 the conformance suite (`conformance/`) disagree, the suite wins and this text
 is fixed.
 
+Format 1 is frozen ([STABILITY.md](../STABILITY.md)). A later 1.x release may
+add optional fields to the bundle or the config, never remove or change one.
+So a runtime ignores fields it doesn't know.
+
 A runtime loads a **bundle** (written by `pubba compile`) and answers:
 `match`, `search`, `next`, `related`, `autocomplete`, `explain`, `intent`,
 plus the **trail**, **events** and the **guide**. Everything that builds the graph
@@ -25,7 +29,8 @@ computed in the order written here.
 3. For each link in order: append it to `adjacent[from]`, then to `adjacent[to]`.
 4. Each entity of `all`, in order, is **linked** if `adjacent` has its id, else
    **unlinked**. Keep both as ordered maps by id.
-5. `config` is used as given. Missing settings take the defaults below.
+5. `config` is used as given. Missing settings take the defaults below, and
+   settings the runtime doesn't know are ignored.
 6. `index.distinctWords` is the set of distinct words (section 4.4).
 
 An id may appear in a trail or a call without existing; it is then ignored as

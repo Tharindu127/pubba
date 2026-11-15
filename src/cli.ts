@@ -134,8 +134,9 @@ function main(argv: string[]): number {
       if (!bPath) return 0;
       if (rest.includes("--update-baseline")) {
         const next: Baseline = { matching: Number(report.matching.score.toFixed(3)), suggestions: Number(report.suggestions.score.toFixed(3)) };
+        if (report.intents) next.intents = Number(report.intents.score.toFixed(3));
         writeFileSync(bPath, `${JSON.stringify(next, null, 2)}\n`);
-        console.log(`\nBaseline updated: matching ${pct(next.matching)}, suggestions ${pct(next.suggestions)}.`);
+        console.log(`\nBaseline updated: matching ${pct(next.matching)}, suggestions ${pct(next.suggestions)}${next.intents === undefined ? "" : `, intents ${pct(next.intents)}`}.`);
         return 0;
       }
       const drops = regressions(report, readJson<Baseline>(bPath));

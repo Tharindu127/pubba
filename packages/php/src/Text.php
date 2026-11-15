@@ -19,13 +19,21 @@ final class Text
     /** @var array<string, string> */
     private static array $normalized = [];
 
-    /** Trim like JavaScript's String.prototype.trim. */
+    /**
+     * Trim like JavaScript's String.prototype.trim.
+     *
+     * @internal
+     */
     public static function jsTrim(string $s): string
     {
         return preg_replace('/^[' . self::SPACE . ']+|[' . self::SPACE . ']+\z/u', '', $s) ?? trim($s);
     }
 
-    /** Runs of white space become one space, then trimmed. */
+    /**
+     * Runs of white space become one space, then trimmed.
+     *
+     * @internal
+     */
     public static function collapse(string $s): string
     {
         return self::jsTrim(preg_replace('/[' . self::SPACE . ']+/u', ' ', $s) ?? $s);
@@ -69,6 +77,8 @@ final class Text
      * A string as UTF-16 code units.
      *
      * @return list<int>
+     *
+     * @internal
      */
     public static function units(string $s): array
     {
@@ -79,7 +89,11 @@ final class Text
         return $u === '' ? [] : array_values(unpack('n*', $u));
     }
 
-    /** Length in UTF-16 code units, as JavaScript counts it. */
+    /**
+     * Length in UTF-16 code units, as JavaScript counts it.
+     *
+     * @internal
+     */
     public static function length(string $s): int
     {
         return preg_match('/[\x80-\xFF]/', $s) ? intdiv(strlen(mb_convert_encoding($s, 'UTF-16BE', 'UTF-8')), 2) : strlen($s);
@@ -180,6 +194,8 @@ final class Text
      * @param iterable<T> $items
      * @param callable(T, T): int $compare
      * @return list<T>
+     *
+     * @internal
      */
     public static function stableSorted(iterable $items, callable $compare): array
     {
@@ -193,28 +209,39 @@ final class Text
 
     // JSON-shaped config, read the way JavaScript reads it.
 
-    /** @return array<array-key, mixed> */
+    /**
+     * @return array<array-key, mixed>
+     *
+     * @internal
+     */
     public static function obj(mixed $v): array
     {
         return is_array($v) ? $v : [];
     }
 
+    /** @internal */
     public static function num(mixed $v, float $fallback): float
     {
         return is_int($v) || is_float($v) ? (float) $v : $fallback;
     }
 
+    /** @internal */
     public static function str(mixed $v): ?string
     {
         return is_string($v) ? $v : null;
     }
 
-    /** @return list<string>|null */
+    /**
+     * @return list<string>|null
+     *
+     * @internal
+     */
     public static function strings(mixed $v): ?array
     {
         return is_array($v) && array_is_list($v) ? array_values(array_filter($v, 'is_string')) : null;
     }
 
+    /** @internal */
     public static function truthy(mixed $v): bool
     {
         if ($v === null || $v === false) {
