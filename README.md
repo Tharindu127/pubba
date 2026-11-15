@@ -282,8 +282,8 @@ portfolio's bundle is 6.4 KB gzipped.
 This is how pubba reaches other languages: a small runtime per language loads
 the same bundle, implements [spec/SPEC.md](spec/SPEC.md), and must pass the
 [conformance suite](conformance/README.md) (4,698 cases over five sample sites)
-to count as done. The TypeScript, Python, Kotlin, Swift and Dart runtimes all pass 100%.
-Next: C# and PHP ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
+to count as done. The TypeScript, Python, Kotlin, Swift, Dart and PHP runtimes all pass 100%.
+C# comes later ([docs/multiplatform-design.md](docs/multiplatform-design.md)).
 
 ### Python
 
@@ -348,6 +348,23 @@ createGuide(pubba, route: (e) => '/item/${e.id}').ask('anything like kiri walet?
 Pure Dart with no dependencies, so it runs in Flutter on every target and on the
 server. A Flutter sample app with a guide is in [examples/flutter](examples/flutter).
 See [packages/dart](packages/dart/README.md).
+
+### PHP (WordPress, Laravel, any PHP site)
+
+```bash
+composer require tharindu127/pubba
+```
+
+```php
+$pubba = Pubba\Pubba::load(file_get_contents('pubba.bundle.json'));
+$pubba->match('flutr')->entity?->id;   // "tech:Flutter"
+(new Pubba\Guide($pubba, route: fn ($e) => "/item/{$e->id}"))->ask('anything like kiri walet?')->text;
+```
+
+PHP 8.1+ with only `json` and `mbstring`; without Composer, copy
+`packages/php` and require its `autoload.php`. A WordPress plugin (related items
+under each page, `[pubba_next]`, an Ask guide with nudges) is in
+[examples/wordpress](examples/wordpress). See [packages/php](packages/php/README.md).
 
 ### HTTP and MCP: `pubba serve`, `pubba mcp`
 
@@ -511,7 +528,8 @@ portfolio site to it: see [CHANGELOG.md](CHANGELOG.md).
 0.3.0 laid the foundation: bundles, the spec, the conformance suite and the
 headless guide. 0.4.0 added the Python runtime and `pubba serve` / `pubba mcp`;
 0.5.0 the Kotlin runtime and an Android sample; 0.6.0 the Swift runtime and an
-iOS sample; 0.7.0 the Dart runtime and a Flutter sample. Next, C# and PHP (0.8).
+iOS sample; 0.7.0 the Dart runtime and a Flutter sample; 0.8.0 the PHP runtime
+and a WordPress plugin. C# comes later.
 
 **v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
 
@@ -547,6 +565,7 @@ cd packages/python && python3 -m unittest discover -s tests   # the Python runti
 cd packages/kotlin && gradle test                             # the Kotlin runtime against the same suite
 swift test                                                    # the Swift runtime against the same suite
 cd packages/dart && dart test                                 # the Dart runtime against the same suite
+php packages/php/tests/run.php                                # the PHP runtime against the same suite
 npm run eval      # the harness on the example; fails below eval/baseline.json
 npm run example
 npm run typecheck

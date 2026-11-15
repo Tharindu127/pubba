@@ -161,9 +161,11 @@ Python (`pip install pubba`: Django, FastAPI, Flask, scripts; same API in
 snake_case: `load_bundle`, `create_guide`, `guided_to`) and Kotlin/Java
 (`com.tharinduathapaththu:pubba` from Maven Central: Android and JVM servers)
 Swift (the Swift Package at `https://github.com/Tharindu127/pubba`: iOS,
-macOS and every Apple platform) and Dart (`pubba` on pub.dev: Flutter on every
-target, and Dart servers).
-For C# or PHP projects, say plainly that their runtime isn't
+macOS and every Apple platform), Dart (`pubba` on pub.dev: Flutter on every
+target, and Dart servers) and PHP (`composer require tharindu127/pubba`:
+WordPress, WooCommerce, Laravel, any PHP 8.1+ site; same API, `Pubba::load`,
+`new Guide($pubba, route: ...)`, `EntityMatch` where other runtimes say `Match`).
+For C# projects, say plainly that the runtime isn't
 released yet (see the library's docs/multiplatform-design.md); offer
 `pubba serve` (HTTP) as a bridge, and you can still map the content, compile
 the bundle and run the evaluation now. For AI assistants, `pubba mcp <bundle>`
@@ -227,6 +229,31 @@ in pubspec.yaml, then:
   over `EntityChip` / `QuestionChip`. Accessibility: `Semantics(liveRegion: true)`
   on reply and nudge text, labelled buttons, 48dp targets, TalkBack and
   VoiceOver checked. `examples/flutter` is a working sample to adapt.
+
+**WordPress (or any PHP site):** compile the bundle from the site's content
+(map posts, pages, products and their taxonomies; `url` = the permalink), then
+add a small plugin, or the theme's functions, that:
+
+- Loads the runtime with Composer, or bundles a copy of the library's
+  `packages/php` and requires its `autoload.php` (most hosts have no Composer).
+- Finds the entity for the current request by its url path (or a post meta id)
+  and records it on `template_redirect`, before output: `$guide->visited($id)`,
+  or `$guide->follow($id, $via)` when a `?pubba_via=` parameter says the guide
+  sent the visitor. Keep the trail in `CookieTrailStorage` (first-party,
+  httpOnly, on the visitor's device); WordPress has no PHP sessions.
+- Renders "Related" (with the reason sentences) and `[pubba_next]` on the server,
+  so they work without JavaScript and help search engines; escape with
+  `esc_html`.
+- Serves the guide from a read-only REST route (`/wp-json/pubba/v1/ask`,
+  `Cache-Control: no-store` since replies depend on the trail), and draws the
+  form the owner asked for in plain JavaScript that only shows replies and
+  navigates. The guide's `accept` should only offer entities that have a page.
+- Nudges: a PHP guide lives for one request, so work the nudge out while
+  rendering the page (a guide with a `now` clock: `visited`, advance by
+  `delayMs`, `nudge()`), and let the browser decide when: after the delay, once
+  per page per visit, the policy's gap apart, and only after the visitor's own
+  step. `examples/wordpress` is a working plugin to adapt, with a demo that runs
+  the same code on `php -S` without WordPress.
 
 ## Rules
 

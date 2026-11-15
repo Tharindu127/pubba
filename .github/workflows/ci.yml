@@ -67,3 +67,20 @@ jobs:
           channel: stable
       - run: flutter pub get && flutter analyze --no-fatal-infos
         working-directory: examples/flutter
+
+  php:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ["8.1", "8.4"]
+    name: php (${{ matrix.php }})
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json
+          tools: composer
+      - run: composer validate --strict
+      - run: for f in $(find packages/php examples/wordpress -name '*.php'); do php -l "$f" > /dev/null || exit 1; done
+      - run: php packages/php/tests/run.php

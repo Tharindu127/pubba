@@ -14,3 +14,6 @@ packages/python/build/
 *.xcuserstate
 xcuserdata/
 DerivedData/
+vendor/
+composer.lock
+examples/wordpress/pubba-guide/lib/

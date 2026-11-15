@@ -1,0 +1,29 @@
+{
+    "name": "tharindu127/pubba",
+    "description": "A knowledge-graph engine for showroom sites: related items with reasons, what-next predictions from a visitor's trail, typo-tolerant matching and a headless guide. The PHP runtime.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["knowledge-graph", "recommendations", "related-posts", "search", "navigation", "wordpress", "portfolio"],
+    "homepage": "https://github.com/Tharindu127/pubba",
+    "support": {
+        "issues": "https://github.com/Tharindu127/pubba/issues",
+        "source": "https://github.com/Tharindu127/pubba"
+    },
+    "authors": [
+        {"name": "Tharindu Athapaththu", "homepage": "https://github.com/Tharindu127"}
+    ],
+    "require": {
+        "php": ">=8.1",
+        "ext-json": "*",
+        "ext-mbstring": "*"
+    },
+    "autoload": {
+        "psr-4": {"Pubba\\": "packages/php/src/"}
+    },
+    "scripts": {
+        "test": "php packages/php/tests/run.php"
+    },
+    "archive": {
+        "exclude": ["/conformance", "/docs", "/eval", "/examples", "/packages/dart", "/packages/kotlin", "/packages/python", "/packages/swift", "/src", "/test", "/skill", "/spec"]
+    }
+}

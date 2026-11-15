@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.8.0 (15 Nov 2026)
+
+- **PHP runtime** (`packages/php`, Packagist `tharindu127/pubba`): loads a
+  bundle and answers like the other runtimes (match, search, next, related,
+  autocomplete, sentences, trail, events, the guide). PHP 8.1+ with only the
+  `json` and `mbstring` extensions; usable without Composer through its
+  `autoload.php`. Passes the conformance suite exactly (4,698 cases), and a
+  mutation check confirms the suite catches changes. CI runs it on PHP 8.1 and 8.4.
+- `composer.json` sits at the repository root, since Packagist reads it there;
+  versions are the repository's git tags.
+- Matching folds characters from a table generated from the JavaScript
+  reference (`packages/php/tool/fold_table.ts`), as in Dart.
+- In PHP a match is `EntityMatch`, since `match` is a reserved word.
+- `CookieTrailStorage` (a first-party, httpOnly cookie) and
+  `SessionTrailStorage` keep the trail between requests.
+- **WordPress sample** (`examples/wordpress`): a plugin with related items and
+  their reasons under each page, a `[pubba_next]` shortcode, and an Ask guide
+  (a REST route and plain JavaScript) with chips and nudges. Its logic is
+  WordPress-free, and `demo/router.php` runs it on PHP's built-in server.
+- **The skill** covers WordPress and PHP sites.
+- C#, planned for this release, is deferred.
+- The npm, PyPI, Maven, Swift and pub.dev packages are unchanged.
+
 ## 0.7.0 (14 Nov 2026)
 
 - **Dart runtime** (`packages/dart`, pub.dev `pubba`): loads a bundle and answers
