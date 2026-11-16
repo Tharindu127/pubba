@@ -131,7 +131,7 @@ sit on top (a character, chat bubble, command palette, sidebar, voice).
 const guide = createGuide(pubba, {
   trail,                              // the visitor's trail
   routes: { project: (e) => `/projects/${e.id.slice(8)}` },   // where an entity lives in this app
-  ai: null,                           // optional, v3: an adapter with timeout and fallback
+  ai,                                 // optional (1.2.0, TypeScript): createAI or remoteAI from pubba/ai; used by guide.askAsync
   events,                             // optional
 });
 
@@ -205,7 +205,8 @@ one pull request. Each package publishes to its own registry from CI.
 | 0.9.0 | Intent profiles, every runtime at once | All runtimes pass the grown suite |
 | 1.0.0 | Stability: the public API and bundle format 1 frozen under semantic versioning (STABILITY.md) | Every runtime passes the suite unchanged; no format or API change needed |
 | 1.1.0 | The rest of the exports: knowledge file, llms-full.txt, list/breadcrumb/occupation JSON-LD, sitemap entries | TypeScript only; runtimes unchanged |
-| 1.x | AI adapters (v3), C# + MAUI | Minor releases, format 1 |
+| 1.2.0 | The site's AI (v3): `pubba/ai` with Claude, OpenAI and Gemini, limits, a kill switch and fallback; `guide.askAsync`; `pubba serve --ai` | TypeScript, server-side only; other runtimes call `/ask` or `/ai` |
+| 1.x | C# + MAUI | Minor releases, format 1 |
 
 Each runtime ships with a small sample app and a skill test on a project that
 isn't this portfolio.

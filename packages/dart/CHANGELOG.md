@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+- No changes to the Dart runtime. Released with pubba 1.2.0, whose AI adapter
+  is server-side TypeScript; a Flutter app reaches it through the site's
+  `/ask` or `/ai` endpoint.
+
 ## 1.1.0
 
 - No changes to the Dart runtime. Released with pubba 1.1.0, whose new exports

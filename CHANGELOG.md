@@ -1,5 +1,38 @@
 # Changelog
 
+## 1.2.0 (16 Nov 2026)
+
+The site's AI (v3), for questions the guide can't answer from the graph.
+TypeScript only, on the server: the runtimes and every answer stay as they
+were (5,182 conformance cases).
+
+- **`pubba/ai`:** `createAI(pubba, { provider, … })` answers from the site's
+  knowledge file only. The guide asks it only when its own reply is `none`
+  (never `not-here`), and every failure quietly gives back the guide's reply:
+  switched off, over a limit, slower than `timeoutMs` (default 8 s), an error,
+  a declined answer, or one the model marks as not answerable. Ids the model
+  names that aren't in the graph are dropped.
+- **Providers**, all plain `fetch` with no SDK to install: `claude()` (the
+  Messages API, `claude-opus-5-5` at low effort by default, the system prompt
+  cached between questions, and the API's fallback model when a safety
+  classifier declines), `openai()` (Chat Completions with a strict JSON schema)
+  and `gemini()` (generateContent with a response schema). Any other model
+  implements `{ name, complete() }`.
+- **Guard rails:** a kill switch read on every question (`enabled`), limits
+  per visitor (default 20 an hour) and per UTC day (default 1000), questions
+  cut to 300 characters, and `onOutcome` for logs and cost tracking that never
+  carries the question or the answer.
+- **The guide:** `createGuide(pubba, { ai })` and `guide.askAsync(question)`,
+  which never rejects; a reply the AI gave has `kind: "ai"`. `remoteAI({ url })`
+  asks the site's server from a browser or an app, so the key stays there.
+- **`pubba serve --ai claude|openai|gemini`:** `/ask` falls through to the AI,
+  and `/ai` answers for `remoteAI`. Keys come from the environment;
+  `--ai-daily`, `--ai-per-visitor`, `--ai-knowledge`, `--trust-proxy`, and
+  `--ai-off-file` (the AI is off while that file exists).
+- **The skill** covers adding the AI, and checking that it falls back.
+- Every package is 1.2.0: npm, PyPI, Maven Central, the Swift Package, pub.dev
+  and Packagist.
+
 ## 1.1.0 (16 Nov 2026)
 
 The rest of the planned exports, all built from the graph at build time. They

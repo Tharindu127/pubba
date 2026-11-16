@@ -27,7 +27,10 @@ A breaking change to any of these needs a new major version:
   helpers, reasons and templates, the exported text helpers, and the result
   types with their fields. In TypeScript this also covers the package's entry
   points (`pubba`, `pubba/portfolio`, `pubba/eval`, `pubba/exports`,
-  `pubba/serve`) and the graph builder.
+  `pubba/serve`, `pubba/ai`) and the graph builder. For `pubba/ai`, what is
+  stable is the API and the answer's shape, not a model's wording: a
+  provider's default model may move to a newer one in a minor release, noted
+  in the changelog.
 - **Config**: every documented key of the dataset and the config, with its
   default ([spec/SPEC.md](spec/SPEC.md) section 2).
 - **Reasons**: the reason kinds and fields, the template keys and the

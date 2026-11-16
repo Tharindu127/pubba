@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { documentDataset, fromDocument, type PubbaDocument } from "./document.ts";
 import { evaluate, formatLint, formatReport, generateCases, lint, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
 import { toJsonLd, toKnowledge, toLlmsTxt, toSitemapEntries, toSitemapXml, validateJsonLd } from "./exports/index.ts";
 import { compileBundle } from "./bundle.ts";
 import { serve, serveMcp } from "./serve.ts";
+import { claude, createAI, gemini, openai, type AIProvider } from "./ai.ts";
 import { VERSION } from "./version.ts";
 import { loadBundle } from "./index.ts";
 
@@ -14,6 +15,9 @@ const HELP = `pubba: a knowledge graph for showroom sites
 Usage:
   pubba compile  <pubba.json> --out <file> [--with-data]   the bundle every runtime loads
   pubba serve    <pubba.json|bundle> [--port 8787] [--host 127.0.0.1] [--cors <origin>]   read-only HTTP API
+                 [--ai claude|openai|gemini] [--ai-model <id>] [--ai-knowledge <file>] [--ai-daily <n>] [--ai-per-visitor <n per hour>]
+                 [--ai-off-file <path>] [--trust-proxy]   the site's AI for questions the guide can't answer;
+                 keys from ANTHROPIC_API_KEY, OPENAI_API_KEY or GEMINI_API_KEY; the AI is off while the off-file exists
   pubba mcp      <pubba.json|bundle> [--name <server name>]   MCP server over stdio, for AI assistants
   pubba inspect  <pubba.json>                    counts of entities and links, by type and kind
   pubba preview  <pubba.json>                    the mapping as Markdown tables, for review before writing
@@ -69,7 +73,27 @@ function main(argv: string[]): number {
       const port = Number(flag(rest, "--port") ?? 8787);
       const host = flag(rest, "--host") ?? "127.0.0.1";
       const cors = flag(rest, "--cors");
-      serve(pubba, { port, host, ...(cors ? { cors } : {}) }).on("listening", () => console.error(`pubba ${VERSION} on http://${host}:${port}  (GET /match?query=… /next?trail=a,b /related?id=… /ask?query=… /explain?from=…&to=…)`));
+      const kind = flag(rest, "--ai");
+      let ai: ReturnType<typeof createAI> | undefined;
+      if (kind) {
+        const provider = aiProvider(kind, flag(rest, "--ai-model"));
+        if (typeof provider === "string") return fail(provider);
+        const offFile = flag(rest, "--ai-off-file");
+        const knowledgePath = flag(rest, "--ai-knowledge");
+        const daily = Number(flag(rest, "--ai-daily"));
+        const hourly = Number(flag(rest, "--ai-per-visitor"));
+        ai = createAI(pubba, {
+          provider,
+          ...(knowledgePath ? { knowledge: readJson<Record<string, unknown>>(knowledgePath) } : {}),
+          ...(offFile ? { enabled: () => !existsSync(offFile) } : {}),
+          ...(daily > 0 ? { perDay: daily } : {}),
+          ...(hourly > 0 ? { perVisitor: { max: hourly, windowMs: 3_600_000 } } : {}),
+          onOutcome: (o) => console.error(`ai ${o.provider} ${o.outcome}${o.ms === undefined ? "" : ` ${o.ms}ms`}${o.detail ? ` (${o.detail})` : ""}`),
+        });
+      }
+      serve(pubba, { port, host, ...(cors ? { cors } : {}), ...(ai ? { ai } : {}), trustProxy: rest.includes("--trust-proxy") }).on("listening", () =>
+        console.error(`pubba ${VERSION} on http://${host}:${port}  (GET /match?query=… /next?trail=a,b /related?id=… /ask?query=… /explain?from=…&to=…${ai ? " /ai?query=…" : ""})`)
+      );
       return -1;
     }
     case "mcp": {
@@ -201,6 +225,29 @@ function main(argv: string[]): number {
     default:
       console.log(HELP);
       return 1;
+  }
+}
+
+/** The provider `--ai` names, with its key from the environment, or what is missing. */
+function aiProvider(kind: string, model: string | undefined): AIProvider | string {
+  const key = (name: string) => process.env[name]?.trim();
+  switch (kind) {
+    case "claude": {
+      const apiKey = key("ANTHROPIC_API_KEY");
+      return apiKey ? claude({ apiKey, ...(model ? { model } : {}) }) : "pubba serve --ai claude: set ANTHROPIC_API_KEY";
+    }
+    case "openai": {
+      const apiKey = key("OPENAI_API_KEY");
+      if (!apiKey) return "pubba serve --ai openai: set OPENAI_API_KEY";
+      return model ? openai({ apiKey, model }) : "pubba serve --ai openai: --ai-model <id> is required";
+    }
+    case "gemini": {
+      const apiKey = key("GEMINI_API_KEY");
+      if (!apiKey) return "pubba serve --ai gemini: set GEMINI_API_KEY";
+      return model ? gemini({ apiKey, model }) : "pubba serve --ai gemini: --ai-model <id> is required";
+    }
+    default:
+      return `pubba serve: --ai must be claude, openai or gemini, not "${kind}"`;
   }
 }
 

@@ -31,10 +31,10 @@ export interface QuestionChip {
 
 export type Chip = EntityChip | QuestionChip;
 
-export type ReplyKind = "open" | "similar" | "none" | "not-here" | "start";
+export type ReplyKind = "open" | "similar" | "none" | "not-here" | "start" | "ai";
 
 export interface Reply {
-  /** `open`: the question named one thing. `similar`: things like one. `none`: nothing here answers (a site may ask its AI). `not-here`: it names something the site doesn't have. `start`: an empty question. */
+  /** `open`: the question named one thing. `similar`: things like one. `none`: nothing here answers (a site may ask its AI). `not-here`: it names something the site doesn't have. `start`: an empty question. `ai`: the site's AI answered, from `askAsync` only. */
   kind: ReplyKind;
   text: string;
   /** Where to take the visitor, when the reply names one place. */
@@ -107,6 +107,27 @@ export interface GuideOptions {
   templates?: Partial<GuideTemplates> & Record<string, string>;
   /** The clock, in ms. Default `Date.now`; tests and other runtimes pass their own. */
   now?: () => number;
+  /** The site's AI, asked by `askAsync` only when the guide has no answer of its own (`createAI` or `remoteAI` from `pubba/ai`). */
+  ai?: GuideAI;
+}
+
+/** What the guide asks a site's AI: the question and the visitor's trail. */
+export interface GuideAIInput {
+  question: string;
+  trail: string[];
+  /** Who is asking, for rate limits: a session or an IP, never stored by pubba. */
+  visitor?: string;
+}
+
+/** An AI's answer: the text, and the ids of the entities it is about, most relevant first. */
+export interface GuideAIAnswer {
+  text: string;
+  ids: string[];
+}
+
+/** Anything that can answer for the guide. `null` means no answer, and the guide keeps its own. */
+export interface GuideAI {
+  answer(input: GuideAIInput): Promise<GuideAIAnswer | null>;
 }
 
 export interface Guide {
@@ -114,6 +135,8 @@ export interface Guide {
   readonly nudgePolicy: Readonly<NudgePolicy>;
   /** Answer a typed question. Doesn't move the visitor: follow the action, then call `follow`. */
   ask(question: string): Reply;
+  /** `ask`, then the site's AI (`ai`) when the guide has no answer of its own. Never rejects: on any AI failure it resolves to `ask`'s reply. */
+  askAsync(question: string, options?: { visitor?: string }): Promise<Reply>;
   /** Follow-ups for where the visitor is now. */
   chips(limit?: number): Chip[];
   /** The visitor went somewhere on their own. */
@@ -184,10 +207,7 @@ export function createGuide(pubba: Pubba, o: GuideOptions = {}): Guide {
     return { type: "open" as const, id: e.id, ...(url !== undefined ? { url } : {}) };
   };
 
-  return {
-    trail,
-    nudgePolicy: policy,
-    ask(question) {
+  const ask = (question: string): Reply => {
       if (!question.trim()) return { kind: "start", text: fill(tpl("start"), {}), chips: chips(limit, [], { kind: "start" }) };
       const m = pubba.match(question);
       if (m.intent === "none") {
@@ -218,7 +238,42 @@ export function createGuide(pubba: Pubba, o: GuideOptions = {}): Guide {
           : chips(limit, [], { kind: "open", entity }),
         ...(m.match ? { match: m.match } : {}),
       };
-    },
+  };
+
+  const askAsync = async (question: string, options: { visitor?: string } = {}): Promise<Reply> => {
+    const local = ask(question);
+    if (local.kind !== "none" || !o.ai) return local;
+    let got: GuideAIAnswer | null = null;
+    try {
+      got = await o.ai.answer({ question, trail: trail.get(), ...(options.visitor !== undefined ? { visitor: options.visitor } : {}) });
+    } catch {
+      got = null;
+    }
+    const text = typeof got?.text === "string" ? got.text.trim() : "";
+    if (!text) return local;
+    const named = [...new Set(Array.isArray(got!.ids) ? got!.ids.filter((x): x is string => typeof x === "string") : [])]
+      .map(find)
+      .filter((e): e is Entity => e !== undefined && (!accept || accept(e)));
+    const [first, ...rest] = named;
+    const aiChips = rest.slice(0, limit).map((e) => {
+      const reason: Reason = { kind: "ai" };
+      return chipFor({ entity: e, reason, text: pubba.explain(reason, e) });
+    });
+    const after = first ? chips(limit, g.entities.has(first.id) ? [first.id] : [], { kind: "open", entity: first }) : local.chips;
+    const seen = new Set([first?.id, ...aiChips.map((c) => c.id)]);
+    return {
+      kind: "ai",
+      text,
+      ...(first ? { action: open(first) } : {}),
+      chips: [...aiChips, ...after.filter((c) => !("id" in c) || !seen.has(c.id))].slice(0, limit),
+    };
+  };
+
+  return {
+    trail,
+    nudgePolicy: policy,
+    ask,
+    askAsync,
     chips: (n) => chips(n ?? limit, [], { kind: "chips" }),
     visited(id) {
       if (!find(id) && !id.startsWith("section:")) return;

@@ -174,8 +174,19 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
    - Record steps: `guide.visited(id)` on every page or item view;
      `guide.follow(id, via)` when the guide's action or a chip took the visitor there.
    - `guide.ask(text)` for typed questions: show `text`, perform `action`
-     (navigate), show `chips`. For `kind: "none"`, show the chips (or, if the
-     site has an AI, ask it and fall back to the chips on any failure).
+     (navigate), show `chips`. For `kind: "none"`, show the chips.
+   - **The site's AI**, only if the owner wants one (ask; it costs per
+     question and needs an API key): on the server,
+     `createAI(pubba, { provider: claude({ apiKey }), instructions, perDay, perVisitor })`
+     from `pubba/ai` (or `openai` / `gemini`, which need a `model`), served at
+     a route of the site's own, or `pubba.sh serve <bundle> --ai claude`. In
+     the browser, `createGuide(pubba, { ai: remoteAI({ url }) })` and
+     `await guide.askAsync(text)` instead of `ask`: the guide answers first,
+     the AI only for `none`, and any failure returns the guide's own reply.
+     Show a `kind: "ai"` reply like any other. Never put an API key in the
+     browser or an app. Tell the owner about the limits and the kill switch
+     (`enabled`, or `--ai-off-file`), and give the AI a knowledge file with the
+     site's FAQ in `extra` if it has one.
    - Nudges: after each step the visitor takes themselves, schedule
      `guide.nudge()` after `guide.nudgePolicy.delayMs`; show it if not null.
    - Words: pass `templates` for the guide's voice and language.
@@ -183,8 +194,10 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
    closes, announced replies (`aria-live`), labelled controls, and respect
    reduced motion.
 5. **Verify** in a browser: ask a name, a typo, "anything like X", an
-   off-topic question; follow a chip; check a nudge appears once. Then run lint
-   and the evaluation.
+   off-topic question; follow a chip; check a nudge appears once. With an AI,
+   also ask something the content answers in prose but no name matches, then
+   switch the AI off and check the same question falls back to chips. Then run
+   lint and the evaluation.
 
 **Platforms:** runtimes exist for JavaScript/TypeScript (any web framework,
 Node, React Native with an async storage wrapper for the trail, Electron),

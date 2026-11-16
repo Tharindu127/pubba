@@ -1,5 +1,5 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { createGuide } from "./guide.ts";
+import { createGuide, type GuideAI } from "./guide.ts";
 import { createTrail } from "./trail.ts";
 import { reasonFromLink, renderReason } from "./reasons.ts";
 import { VERSION } from "./version.ts";
@@ -115,13 +115,20 @@ export interface ServeOptions {
   host?: string;
   /** Allow this origin to call from a browser (`*` for any). Default: none. */
   cors?: string;
+  /** The site's AI (`createAI` from `pubba/ai`): /ask uses it when the guide has no answer, and /ai serves `remoteAI`. */
+  ai?: GuideAI;
+  /** Behind a proxy: take the visitor's address (for the AI's per-visitor limit) from `x-forwarded-for`. Default false. */
+  trustProxy?: boolean;
 }
+
+const trailOf = (s: string | null) => list(s).slice(-24);
 
 /**
  * GET /match?query=… /search?query=…&limit=&types= /next?trail=a,b&limit=&intent= /related?id=…&kinds=&limit=
  * /autocomplete?query=…&trail= /ask?query=…&trail= /explain?from=…&to= /intent?trail=a,b /health
+ * and, with an AI, /ai?query=…&trail= (the AI alone: `{ text, ids }`, or `{ text: null }`).
  */
-export function serve(pubba: Pubba, { port = 8787, host = "127.0.0.1", cors }: ServeOptions = {}): Server {
+export function serve(pubba: Pubba, { port = 8787, host = "127.0.0.1", cors, ai, trustProxy = false }: ServeOptions = {}): Server {
   const reply = (res: ServerResponse, status: number, body: unknown) => {
     res.writeHead(status, {
       "content-type": "application/json; charset=utf-8",
@@ -139,6 +146,27 @@ export function serve(pubba: Pubba, { port = 8787, host = "127.0.0.1", cors }: S
     const url = new URL(req.url ?? "/", "http://pubba.local");
     const op = url.pathname.replace(/^\/+|\/+$/g, "");
     if (op === "health" || op === "") return reply(res, 200, { ok: true, pubba: VERSION, entities: pubba.graph.entities.size + pubba.graph.unlinked.size, links: pubba.graph.links.length });
+    if (ai && (op === "ask" || op === "ai")) {
+      const forwarded = trustProxy ? String(req.headers["x-forwarded-for"] ?? "").split(",")[0]!.trim() : "";
+      const visitor = forwarded || req.socket.remoteAddress || undefined;
+      const question = (url.searchParams.get("query") ?? "").slice(0, 300);
+      const trail = trailOf(url.searchParams.get("trail"));
+      const done =
+        op === "ai"
+          ? ai.answer({ question, trail, ...(visitor ? { visitor } : {}) }).then((a) => a ?? { text: null })
+          : (() => {
+              const t = createTrail();
+              for (const id of trail) t.record(id);
+              return createGuide(pubba, { trail: t, ai })
+                .askAsync(question, visitor ? { visitor } : {})
+                .then((r) => ({ kind: r.kind, text: r.text, ...(r.action ? { action: r.action } : {}), chips: r.chips }));
+            })();
+      void done.then(
+        (body) => reply(res, 200, body),
+        () => reply(res, 500, { error: "could not answer" })
+      );
+      return;
+    }
     if (!OPERATIONS.includes(op)) return reply(res, 404, { error: `unknown endpoint /${op}` });
     try {
       return reply(res, 200, answer(pubba, op, Object.fromEntries(url.searchParams)));

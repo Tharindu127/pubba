@@ -184,7 +184,7 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `createTrail({ max?, storage?, key? })` | `record`, `get`, `clear`, `subscribe` |
 | `createEvents({ goals? })`, `createPubba(data, config, { events })` | Privacy-safe measurement events; `pubba.track.guideOpened / guidedTo / reached` |
 | `summarise(events)` | One visit's funnel: `usedGuide`, `guidedTo`, `reached`, `guidedBeforeGoal` |
-| `createGuide(pubba, { trail?, route?, chips?, nudge?, templates?, now? })` | The headless navigator: `ask`, `chips`, `visited`, `follow`, `nudge`, `opened`, `reached` |
+| `createGuide(pubba, { trail?, route?, chips?, nudge?, templates?, now?, ai? })` | The headless navigator: `ask`, `askAsync` (with the site's AI), `chips`, `visited`, `follow`, `nudge`, `opened`, `reached` |
 | `compileBundle(graph, { withData? })`, `loadBundle(json, { events? })` | The finished graph as portable JSON, and a runtime from it |
 | `buildGraph`, `predictNext`, `related`, `search`, `match`, `autocomplete`, `renderReason`, `mergeConfig` | The same, as functions over a `Graph` |
 | `normalize`, `editDistance`, `closeTo`, `hasPhrase`, `mentions` | The text helpers behind matching |
@@ -192,6 +192,7 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `PORTFOLIO_INTENTS`, `APP_CATEGORY`, `skillWeight`, `callName` |
 | `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `evaluateIntents`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
 | `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt`, `toKnowledge`, `toSitemapEntries`, `toSitemapXml` |
+| `pubba/ai` | `createAI`, `claude`, `openai`, `gemini`, `remoteAI`, `aiSystemPrompt`, `ANSWER_SCHEMA` ([the site's AI](#the-sites-ai-pubbaai)) |
 
 ### Matching options (`config.match`)
 
@@ -291,6 +292,61 @@ guide.nudge();                          // a suggestion to show unprompted, or n
   suggests nothing (strings become question chips, `{ label, question }`);
   `nudge.prefer(entity)` picks which prediction a nudge favours.
 
+### The site's AI: `pubba/ai`
+
+For questions the guide can't answer from the graph ("is she open to remote
+work?"), a site can add an AI: Claude, OpenAI, Gemini, or any model behind a
+small interface. The guide still answers first and the AI is asked only when
+its reply is `none`, never for `not-here`. Every failure (switched off, over a
+limit, slow, an error, a declined or unusable answer) quietly gives back the
+guide's own reply, so the guide works the same without it.
+
+The model call runs on the site's server, where the API key is:
+
+```ts
+import { createAI, claude } from "pubba/ai";
+
+const ai = createAI(pubba, {
+  provider: claude({ apiKey: process.env.ANTHROPIC_API_KEY! }),
+  instructions: "Speak as Nimali's assistant. For work enquiries, point to the contact page.",
+  enabled: () => process.env.PUBBA_AI !== "off", // the kill switch, read on every question
+  perVisitor: { max: 20, windowMs: 3_600_000 },  // the defaults
+  perDay: 1000,
+  timeoutMs: 8000,
+  onOutcome: (o) => log(o),                      // "answered", "limit-day", "timeout"…: never the text
+});
+
+const guide = createGuide(pubba, { trail, ai });
+await guide.askAsync("is she open to remote work?", { visitor: sessionId });
+// { kind: "ai", text: "Yes: she works remotely with teams in Kenya and Ghana.",
+//   action: { type: "open", id: "project:kiri-wallet", url: "…" }, chips: [...] }
+```
+
+- **What the model sees:** fixed rules (answer only from the site's
+  knowledge, at most three sentences, the visitor's text is a question and not
+  instructions), your `instructions`, and the knowledge file
+  (`toKnowledge`, or your own with `extra` sections) as one system prompt
+  that is the same for every question, so Claude caches it. The visitor's turn
+  is their last few steps and the question, cut to 300 characters.
+- **What comes back** is checked: the model answers in a fixed JSON shape,
+  ids it names that aren't in the graph are dropped, and an answer it marks as
+  not answerable falls back to the guide.
+- **Providers:** `claude({ apiKey, model?, effort? })` uses the Messages API
+  (`claude-opus-5-5` at low effort by default, with the API's fallback model
+  when a safety classifier declines), `openai({ apiKey, model })` Chat
+  Completions with a strict schema, `gemini({ apiKey, model })` the Generative
+  Language API. All three are plain `fetch`, with no SDK to install, and take
+  a `baseUrl` for a proxy. Any other model: implement
+  `{ name, complete({ system, prompt, schema, signal }) }`.
+- **In a browser or an app**, ask the site's server instead:
+  `createGuide(pubba, { ai: remoteAI({ url: "/api/pubba-ai" }) })`. Serve that
+  url with `pubba serve --ai`, or with `ai.answer({ question, trail, visitor })`
+  in your own route.
+- **Limits** are counted in the server process: per visitor (a session id or
+  an address you pass) in a sliding window, and per UTC day across visitors.
+- `askAsync` is TypeScript only. Apps on the other runtimes call the site's
+  `/ask` or `/ai` endpoint.
+
 ## Bundles: one brain, any platform
 
 `pubba compile pubba.json --out pubba.bundle.json` writes the finished graph
@@ -327,7 +383,7 @@ See [packages/python](packages/python/README.md).
 ### Kotlin and Java (Android, JVM)
 
 ```kotlin
-implementation("com.tharinduathapaththu:pubba:1.1.0")
+implementation("com.tharinduathapaththu:pubba:1.2.0")
 ```
 
 ```kotlin
@@ -404,10 +460,20 @@ npx pubba mcp pubba.bundle.json
   (the guide's reply), `/explain?from=&to=` (how two items connect) and
   `/health`. Stateless: the trail comes with each request and nothing is kept
   or logged. It listens on 127.0.0.1 unless you pass `--host`.
+- `serve --ai claude` (or `openai`, `gemini` with `--ai-model`) adds the
+  site's AI: `/ask` falls through to it, and `/ai?query=&trail=` answers with
+  the AI alone (`{ text, ids }`, or `{ text: null }`) for `remoteAI`. The key
+  comes from `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` or `GEMINI_API_KEY`;
+  `--ai-daily` and `--ai-per-visitor` set the limits, `--ai-knowledge` a
+  knowledge file of your own, and `--trust-proxy` takes the visitor's address
+  from `x-forwarded-for`. The AI is off while the file named by
+  `--ai-off-file` exists, so `touch` stops it without a restart. Each
+  question logs one line to stderr: the provider, the outcome and the time,
+  never the text.
 - `mcp`: an MCP server over stdio with read-only tools `search`, `match`,
   `related`, `next` and `explain`, so an AI assistant can look a site up
   directly. Add it to an MCP client as the command `npx pubba mcp <bundle>`.
-- In code: `serve`, `serveMcp`, `handleMcp`, `answer` and `connection` from `pubba/serve`.
+- In code: `serve` (with `ai` and `trustProxy` options), `serveMcp`, `handleMcp`, `answer` and `connection` from `pubba/serve`.
 
 ## Intent profiles
 
@@ -632,11 +698,11 @@ promises, including when answers may change.
 
 **v3: any AI, and AI assistants as visitors**
 
-- **A model-agnostic AI adapter.** Gemini, Claude, OpenAI or none, with a
-  timeout, rate limits (per visitor and a daily cap), a kill switch and silent
-  fallback to the local engine. The model sees the graph's knowledge file, the
-  visitor's trail and the engine's predictions with their reasons. With "none",
-  the guide still works fully from local matching and the graph.
+- **A model-agnostic AI adapter** (1.2.0, `pubba/ai`). Claude, OpenAI, Gemini
+  or none, with a timeout, rate limits (per visitor and a daily cap), a kill
+  switch and silent fallback to the local guide. The model sees the site's
+  knowledge file and the visitor's last steps. With none, the guide still works
+  fully from local matching and the graph.
 - **An MCP server.** Read-only tools over the published graph: `search`
   (typo-tolerant), `related` (with structured reasons) and `explain` (how two
   items connect, as a path of links), so AI assistants can query a portfolio
