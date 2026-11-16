@@ -191,7 +191,7 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `pubba.graph.unlinked` | Entities with no links: never suggested, but `match` and `search` still find them |
 | `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `PORTFOLIO_INTENTS`, `APP_CATEGORY`, `skillWeight`, `callName` |
 | `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `evaluateIntents`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
-| `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt` |
+| `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt`, `toKnowledge`, `toSitemapEntries`, `toSitemapXml` |
 
 ### Matching options (`config.match`)
 
@@ -223,11 +223,31 @@ with `stems: true` links editions: "Student rePo (Android)" ↔ "(Web)".
 | `include` | Only these entity ids besides the person: one project's page |
 | `includeEmail` | Publish the person's email. Default off |
 | `types` | schema.org type per entity type (projects are SoftwareApplication, creative pieces CreativeWork) |
+| `itemList` | An `ItemList` of one type's entities, for a listing page: `"project"`, or `{ type, name, url }` |
+| `breadcrumb` | A `BreadcrumbList` ending at one entity, for its page: an id, or `{ id, parents: [{ name, url }] }`. Default parent: the home page |
+| `occupations` | The person's roles as `hasOccupation`, alongside `worksFor`. Default off |
 
 Software apps get `applicationCategory` (from `data.applicationCategory`; the
 portfolio preset picks one of Google's app types from the project's topics) and
 `operatingSystem` (from `data.operatingSystem`: the project's platforms), the two
 properties Google's Software App rich result needs without a price or rating.
+
+### What else a site can publish
+
+All built from the same graph, at build time:
+
+| Export | What it is |
+| --- | --- |
+| `toLlmsTxt(graph, { full: true })` | `llms-full.txt`: each item under its own heading, with its full description and how it connects, in sentences |
+| `toKnowledge(graph, options)` | The graph as one JSON file for an AI assistant to read: every entity with a short description and its strongest connections in words, and every link as `[from, kind, to, weight]` (plus what the two share). Versioned (`v: 3`); `extra` adds the site's own sections. Publish it as `/pubba-knowledge.json` so an assistant and the pages agree |
+| `toSitemapEntries(graph, { baseUrl })` | A sitemap entry for each page on the site, with `lastModified` from `data.updated` or `data.date`. `toSitemapXml(entries)` writes the sitemap.xml |
+
+```ts
+import { toKnowledge, toSitemapEntries, toSitemapXml } from "pubba/exports";
+
+const knowledge = toKnowledge(pubba.graph, { baseUrl: "https://example.com", extra: { faq } });
+const sitemap = toSitemapXml(toSitemapEntries(pubba.graph, { baseUrl: "https://example.com" }));
+```
 
 ## The guide: `createGuide`
 
@@ -307,7 +327,7 @@ See [packages/python](packages/python/README.md).
 ### Kotlin and Java (Android, JVM)
 
 ```kotlin
-implementation("com.tharinduathapaththu:pubba:1.0.0")
+implementation("com.tharinduathapaththu:pubba:1.1.0")
 ```
 
 ```kotlin
@@ -530,8 +550,10 @@ pubba next     <pubba.json> <id> [<id>…]
 pubba lint     <pubba.json>                  name collisions, heavy weights, dead ends; exits 1 on errors
 pubba eval     <pubba.json> [--queries <f>] [--trails <f>] [--generated] [--baseline <f>] [--update-baseline] [--json]
 pubba generate <pubba.json> [--out-dir <dir>]  the generated cases, to read
-pubba jsonld   <pubba.json> [--base-url <url>] [--out <f>]
-pubba llms     <pubba.json> [--base-url <url>] [--out <f>]
+pubba jsonld   <pubba.json> [--base-url <url>] [--item-list <type>] [--breadcrumb <id>] [--occupations] [--out <f>]
+pubba llms     <pubba.json> [--base-url <url>] [--full] [--out <f>]   llms.txt, or llms-full.txt
+pubba knowledge <pubba.json> [--base-url <url>] [--out <f>]   the knowledge file for AI assistants
+pubba sitemap  <pubba.json> --base-url <url> [--json] [--out <f>]
 ```
 
 Every command except `compile` also takes a compiled bundle in place of the
@@ -547,8 +569,9 @@ preset, content and config:
    dump) to entities, types, aliases, link kinds, rules and weights, and shows
    the mapping for review before writing anything.
 2. Generates schema.org JSON-LD (Person, SoftwareApplication, CreativeWork, with
-   creator, knowsAbout and worksFor) and an `llms.txt` from the graph, and
-   validates the JSON-LD.
+   creator, knowsAbout and worksFor, plus lists and breadcrumbs for pages),
+   `llms.txt` and `llms-full.txt`, the knowledge file and sitemap entries from
+   the graph, and validates the JSON-LD.
 3. Builds a sample query set from the site's own content, runs the harness, and
    suggests fixes to aliases, weights or rules.
 
@@ -594,7 +617,7 @@ and a WordPress plugin; 0.9.0 intent profiles in every runtime at once. C# comes
 by semantic versioning: see [STABILITY.md](STABILITY.md) for what that
 promises, including when answers may change.
 
-**v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0; intent profiles and the remaining exports follow the runtimes, so they reach every platform at once.
+**v2: knowing the visitor, measuring, exporting** (design: [docs/v2-design.md](docs/v2-design.md)). Measurement events shipped in 0.2.0, intent profiles in 0.9.0 and the remaining exports in 1.1.0.
 
 - **Intent profiles.** Infer a visitor's likely intent from their trail ("mobile
   hiring" versus "web client") and weight related items and predictions by it.
@@ -603,8 +626,9 @@ promises, including when answers may change.
 - **Measurement hooks.** Privacy-safe events (guide opened, guided to item,
   reached contact) that a site can forward to any analytics tool. Never the text
   of a question or answer; pubba only emits, the site decides where they go.
-- **Exports.** Full schema.org JSON-LD and `llms.txt` generation from the graph,
-  replacing hand-written JSON-LD, building on the v1 helpers.
+- **Exports.** schema.org JSON-LD (with lists, breadcrumbs and occupations),
+  `llms.txt` and `llms-full.txt`, a knowledge file for AI assistants, and
+  sitemap entries, all generated from the graph.
 
 **v3: any AI, and AI assistants as visitors**
 

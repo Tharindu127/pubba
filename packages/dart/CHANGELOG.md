@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+- No changes to the Dart runtime. Released with pubba 1.1.0, whose new exports
+  (knowledge file, llms-full.txt, more JSON-LD, sitemap entries) are build-time
+  TypeScript only.
+
 ## 1.0.0
 
 - First stable release: the public API and bundle format 1 are covered by

@@ -1,6 +1,6 @@
 # pubba v2 design: intent, measurement, exports
 
-Status: **agreed 10 Nov 2026**, events first (see §6). Events shipped in 0.2.0; **intent profiles in 0.9.0**, in every runtime (exact formulas: spec/SPEC.md 5.7, 5.8; reason labels stay unchanged unless a site writes an `intent.<id>` template).
+Status: **agreed 10 Nov 2026**, events first (see §6). Events shipped in 0.2.0; **intent profiles in 0.9.0**, in every runtime (exact formulas: spec/SPEC.md 5.7, 5.8; reason labels stay unchanged unless a site writes an `intent.<id>` template); **the exports in 1.1.0** (section 3).
 Scope: the three v2 items of LIBRARY_PLAN.md. v3 (AI adapter, MCP server) is out
 of scope, but nothing here should block it.
 

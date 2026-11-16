@@ -40,6 +40,9 @@ A breaking change to any of these needs a new major version:
   tool names and inputs, and the shape of their answers.
 - **Evaluation files**: the case files `pubba generate` writes and the
   baseline file `pubba eval` reads.
+- **The knowledge file** (`toKnowledge`, format `v: 3`): its keys and the
+  layout of `links.edges`. A minor release may add a key; changing or removing
+  one needs a new format number and a major release.
 
 ## Answers
 

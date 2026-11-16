@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { documentDataset, fromDocument, type PubbaDocument } from "./document.ts";
 import { evaluate, formatLint, formatReport, generateCases, lint, pct, regressions, type Baseline, type QueryCase, type TrailCase } from "./eval/index.ts";
-import { toJsonLd, toLlmsTxt, validateJsonLd } from "./exports/index.ts";
+import { toJsonLd, toKnowledge, toLlmsTxt, toSitemapEntries, toSitemapXml, validateJsonLd } from "./exports/index.ts";
 import { compileBundle } from "./bundle.ts";
 import { serve, serveMcp } from "./serve.ts";
 import { VERSION } from "./version.ts";
@@ -24,8 +24,10 @@ Usage:
                  --generated adds cases derived from the content itself, so the set grows with it
   pubba generate <pubba.json> [--out-dir <dir>]  write the generated cases, to read or to keep
   pubba lint     <pubba.json>                    content problems that cost accuracy; exits 1 on errors
-  pubba jsonld   <pubba.json> [--base-url <url>] [--out <file>]
-  pubba llms     <pubba.json> [--base-url <url>] [--out <file>]
+  pubba jsonld   <pubba.json> [--base-url <url>] [--item-list <type>] [--breadcrumb <id>] [--occupations] [--out <file>]
+  pubba llms     <pubba.json> [--base-url <url>] [--full] [--out <file>]   llms.txt, or llms-full.txt with --full
+  pubba knowledge <pubba.json> [--base-url <url>] [--out <file>]   the graph as one JSON file for AI assistants
+  pubba sitemap  <pubba.json> --base-url <url> [--json] [--out <file>]   sitemap.xml entries for every page
 
 A pubba.json holds { preset, presetOptions, portfolio | entities + links, config }.
 "portfolio" may be a path to a JSON file, relative to the pubba.json.`;
@@ -166,7 +168,14 @@ function main(argv: string[]): number {
     }
     case "jsonld": {
       const baseUrl = flag(rest, "--base-url");
-      const doc = toJsonLd(pubba.graph, baseUrl ? { baseUrl } : {});
+      const itemList = flag(rest, "--item-list");
+      const breadcrumb = flag(rest, "--breadcrumb");
+      const doc = toJsonLd(pubba.graph, {
+        ...(baseUrl ? { baseUrl } : {}),
+        ...(itemList ? { itemList } : {}),
+        ...(breadcrumb ? { breadcrumb } : {}),
+        occupations: rest.includes("--occupations"),
+      });
       const problems = validateJsonLd(doc);
       write(`${JSON.stringify(doc, null, 2)}\n`, flag(rest, "--out"));
       if (problems.length) return fail(`JSON-LD problems:\n  ${problems.join("\n  ")}`);
@@ -174,7 +183,19 @@ function main(argv: string[]): number {
     }
     case "llms": {
       const baseUrl = flag(rest, "--base-url");
-      write(toLlmsTxt(pubba.graph, baseUrl ? { baseUrl } : {}), flag(rest, "--out"));
+      write(toLlmsTxt(pubba.graph, { ...(baseUrl ? { baseUrl } : {}), full: rest.includes("--full") }), flag(rest, "--out"));
+      return 0;
+    }
+    case "knowledge": {
+      const baseUrl = flag(rest, "--base-url");
+      write(`${JSON.stringify(toKnowledge(pubba.graph, baseUrl ? { baseUrl } : {}), null, 2)}\n`, flag(rest, "--out"));
+      return 0;
+    }
+    case "sitemap": {
+      const baseUrl = flag(rest, "--base-url");
+      if (!baseUrl) return fail("pubba sitemap: --base-url <url> is required");
+      const entries = toSitemapEntries(pubba.graph, { baseUrl });
+      write(rest.includes("--json") ? `${JSON.stringify(entries, null, 2)}\n` : toSitemapXml(entries), flag(rest, "--out"));
       return 0;
     }
     default:

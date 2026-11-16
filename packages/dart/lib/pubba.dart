@@ -16,4 +16,4 @@ export 'src/text.dart' show closeTo, containsName, editDistance, hasPhrase, norm
 export 'src/trail.dart';
 
 /// This runtime's version.
-const String version = '1.0.0';
+const String version = '1.1.0';

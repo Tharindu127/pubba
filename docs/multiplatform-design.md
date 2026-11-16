@@ -204,7 +204,8 @@ one pull request. Each package publishes to its own registry from CI.
 | 0.8.0 | PHP runtime + WordPress guide | Same, on WordPress |
 | 0.9.0 | Intent profiles, every runtime at once | All runtimes pass the grown suite |
 | 1.0.0 | Stability: the public API and bundle format 1 frozen under semantic versioning (STABILITY.md) | Every runtime passes the suite unchanged; no format or API change needed |
-| 1.x | The rest of the exports, AI adapters (v3), C# + MAUI | Minor releases, format 1 |
+| 1.1.0 | The rest of the exports: knowledge file, llms-full.txt, list/breadcrumb/occupation JSON-LD, sitemap entries | TypeScript only; runtimes unchanged |
+| 1.x | AI adapters (v3), C# + MAUI | Minor releases, format 1 |
 
 Each runtime ships with a small sample app and a skill test on a project that
 isn't this portfolio.

@@ -12,7 +12,7 @@ conformance suite (4,698 cases) exactly.
 
 ```kotlin
 dependencies {
-    implementation("com.tharinduathapaththu:pubba:1.0.0")
+    implementation("com.tharinduathapaththu:pubba:1.1.0")
 }
 ```
 

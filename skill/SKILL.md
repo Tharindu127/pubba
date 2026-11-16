@@ -1,6 +1,6 @@
 ---
 name: pubba
-description: Set up and maintain pubba, a knowledge-graph engine for portfolio and "showroom" sites (related items with reasons, what-next from a visitor's trail, typo-tolerant matching). Use when someone wants to add pubba to a site, map their content (JSON, Markdown, a CMS export, a database dump) to pubba's entities and links, generate schema.org JSON-LD or an llms.txt from it, or run and improve pubba's evaluation harness (aliases, weights, rules).
+description: Set up and maintain pubba, a knowledge-graph engine for portfolio and "showroom" sites (related items with reasons, what-next from a visitor's trail, typo-tolerant matching). Use when someone wants to add pubba to a site, map their content (JSON, Markdown, a CMS export, a database dump) to pubba's entities and links, generate schema.org JSON-LD, an llms.txt, a knowledge file for AI assistants or sitemap entries from it, or run and improve pubba's evaluation harness (aliases, weights, rules).
 ---
 
 # pubba
@@ -29,8 +29,10 @@ skill folder): it uses the project's installed `pubba`, else a checkout named by
 | `pubba.sh lint <pubba.json>` | Content problems that cost accuracy (name collisions, heavy weights, dead ends); exits 1 on errors |
 | `pubba.sh eval <pubba.json> --queries q.json --trails t.json --generated --baseline b.json` | Scores matching and suggestions, with cases generated from the content added; exits 1 on a drop |
 | `pubba.sh generate <pubba.json> --out-dir eval/` | Writes the generated cases, to read |
-| `pubba.sh jsonld <pubba.json> --base-url <url> [--out file]` | schema.org JSON-LD, validated; exits 1 on problems |
-| `pubba.sh llms <pubba.json> --base-url <url> [--out file]` | An llms.txt |
+| `pubba.sh jsonld <pubba.json> --base-url <url> [--item-list <type>] [--breadcrumb <id>] [--occupations] [--out file]` | schema.org JSON-LD, validated; exits 1 on problems |
+| `pubba.sh llms <pubba.json> --base-url <url> [--full] [--out file]` | An llms.txt, or llms-full.txt with `--full` |
+| `pubba.sh knowledge <pubba.json> --base-url <url> [--out file]` | The knowledge file: the graph as one JSON file for AI assistants |
+| `pubba.sh sitemap <pubba.json> --base-url <url> [--json] [--out file]` | sitemap.xml entries for every page |
 
 Read `references/schema.md` before writing a `pubba.json`; it has the full format.
 
@@ -63,7 +65,7 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
 4. Keep ids stable (`project:<slug>`, `tech:<name>`): trails saved in visitors'
    browsers and analytics refer to them.
 
-## 2. Generate JSON-LD and llms.txt
+## 2. Generate JSON-LD, llms.txt, the knowledge file and the sitemap
 
 1. Ask for the site's public base URL if it isn't in the content.
 2. Run `pubba.sh jsonld pubba.json --base-url <url> --out public/pubba.jsonld`.
@@ -74,14 +76,30 @@ Read `references/schema.md` before writing a `pubba.json`; it has the full forma
    - Email is left out unless the user asks; it's personal data.
    - In code, `toJsonLd(graph, { knowsAbout: [...] })` takes a curated skill list,
      and `{ include: ["project:<slug>"] }` gives one project page's subset.
+   - For a listing page add `itemList: "project"` (an `ItemList` of that type,
+     in order); for an item's page add `breadcrumb: "project:<slug>"` (with
+     `parents` when the page sits under a listing). `occupations: true` adds
+     every role as `hasOccupation`. Build them per page, in code.
    - If the site already has hand-written JSON-LD, diff the two and point out
      what the generated one adds or loses before replacing anything.
    - To use it in a page, embed it in a `<script type="application/ld+json">`.
      Suggest checking it with the Schema.org validator or Google's Rich Results
      Test; you can't reach those for the user unless a browser tool is available.
 3. Run `pubba.sh llms pubba.json --base-url <url> --out public/llms.txt`. It is
-   served from the site root as `/llms.txt`.
-4. Show both outputs to the user before they ship.
+   served from the site root as `/llms.txt`. Add `--full --out public/llms-full.txt`
+   for the long form (every item's full description and connections).
+4. If the site has (or plans) an AI assistant, run
+   `pubba.sh knowledge pubba.json --base-url <url> --out public/pubba-knowledge.json`
+   and point the assistant at it. In code, `toKnowledge(graph, { extra })` adds
+   the site's own sections (an FAQ, contact details); `fields` copies `data`
+   fields such as dates. If the site already builds a knowledge file by hand,
+   diff the two and say what moves into `extra` before replacing it.
+5. If the site builds its sitemap from content, `pubba.sh sitemap pubba.json
+   --base-url <url>` lists every page with its last-modified date (from
+   `data.updated`, else `data.date`). In code, `toSitemapEntries` gives the
+   entries to merge with the site's other pages. Skip it when the framework
+   already generates a complete sitemap.
+6. Show the outputs to the user before they ship.
 
 ## 3. Run the evaluation harness and suggest fixes
 

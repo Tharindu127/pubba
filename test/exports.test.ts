@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { toJsonLd, toLlmsTxt, validateJsonLd } from "../src/exports/index.ts";
+import { KNOWLEDGE_FORMAT, toJsonLd, toKnowledge, toLlmsTxt, toSitemapEntries, toSitemapXml, validateJsonLd } from "../src/exports/index.ts";
+import { buildGraph } from "../src/graph.ts";
+import { VERSION } from "../src/version.ts";
 import { examplePubba, portfolio } from "./fixtures.ts";
 
 const g = examplePubba().graph;
@@ -89,4 +91,126 @@ test("0.1.5: apps carry the two properties Google's Software App result needs; t
   assert.equal(by("Synthpad").operatingSystem, "Web", "not Backend, not the founded tag");
   assert.equal(by("StudyBuddy Planner").operatingSystem, "Mobile");
   assert.ok(!apps.some((n) => /founded/i.test(n.operatingSystem)));
+});
+
+test("1.1: the knowledge file: every entity in config order, connections in words, links as tuples", () => {
+  const k = toKnowledge(g, { baseUrl: "https://nimali.example.com", fields: ["date"] }) as Record<string, any>;
+  assert.equal(k.v, KNOWLEDGE_FORMAT);
+  assert.equal(k.generator, `pubba ${VERSION}`);
+  assert.equal(k.title, "Nimali Perera");
+  assert.equal(k.url, "https://nimali.example.com/");
+  assert.equal(k.entities.length, g.entities.size + g.unlinked.size, "linked and unlinked entities alike");
+  assert.deepEqual(Object.keys(k.types).slice(0, 3), ["person", "project", "tech"]);
+  assert.equal(k.types.project.count, k.entities.filter((e: any) => e.type === "project").length);
+  const wallet = k.entities.find((e: any) => e.id === "project:kiri-wallet");
+  assert.equal(wallet.url, "https://nimali.example.com/projects/kiri-wallet");
+  assert.equal(wallet.date, "2024");
+  assert.equal(wallet.related.length, 3);
+  assert.match(wallet.related[0].text, /Kiri Merchant/);
+  const sameStack = k.links.edges.find((e: unknown[]) => e[1] === "same-stack");
+  assert.equal(sameStack.length, 5, "[from, kind, to, weight, via]");
+  assert.ok(typeof sameStack[3] === "number" && Array.isArray(sameStack[4]));
+  assert.ok(k.links.edges.every((e: unknown[]) => e.length === 4 || e.length === 5));
+  assert.match(k.links.about, /\[from, kind, to, weight\]/);
+  assert.match(k.links.about, /same-stack/);
+});
+
+test("1.1: the knowledge file takes the site's own sections, never over its own keys; types, related and cut", () => {
+  const k = toKnowledge(g, { types: ["project"], related: 0, maxDescription: 20, extra: { faq: ["Where?"], v: 99, entities: [] } }) as Record<string, any>;
+  assert.deepEqual(k.faq, ["Where?"]);
+  assert.equal(k.v, KNOWLEDGE_FORMAT);
+  assert.ok(k.entities.length > 0 && k.entities.every((e: any) => e.type === "project" && e.related === undefined));
+  assert.ok(k.entities.every((e: any) => !e.description || e.description.length <= 20));
+  assert.ok(k.entities.some((e: any) => e.description?.endsWith("…")));
+  assert.ok(k.links.edges.every((e: string[]) => String(e[0]).startsWith("project:") && String(e[2]).startsWith("project:")), "only links between included entities");
+  assert.equal(k.url, undefined, "no url without a base");
+});
+
+test("1.1: llms-full.txt gives every item a heading, its full description and its connections", () => {
+  const graph = examplePubba(undefined, {
+    ...portfolio,
+    projects: portfolio.projects.map((p) => (p.slug === "kiri-wallet" ? { ...p, fullDescription: "The whole story of Kiri Wallet, at length." } : p)),
+  }).graph;
+  const full = toLlmsTxt(graph, { full: true });
+  assert.match(full, /\n## Projects\n\n### \[Kiri Wallet\]\(https:\/\/nimali\.example\.com\/projects\/kiri-wallet\)\n\nA mobile wallet for everyday payments\.\n\nThe whole story of Kiri Wallet, at length\.\n\n- Kiri Merchant is built on the same stack/);
+  assert.ok(!/^- \[Kiri Wallet\]/m.test(full), "no one-line entries");
+  assert.ok(full.endsWith("\n") && !full.endsWith("\n\n"));
+});
+
+test("1.1: JSON-LD ItemList, BreadcrumbList and hasOccupation, each only when asked", () => {
+  const base = "https://nimali.example.com";
+  const plain = toJsonLd(g, { baseUrl: base })["@graph"] as Record<string, any>[];
+  assert.ok(!plain.some((n) => n["@type"] === "ItemList" || n["@type"] === "BreadcrumbList"));
+  assert.equal(plain.find((n) => n["@type"] === "Person")!.hasOccupation, undefined);
+
+  const doc = toJsonLd(g, { baseUrl: base, itemList: { type: "project", url: "/projects" }, breadcrumb: "project:kiri-wallet", occupations: true });
+  const nodes = doc["@graph"] as Record<string, any>[];
+  const list = nodes.find((n) => n["@type"] === "ItemList")!;
+  assert.equal(list.name, "Projects");
+  assert.equal(list.url, `${base}/projects`);
+  assert.equal(list.numberOfItems, list.itemListElement.length);
+  assert.deepEqual(list.itemListElement[0], { "@type": "ListItem", position: 1, name: "Kiri Wallet", item: `${base}/projects/kiri-wallet` });
+  const crumbs = nodes.find((n) => n["@type"] === "BreadcrumbList")!;
+  assert.deepEqual(
+    crumbs.itemListElement.map((i: any) => [i.position, i.name, i.item]),
+    [
+      [1, "Home", `${base}/`],
+      [2, "Kiri Wallet", `${base}/projects/kiri-wallet`],
+    ]
+  );
+  const jobs = nodes.find((n) => n["@type"] === "Person")!.hasOccupation;
+  assert.equal(jobs.length, 3, "every role, past ones too");
+  assert.equal(jobs[0]["@type"], "Occupation");
+  assert.match(jobs[0].skills, /Flutter/);
+  assert.deepEqual(validateJsonLd(doc), []);
+
+  const parents = toJsonLd(g, { baseUrl: base, breadcrumb: { id: "project:kiri-wallet", parents: [{ name: "Home", url: "/" }, { name: "Projects", url: "/projects" }] } });
+  assert.deepEqual(((parents["@graph"] as any[]).find((n) => n["@type"] === "BreadcrumbList").itemListElement as any[]).map((i) => i.name), ["Home", "Projects", "Kiri Wallet"]);
+  assert.ok(!(toJsonLd(g, { breadcrumb: "nope" })["@graph"] as any[]).some((n) => n["@type"] === "BreadcrumbList"), "an unknown id adds nothing");
+});
+
+test("1.1: JSON-LD validation checks list positions and urls", () => {
+  const problems = validateJsonLd({
+    "@context": "https://schema.org",
+    "@graph": [
+      { "@type": "ItemList", name: "Projects", itemListElement: [{ "@type": "ListItem", position: 2, name: "A", item: "/a" }] },
+      { "@type": "BreadcrumbList", name: "B", itemListElement: [{ position: 1, name: "Home" }, { position: 2, name: "B" }] },
+      { "@type": "ItemList", name: "Empty", itemListElement: [] },
+    ],
+  });
+  assert.deepEqual(problems, [
+    "@graph[0] (Projects): item 1 should have position 1",
+    "@graph[0] (Projects): item 1 needs an absolute http(s) url",
+    "@graph[1] (B): item 1 needs an absolute http(s) url",
+    "@graph[2] (Empty): itemListElement is missing or empty",
+  ]);
+});
+
+test("1.1: sitemap entries: the site's own pages once each, with W3C dates", () => {
+  const graph = buildGraph({
+    entities: [
+      { id: "a", type: "page", label: "A", url: "/a", data: { date: "2026-11-15" } },
+      { id: "b", type: "page", label: "B", url: "https://site.example/b?x=1&y=2", data: { updated: "2026-11", date: "2020" } },
+      { id: "c", type: "page", label: "C", url: "https://elsewhere.example/c" },
+      { id: "d", type: "page", label: "D", url: "/a" },
+      { id: "e", type: "page", label: "E", url: "/e", data: { date: "15 Nov 2026" } },
+      { id: "f", type: "page", label: "F" },
+      { id: "t", type: "tag", label: "T", url: "/t" },
+    ],
+    links: [
+      { from: "a", kind: "tagged", to: "t" },
+      { from: "b", kind: "tagged", to: "t" },
+    ],
+  }, { types: { tag: { destination: false } } });
+  assert.deepEqual(toSitemapEntries(graph, { baseUrl: "https://site.example" }), [
+    { url: "https://site.example/a", lastModified: "2026-11-15" },
+    { url: "https://site.example/b?x=1&y=2", lastModified: "2026-11" },
+    { url: "https://site.example/e" },
+  ]);
+  assert.deepEqual(toSitemapEntries(graph).map((e) => e.url), ["https://site.example/b?x=1&y=2", "https://elsewhere.example/c"], "without a base, only absolute urls");
+  assert.deepEqual(toSitemapEntries(graph, { baseUrl: "https://site.example", types: ["tag"] }), [{ url: "https://site.example/t" }]);
+  const xml = toSitemapXml(toSitemapEntries(graph, { baseUrl: "https://site.example" }));
+  assert.match(xml, /^<\?xml version="1.0" encoding="UTF-8"\?>\n<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">\n/);
+  assert.match(xml, /<loc>https:\/\/site\.example\/b\?x=1&amp;y=2<\/loc>\n    <lastmod>2026-11<\/lastmod>/);
+  assert.equal(toSitemapXml([]), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n</urlset>\n');
 });

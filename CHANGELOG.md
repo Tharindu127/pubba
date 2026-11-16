@@ -1,5 +1,33 @@
 # Changelog
 
+## 1.1.0 (16 Nov 2026)
+
+The rest of the planned exports, all built from the graph at build time. They
+are TypeScript only, so the runtimes and every answer stay as they were
+(5,182 conformance cases).
+
+- **Knowledge file:** `toKnowledge(graph, options)` and `pubba knowledge` give
+  the graph as one JSON file for an AI assistant to read: the site's title and
+  summary, each type with its count, every entity with a short description
+  and its strongest connections in sentences, and every link as
+  `[from, kind, to, weight]` (plus what the two share) with a note on how to
+  read them. Versioned (`v: 3`), and covered by STABILITY.md. `extra` adds the
+  site's own sections without replacing pubba's; `fields` copies `data` fields;
+  `types`, `related` and `maxDescription` trim it.
+- **llms-full.txt:** `toLlmsTxt(graph, { full: true })` and `pubba llms --full`
+  give every item its own heading, its full description and its connections.
+- **JSON-LD:** `itemList` adds an `ItemList` of one type for a listing page,
+  `breadcrumb` a `BreadcrumbList` for an item's page, and `occupations` the
+  person's roles as `hasOccupation`. Each is off unless asked, and on the CLI
+  as `--item-list`, `--breadcrumb` and `--occupations`. `validateJsonLd` checks
+  list positions and urls.
+- **Sitemap:** `toSitemapEntries(graph, { baseUrl })` lists each page on the
+  site once, with `lastModified` from `data.updated` or `data.date` when it's
+  a W3C date. `toSitemapXml` and `pubba sitemap` write the sitemap.xml.
+- **The skill** covers all four.
+- Every package is 1.1.0: npm, PyPI, Maven Central, the Swift Package, pub.dev
+  and Packagist.
+
 ## 1.0.0 (15 Nov 2026)
 
 The first stable release. No new features, and no answer changes: every

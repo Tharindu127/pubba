@@ -9,7 +9,7 @@ use InvalidArgumentException;
 /** Answers from one graph: related items, what next, matching, sentences, measurement. */
 final class Pubba
 {
-    public const VERSION = '1.0.0';
+    public const VERSION = '1.1.0';
 
     private const DEFAULT_STOP_WORDS = ['the', 'app', 'and', 'for', 'web', 'application', 'mobile', 'portal', 'site', 'website'];
     private const DEFAULT_SIMILAR = '\b(like|similar|alike|same stack|related to|anything else)\b';
