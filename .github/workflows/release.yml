@@ -1,0 +1,144 @@
+name: release
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tag matches every version field
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          fail=0
+          check() {
+            if [ "$2" = "$TAG" ]; then
+              echo "ok    $1  $2"
+            else
+              echo "::error file=$1::version is '$2' but the tag is '$TAG'"
+              fail=1
+            fi
+          }
+          check package.json "$(node -p 'require("./package.json").version')"
+          check src/version.ts "$(sed -nE 's/^export const VERSION = "([^"]+)";.*/\1/p' src/version.ts)"
+          check packages/python/pyproject.toml "$(sed -nE 's/^version = "([^"]+)"/\1/p' packages/python/pyproject.toml)"
+          check packages/python/pubba/__init__.py "$(sed -nE 's/^__version__ = "([^"]+)"/\1/p' packages/python/pubba/__init__.py)"
+          check packages/kotlin/gradle.properties "$(sed -nE 's/^version=(.*)$/\1/p' packages/kotlin/gradle.properties)"
+          check packages/kotlin/src/main/kotlin/com/tharinduathapaththu/pubba/Version.kt "$(sed -nE 's/.*VERSION: String = "([^"]+)".*/\1/p' packages/kotlin/src/main/kotlin/com/tharinduathapaththu/pubba/Version.kt)"
+          check packages/dart/pubspec.yaml "$(sed -nE 's/^version: *([^ ]+).*$/\1/p' packages/dart/pubspec.yaml)"
+          check packages/dart/lib/pubba.dart "$(sed -nE "s/^const String version = '([^']+)';.*/\1/p" packages/dart/lib/pubba.dart)"
+          check packages/php/src/Pubba.php "$(sed -nE "s/.*const VERSION = '([^']+)';.*/\1/p" packages/php/src/Pubba.php)"
+          exit $fail
+
+  tests:
+    needs: version
+    uses: ./.github/workflows/ci.yml
+
+  npm:
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
+      - run: npm install -g npm@^11.5.1
+      - run: npm ci
+      - run: npm run build
+      - name: Publish
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          case "$TAG" in
+            *-*) npm publish --tag next ;;
+            *)   npm publish ;;
+          esac
+
+  pypi:
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - run: python -m pip install --upgrade build
+      - run: python -m build
+        working-directory: packages/python
+      - uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: packages/python/dist/
+
+  pub-dev:
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      # With id-token: write, setup-dart signs pub in to pub.dev through OIDC.
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+        working-directory: packages/dart
+      - run: dart pub publish --force
+        working-directory: packages/dart
+
+  maven-central:
+    needs: [version, tests]
+    runs-on: ubuntu-latest
+    environment: release
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - name: Secrets are set
+        env:
+          MAVEN_CENTRAL_USERNAME: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          MAVEN_CENTRAL_PASSWORD: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+        run: |
+          missing=0
+          for name in MAVEN_CENTRAL_USERNAME MAVEN_CENTRAL_PASSWORD SIGNING_KEY; do
+            if [ -z "${!name}" ]; then echo "::error::secret $name is not set"; missing=1; fi
+          done
+          exit $missing
+      # Uploads, signs, and releases the deployment in the Central Portal without a manual click.
+      - name: Publish
+        working-directory: packages/kotlin
+        env:
+          ORG_GRADLE_PROJECT_mavenCentralUsername: ${{ secrets.MAVEN_CENTRAL_USERNAME }}
+          ORG_GRADLE_PROJECT_mavenCentralPassword: ${{ secrets.MAVEN_CENTRAL_PASSWORD }}
+          ORG_GRADLE_PROJECT_signingInMemoryKey: ${{ secrets.SIGNING_KEY }}
+          ORG_GRADLE_PROJECT_signingInMemoryKeyPassword: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_ID: ${{ secrets.SIGNING_KEY_ID }}
+        run: |
+          if [ -n "$SIGNING_KEY_ID" ]; then export ORG_GRADLE_PROJECT_signingInMemoryKeyId="$SIGNING_KEY_ID"; fi
+          gradle publishAndReleaseToMavenCentral --console=plain --no-configuration-cache
