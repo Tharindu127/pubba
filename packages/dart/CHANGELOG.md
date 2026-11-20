@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.3.0
+
+- No changes to the Dart runtime. Released with pubba 1.3.0, whose shared AI
+  limits and web request handler are server-side TypeScript.
+
 ## 1.2.0
 
 - No changes to the Dart runtime. Released with pubba 1.2.0, whose AI adapter

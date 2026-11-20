@@ -13,7 +13,7 @@ from .guide import DEFAULT_GUIDE_TEMPLATES, EntityChip, Guide, NudgePolicy, Ques
 from .text import close_to, contains_name, edit_distance, has_phrase, normalize
 from .trail import Trail, create_trail, section_step
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 __all__ = [
     "BUNDLE_FORMAT", "Entity", "Graph", "Link", "Match", "MatchResult", "Pubba", "Related", "Spread", "Suggestion", "Why",

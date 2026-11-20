@@ -1,5 +1,37 @@
 # Changelog
 
+## 1.3.0 (20 Nov 2026)
+
+The site's AI, ready for serverless hosts. Server-side TypeScript only: the
+runtimes and every answer stay as they were (5,182 conformance cases), and a
+site that passes neither new option behaves exactly as on 1.2.0.
+
+- **Shared limits:** `createAI(pubba, { counter })` counts the per-visitor and
+  daily limits in a store every instance shares (Redis, Upstash, a database).
+  On Vercel, Netlify, Cloudflare or Lambda each instance has its own memory, so
+  limits counted in memory didn't hold there. A counter is one method,
+  `increment(key, ttlMs)`; the README shows Upstash in eight lines. With a
+  counter, limits count in fixed windows (this hour, this UTC day).
+  - Visitor keys are hashed before they reach the store, so no address or
+    session id is kept in it.
+  - A store that fails gives no AI answer for that question (the guide's own
+    reply) rather than spending without limits; `onOutcome` reports it.
+  - A visitor over their own limit doesn't use up the day's allowance.
+  - `memoryCounter()` is the same thing in memory, for tests and single servers.
+- **`aiHandler(ai)`:** the AI as a web `Request` to `Response` handler, for
+  `remoteAI`: `export const GET = aiHandler(ai)` in a Next.js route, or the
+  same in Cloudflare Workers, Deno and Bun. GET or POST, `{ text, ids }` or
+  `{ text: null }`, questions cut to 300 characters, `no-store`, optional
+  CORS. The visitor is the first `x-forwarded-for` address unless the site
+  passes its own `visitor(request)`.
+- **The skill** asks which store a serverless site has and wires both.
+- **Not yet checked against the live APIs:** the providers (`claude`,
+  `openai`, `gemini`) are tested against recorded request and response
+  shapes, and a call with an invalid key reached the Claude API and fell back
+  as designed, but no answer has come back from a real model yet.
+- Every package is 1.3.0: npm, PyPI, Maven Central, the Swift Package, pub.dev
+  and Packagist.
+
 ## 1.2.0 (16 Nov 2026)
 
 The site's AI (v3), for questions the guide can't answer from the graph.

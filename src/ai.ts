@@ -169,14 +169,52 @@ export interface AIOptions {
   timeoutMs?: number;
   /** Questions one visitor may send to the model per window. Default 20 an hour. */
   perVisitor?: { max: number; windowMs: number };
-  /** Questions sent to the model per day (UTC), across all visitors. Default 1000. Counted in this process. */
+  /** Questions sent to the model per day (UTC), across all visitors. Default 1000. */
   perDay?: number;
+  /**
+   * Where the limits are counted. Default: this process's memory, which is right
+   * for one long-running server. On serverless hosts (Vercel, Netlify, Cloudflare,
+   * Lambda) every instance has its own memory, so pass a shared store (Redis,
+   * Upstash, a database) or the limits won't hold.
+   */
+  counter?: AICounter;
+  /** Prepended to every counter key. Default `pubba-ai:`. */
+  counterPrefix?: string;
   /** Longer questions are cut to this many characters. Default 300. */
   maxQuestionLength?: number;
   /** Called once per question that reached the AI step. */
   onOutcome?: (outcome: AIOutcome) => void;
   /** The clock, in ms. Default `Date.now`. */
   now?: () => number;
+}
+
+/**
+ * A shared count for the AI's limits: add one to a key and get the new count.
+ * A key is new at 0 and may be forgotten after `ttlMs`. With Redis: INCR, then
+ * PEXPIRE when the count is 1. Visitor keys are hashed before they get here.
+ */
+export interface AICounter {
+  increment(key: string, ttlMs: number): Promise<number>;
+}
+
+/** An `AICounter` in this process's memory, with the same fixed windows a shared store gets. For tests and single servers. */
+export function memoryCounter(now: () => number = () => Date.now()): AICounter {
+  const counts = new Map<string, { n: number; until: number }>();
+  return {
+    async increment(key, ttlMs) {
+      const at = now();
+      for (const [k, v] of counts) if (v.until <= at) counts.delete(k);
+      const n = (counts.get(key)?.n ?? 0) + 1;
+      counts.set(key, { n, until: counts.get(key)?.until ?? at + ttlMs });
+      return n;
+    },
+  };
+}
+
+/** A visitor key for a shared store: a hash, so no address or session id is stored in it. */
+async function hashed(visitor: string): Promise<string> {
+  const bytes = new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(visitor)));
+  return [...bytes.slice(0, 12)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /** The answer's shape, as every provider is asked for it. */
@@ -210,7 +248,7 @@ export function aiSystemPrompt(knowledge: Json, instructions?: string): string {
 }
 
 export interface AI extends GuideAI {
-  /** How many questions went to the model today (UTC), in this process. */
+  /** How many questions this process sent to the model today (UTC). With a shared `counter`, other instances' questions aren't included. */
   usedToday(): number;
 }
 
@@ -229,6 +267,7 @@ export function createAI(pubba: Pubba, o: AIOptions): AI {
   const perDay = o.perDay ?? 1000;
   const maxLength = o.maxQuestionLength ?? 300;
   const name = o.provider?.name ?? "none";
+  const prefix = o.counterPrefix ?? "pubba-ai:";
   const recent = new Map<string, number[]>();
   let day = "";
   let today = 0;
@@ -241,6 +280,26 @@ export function createAI(pubba: Pubba, o: AIOptions): AI {
   };
   const dayOf = (ms: number) => new Date(ms).toISOString().slice(0, 10);
   const labelOf = (id: string) => (g.entities.get(id) ?? g.unlinked.get(id))?.label;
+
+  /** With a shared counter: fixed windows, the visitor's first so a visitor over their limit doesn't use up the day's. */
+  const admitShared = async (counter: AICounter, visitor: string | undefined): Promise<"limit-visitor" | "limit-day" | null> => {
+    const at = now();
+    if (visitor !== undefined) {
+      const slot = Math.floor(at / window.windowMs);
+      const n = await counter.increment(`${prefix}v:${await hashed(visitor)}:${slot}`, (slot + 1) * window.windowMs - at);
+      if (n > window.max) return "limit-visitor";
+    }
+    const endOfDay = Date.UTC(new Date(at).getUTCFullYear(), new Date(at).getUTCMonth(), new Date(at).getUTCDate() + 1);
+    // An hour past midnight, so a clock a little behind still finds the day's key.
+    const n = await counter.increment(`${prefix}d:${dayOf(at)}`, endOfDay - at + 3_600_000);
+    if (n > perDay) return "limit-day";
+    if (dayOf(at) !== day) {
+      day = dayOf(at);
+      today = 0;
+    }
+    today++;
+    return null;
+  };
 
   /** Takes one question from the visitor's and the day's allowance, or says which is spent. */
   const admit = (visitor: string | undefined): "limit-visitor" | "limit-day" | null => {
@@ -274,7 +333,14 @@ export function createAI(pubba: Pubba, o: AIOptions): AI {
         report("disabled");
         return null;
       }
-      const limited = admit(visitor);
+      let limited: "limit-visitor" | "limit-day" | null;
+      try {
+        limited = o.counter ? await admitShared(o.counter, visitor) : admit(visitor);
+      } catch (e) {
+        // A store that can't count can't keep the limits: no answer, rather than an unlimited bill.
+        report("error", { detail: `counter: ${e instanceof Error ? e.message : String(e)}` });
+        return null;
+      }
       if (limited) {
         report(limited);
         return null;
@@ -360,5 +426,74 @@ export function remoteAI(o: RemoteAIOptions): GuideAI {
         clearTimeout(timer);
       }
     },
+  };
+}
+
+export interface AIHandlerOptions {
+  /** Allow this origin to call from a browser (`*` for any). Default: same origin only. */
+  cors?: string;
+  /**
+   * Who is asking, for the per-visitor limit. Default: the first address in
+   * `x-forwarded-for`, else `x-real-ip`, as hosts like Vercel and Netlify set
+   * them. Without a proxy that sets them, a visitor could send their own, so
+   * pass a session id or the platform's own client address instead.
+   */
+  visitor?: (request: Request) => string | undefined;
+}
+
+const firstAddress = (request: Request) =>
+  request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || request.headers.get("x-real-ip")?.trim() || undefined;
+
+/**
+ * The site's AI as a web request handler, for `remoteAI` in the browser:
+ * `export const GET = aiHandler(ai)` in a Next.js route, or the same handler in
+ * Cloudflare Workers, Deno, Bun or any server with web `Request`s. GET takes
+ * `?query=&trail=a,b`; POST takes `{ query, trail }` as JSON. It answers
+ * `{ text, ids }`, or `{ text: null }` when there's no answer.
+ */
+export function aiHandler(ai: GuideAI, o: AIHandlerOptions = {}): (request: Request) => Promise<Response> {
+  const headers = (extra: Record<string, string> = {}) => ({
+    "content-type": "application/json; charset=utf-8",
+    "cache-control": "no-store",
+    ...(o.cors ? { "access-control-allow-origin": o.cors, vary: "origin" } : {}),
+    ...extra,
+  });
+  const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: headers() });
+  const none = () => json({ text: null });
+  return async (request) => {
+    if (request.method === "OPTIONS") {
+      return new Response(null, {
+        status: 204,
+        headers: o.cors ? { "access-control-allow-origin": o.cors, "access-control-allow-methods": "GET, POST", "access-control-allow-headers": "content-type", "access-control-max-age": "86400" } : {},
+      });
+    }
+    let query = "";
+    let trail: string[] = [];
+    if (request.method === "GET") {
+      const url = new URL(request.url);
+      query = url.searchParams.get("query") ?? "";
+      trail = (url.searchParams.get("trail") ?? "").split(",");
+    } else if (request.method === "POST") {
+      let body: Json;
+      try {
+        body = (await request.json()) as Json;
+      } catch {
+        return json({ error: "a JSON body is required" }, 400);
+      }
+      query = typeof body.query === "string" ? body.query : "";
+      trail = Array.isArray(body.trail) ? body.trail.filter((x): x is string => typeof x === "string") : typeof body.trail === "string" ? body.trail.split(",") : [];
+    } else {
+      return new Response(JSON.stringify({ error: "GET or POST only" }), { status: 405, headers: headers({ allow: "GET, POST, OPTIONS" }) });
+    }
+    query = query.trim().slice(0, 300);
+    trail = trail.map((x) => x.trim()).filter(Boolean).slice(-24);
+    if (!query) return none();
+    try {
+      const visitor = (o.visitor ?? firstAddress)(request);
+      const answer = await ai.answer({ question: query, trail, ...(visitor ? { visitor } : {}) });
+      return answer ? json({ text: answer.text, ids: answer.ids }) : none();
+    } catch {
+      return none();
+    }
   };
 }

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { once } from "node:events";
 import type { AddressInfo } from "node:net";
-import { ANSWER_SCHEMA, aiSystemPrompt, claude, createAI, gemini, openai, remoteAI, type AIOutcome, type AIProvider, type AIRequest } from "../src/ai.ts";
+import { ANSWER_SCHEMA, aiHandler, aiSystemPrompt, claude, createAI, gemini, memoryCounter, openai, remoteAI, type AICounter, type AIOutcome, type AIProvider, type AIRequest } from "../src/ai.ts";
 import { createGuide } from "../src/guide.ts";
 import { serve } from "../src/serve.ts";
 import { examplePubba } from "./fixtures.ts";
@@ -272,4 +272,119 @@ test("pubba serve: /ask falls through to the AI, /ai answers alone, and the visi
   } finally {
     plain.close();
   }
+});
+
+test("1.3: a shared counter holds the limits across instances, as serverless hosts run them", async () => {
+  let clock = Date.UTC(2026, 10, 20, 10, 0);
+  const shared = memoryCounter(() => clock);
+  const model = fake(() => says("Yes."));
+  const instance = () => createAI(pubba, { provider: model, counter: shared, perVisitor: { max: 2, windowMs: 60_000 }, perDay: 3, now: () => clock });
+  const [a, b, c] = [instance(), instance(), instance()];
+  const ask = (ai: ReturnType<typeof createAI>, visitor?: string) => ai.answer({ question: "q", trail: [], ...(visitor ? { visitor } : {}) });
+  assert.ok(await ask(a, "v1"));
+  assert.ok(await ask(b, "v1"), "another instance, the same visitor");
+  assert.equal(await ask(c, "v1"), null, "a third instance still sees two");
+  assert.ok(await ask(c, "v2"));
+  assert.equal(await ask(a, "v3"), null, "the day's three are spent across all instances");
+  assert.equal(model.calls.length, 3);
+  assert.equal(a.usedToday() + b.usedToday() + c.usedToday(), 3, "each instance counts only its own");
+  clock = Date.UTC(2026, 10, 21, 0, 1);
+  assert.ok(await ask(b, "v1"), "a new day and a new window");
+});
+
+test("1.3: a visitor over their limit doesn't use up the day's allowance", async () => {
+  const counter = memoryCounter(() => 0);
+  const ai = createAI(pubba, { provider: fake(() => says("Yes.")), counter, perVisitor: { max: 1, windowMs: 60_000 }, perDay: 2, now: () => 0 });
+  assert.ok(await ai.answer({ question: "q", trail: [], visitor: "a" }));
+  for (let i = 0; i < 5; i++) assert.equal(await ai.answer({ question: "q", trail: [], visitor: "a" }), null);
+  assert.ok(await ai.answer({ question: "q", trail: [], visitor: "b" }), "the day still has room");
+});
+
+test("1.3: the shared store gets hashed visitor keys with windows that expire, never the address", async () => {
+  const seen: [string, number][] = [];
+  const counter: AICounter = { async increment(key, ttl) { seen.push([key, ttl]); return 1; } };
+  const at = Date.UTC(2026, 10, 20, 10, 0, 30);
+  const ai = createAI(pubba, { provider: fake(() => says("Yes.")), counter, counterPrefix: "site:", perVisitor: { max: 5, windowMs: 60_000 }, now: () => at });
+  await ai.answer({ question: "q", trail: [], visitor: "203.0.113.7" });
+  await ai.answer({ question: "q", trail: [], visitor: "203.0.113.7" });
+  const [visitorKey, visitorTtl] = seen[0]!;
+  const [dayKey, dayTtl] = seen[1]!;
+  assert.match(visitorKey!, /^site:v:[0-9a-f]{24}:\d+$/);
+  assert.ok(!seen.some(([k]) => k.includes("203.0.113.7")), "no address in any key");
+  assert.equal(seen[2]![0], visitorKey, "the same visitor, the same key");
+  assert.equal(visitorTtl, 30_000, "until the window ends");
+  assert.equal(dayKey, "site:d:2026-11-20");
+  assert.equal(dayTtl, Date.UTC(2026, 10, 21) - at + 3_600_000, "until an hour past midnight UTC");
+});
+
+test("1.3: a counter that fails turns the AI off for that question, not the limits", async () => {
+  const outcomes: AIOutcome[] = [];
+  const model = fake(() => says("Yes."));
+  const broken: AICounter = { increment: () => Promise.reject(new Error("store down")) };
+  const ai = createAI(pubba, { provider: model, counter: broken, onOutcome: (o) => outcomes.push(o) });
+  assert.equal(await ai.answer({ question: "q", trail: [], visitor: "v" }), null);
+  assert.equal(model.calls.length, 0, "the model is never asked");
+  assert.deepEqual(outcomes, [{ outcome: "error", provider: "fake", detail: "counter: store down" }]);
+  const r = await createGuide(pubba, { ai }).askAsync(UNANSWERED);
+  assert.equal(r.kind, "none", "the guide keeps its own reply");
+});
+
+test("1.3: aiHandler answers web requests for remoteAI, GET or POST", async () => {
+  const asked: { question: string; trail: string[]; visitor?: string }[] = [];
+  const ai = {
+    async answer(input: { question: string; trail: string[]; visitor?: string }) {
+      asked.push(input);
+      return input.question.includes("remote") ? { text: "Yes, remote.", ids: ["project:kiri-wallet"] } : null;
+    },
+  };
+  const handle = aiHandler(ai);
+  const get = await handle(new Request(`https://site.example/api/ai?query=${encodeURIComponent("open to remote?")}&trail=role:0,%20project:kiri-wallet`, { headers: { "x-forwarded-for": "203.0.113.7, 10.0.0.1" } }));
+  assert.equal(get.status, 200);
+  assert.equal(get.headers.get("cache-control"), "no-store");
+  assert.deepEqual(await get.json(), { text: "Yes, remote.", ids: ["project:kiri-wallet"] });
+  assert.deepEqual(asked[0], { question: "open to remote?", trail: ["role:0", "project:kiri-wallet"], visitor: "203.0.113.7" });
+
+  const post = await handle(new Request("https://site.example/api/ai", { method: "POST", body: JSON.stringify({ query: "nothing here", trail: ["role:0"] }), headers: { "x-real-ip": "198.51.100.2" } }));
+  assert.deepEqual(await post.json(), { text: null });
+  assert.equal(asked[1]!.visitor, "198.51.100.2");
+
+  assert.deepEqual(await (await handle(new Request("https://site.example/api/ai?query=%20%20"))).json(), { text: null });
+  assert.equal(asked.length, 2, "an empty question never reaches the AI");
+  assert.equal((await handle(new Request("https://site.example/api/ai", { method: "POST", body: "not json" }))).status, 400);
+  const put = await handle(new Request("https://site.example/api/ai", { method: "PUT" }));
+  assert.equal(put.status, 405);
+  assert.equal(put.headers.get("allow"), "GET, POST, OPTIONS");
+  assert.equal((await handle(new Request("https://site.example/api/ai?query=" + "x".repeat(400)))).status, 200);
+  assert.equal(asked[2]!.question.length, 300, "cut to 300 characters");
+  assert.equal(asked[2]!.visitor, undefined, "no address header, no visitor");
+});
+
+test("1.3: aiHandler options: CORS for another origin, the site's own visitor id, and an AI that throws", async () => {
+  const visitors: (string | undefined)[] = [];
+  const handle = aiHandler(
+    { async answer({ visitor }) { visitors.push(visitor); throw new Error("down"); } },
+    { cors: "https://www.example.com", visitor: (r) => r.headers.get("x-session") ?? undefined }
+  );
+  const pre = await handle(new Request("https://api.example.com/ai", { method: "OPTIONS" }));
+  assert.equal(pre.status, 204);
+  assert.equal(pre.headers.get("access-control-allow-origin"), "https://www.example.com");
+  assert.equal(pre.headers.get("access-control-allow-methods"), "GET, POST");
+  const r = await handle(new Request("https://api.example.com/ai?query=q", { headers: { "x-session": "s-1", "x-forwarded-for": "203.0.113.7" } }));
+  assert.equal(r.status, 200);
+  assert.equal(r.headers.get("access-control-allow-origin"), "https://www.example.com");
+  assert.deepEqual(await r.json(), { text: null }, "a failing AI is no answer, not an error");
+  assert.deepEqual(visitors, ["s-1"]);
+  assert.equal((await aiHandler({ answer: async () => null })(new Request("https://x.example/ai", { method: "OPTIONS" }))).headers.get("access-control-allow-origin"), null, "no CORS unless asked");
+});
+
+test("1.3: the browser guide, remoteAI and aiHandler end to end, with a shared counter", async () => {
+  const counter = memoryCounter();
+  const server = createAI(pubba, { provider: fake(() => says("Yes, she works remotely.", ["project:kiri-wallet"])), counter, perVisitor: { max: 1, windowMs: 60_000 } });
+  const handle = aiHandler(server);
+  const fetchToHandler = (async (url: string | URL | Request, init?: RequestInit) => handle(new Request(String(url), { ...init, headers: { "x-forwarded-for": "203.0.113.9" } }))) as typeof fetch;
+  const guide = createGuide(pubba, { ai: remoteAI({ url: "https://site.example/api/ai", fetch: fetchToHandler }) });
+  const first = await guide.askAsync(UNANSWERED);
+  assert.equal(first.kind, "ai");
+  assert.equal(first.action?.id, "project:kiri-wallet");
+  assert.equal((await guide.askAsync(UNANSWERED)).kind, "none", "over the visitor's limit: the guide's own reply");
 });

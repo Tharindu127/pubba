@@ -192,7 +192,7 @@ Tokens: `{item}`, `{other}`, `{otherLower}`, `{via}`, `{kind}`, `{name}`. A
 | `pubba/portfolio` | `portfolioConfig`, `portfolioTemplates`, `fromPortfolio`, `PORTFOLIO_TOPICS`, `PORTFOLIO_INTENTS`, `APP_CATEGORY`, `skillWeight`, `callName` |
 | `pubba/eval` | `evaluate`, `evaluateQueries`, `evaluateTrails`, `evaluateIntents`, `regressions`, `formatReport`, `generateCases`, `lint`, `formatLint` |
 | `pubba/exports` | `toJsonLd`, `validateJsonLd`, `toLlmsTxt`, `toKnowledge`, `toSitemapEntries`, `toSitemapXml` |
-| `pubba/ai` | `createAI`, `claude`, `openai`, `gemini`, `remoteAI`, `aiSystemPrompt`, `ANSWER_SCHEMA` ([the site's AI](#the-sites-ai-pubbaai)) |
+| `pubba/ai` | `createAI`, `claude`, `openai`, `gemini`, `remoteAI`, `aiHandler`, `memoryCounter`, `aiSystemPrompt`, `ANSWER_SCHEMA` ([the site's AI](#the-sites-ai-pubbaai)) |
 
 ### Matching options (`config.match`)
 
@@ -340,10 +340,53 @@ await guide.askAsync("is she open to remote work?", { visitor: sessionId });
   `{ name, complete({ system, prompt, schema, signal }) }`.
 - **In a browser or an app**, ask the site's server instead:
   `createGuide(pubba, { ai: remoteAI({ url: "/api/pubba-ai" }) })`. Serve that
-  url with `pubba serve --ai`, or with `ai.answer({ question, trail, visitor })`
-  in your own route.
-- **Limits** are counted in the server process: per visitor (a session id or
-  an address you pass) in a sliding window, and per UTC day across visitors.
+  url with `aiHandler(ai)` (below), `pubba serve --ai`, or
+  `ai.answer({ question, trail, visitor })` in a route of your own.
+- **Limits** are per visitor (a session id or an address) and per UTC day
+  across visitors. By default they're counted in the server's memory, in a
+  sliding window: right for one long-running server.
+
+#### On serverless hosts: `aiHandler` and a shared counter
+
+Vercel, Netlify, Cloudflare and Lambda run many short-lived copies of a
+function, each with its own memory, so limits counted in memory don't hold
+there. Pass a `counter` that every copy shares, and serve the AI with
+`aiHandler`, which takes a web `Request` and returns a `Response`:
+
+```ts
+// app/api/pubba-ai/route.ts (Next.js); the same handler works in Cloudflare Workers, Deno and Bun
+import { Redis } from "@upstash/redis";
+import { aiHandler, claude, createAI } from "pubba/ai";
+
+const redis = Redis.fromEnv();
+const ai = createAI(pubba, {
+  provider: claude({ apiKey: process.env.ANTHROPIC_API_KEY! }),
+  counter: {
+    async increment(key, ttlMs) {
+      const n = await redis.incr(key);
+      if (n === 1) await redis.pexpire(key, ttlMs);
+      return n;
+    },
+  },
+});
+
+export const GET = aiHandler(ai);
+export const POST = GET;
+```
+
+- **The counter** is anything that can add one to a key and return the count
+  (Redis or Upstash `INCR`, a database row, a Durable Object). With it, limits
+  count in fixed windows (this hour, this UTC day). Visitor keys are hashed
+  before they reach the store, so no address or session id is kept there.
+  If the store fails, that question gets no AI answer: the guide's own reply
+  instead of an unlimited bill.
+- **`aiHandler`** takes `GET ?query=&trail=a,b` or a `POST` of
+  `{ query, trail }`, and answers `{ text, ids }` or `{ text: null }`. The
+  visitor for the per-visitor limit is the first `x-forwarded-for` address
+  (as Vercel and Netlify set it); without such a proxy, pass
+  `visitor: (request) => …` (a session id, or the platform's client address),
+  since a visitor could send that header themselves. `cors` allows another
+  origin.
 - `askAsync` is TypeScript only. Apps on the other runtimes call the site's
   `/ask` or `/ai` endpoint.
 
@@ -383,7 +426,7 @@ See [packages/python](packages/python/README.md).
 ### Kotlin and Java (Android, JVM)
 
 ```kotlin
-implementation("com.tharinduathapaththu:pubba:1.2.0")
+implementation("com.tharinduathapaththu:pubba:1.3.0")
 ```
 
 ```kotlin

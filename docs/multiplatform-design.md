@@ -206,6 +206,7 @@ one pull request. Each package publishes to its own registry from CI.
 | 1.0.0 | Stability: the public API and bundle format 1 frozen under semantic versioning (STABILITY.md) | Every runtime passes the suite unchanged; no format or API change needed |
 | 1.1.0 | The rest of the exports: knowledge file, llms-full.txt, list/breadcrumb/occupation JSON-LD, sitemap entries | TypeScript only; runtimes unchanged |
 | 1.2.0 | The site's AI (v3): `pubba/ai` with Claude, OpenAI and Gemini, limits, a kill switch and fallback; `guide.askAsync`; `pubba serve --ai` | TypeScript, server-side only; other runtimes call `/ask` or `/ai` |
+| 1.3.0 | The AI on serverless hosts: shared limits (`counter`) and `aiHandler` for web requests | TypeScript, server-side only |
 | 1.x | C# + MAUI | Minor releases, format 1 |
 
 Each runtime ships with a small sample app and a skill test on a project that

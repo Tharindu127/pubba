@@ -179,7 +179,11 @@ a bot, a character, a sidebar, anything. Ask them; don't pick for them. pubba's
      question and needs an API key): on the server,
      `createAI(pubba, { provider: claude({ apiKey }), instructions, perDay, perVisitor })`
      from `pubba/ai` (or `openai` / `gemini`, which need a `model`), served at
-     a route of the site's own, or `pubba.sh serve <bundle> --ai claude`. In
+     a route of the site's own with `aiHandler(ai)` (Next.js, Cloudflare, Deno,
+     Bun), or `pubba.sh serve <bundle> --ai claude`. On a serverless host
+     (Vercel, Netlify, Cloudflare, Lambda), also pass a shared `counter` (the
+     site's Redis, Upstash or database; see the README), or the limits won't
+     hold across instances; ask the owner which store they have. In
      the browser, `createGuide(pubba, { ai: remoteAI({ url }) })` and
      `await guide.askAsync(text)` instead of `ask`: the guide answers first,
      the AI only for `none`, and any failure returns the guide's own reply.
