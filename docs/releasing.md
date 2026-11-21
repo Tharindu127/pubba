@@ -87,3 +87,35 @@ The Kotlin build uses the `com.vanniktech.maven.publish` plugin. The workflow ru
 3. Watch the **release** run under the repository's **Actions** tab.
 
 If one registry fails, fix the cause and use **Re-run failed jobs** on the same run. Registries refuse a version that's already there, so re-running only the failed job is the safe path. If the version check fails, don't move the tag: fix the files, then delete and re-push the tag (nothing was published yet).
+
+## The weekly check
+
+`.github/workflows/weekly.yml` runs every Monday at 03:00 UTC and opens a
+GitHub issue labelled `weekly-report` (closing the previous one), so GitHub
+emails you a summary. It is read-only: it never changes code, never tags and
+never publishes.
+
+What it checks:
+
+- **Health:** the full CI on every runtime, and the latest package from each
+  registry (npm, PyPI, pub.dev, Packagist, Maven Central), installed the way a
+  user would, against the conformance suite. The Swift Package is resolved
+  from GitHub at the latest tag and must give the TypeScript reference's
+  answers.
+- **Versions:** every registry shows the latest git tag.
+- **Advisories:** `npm audit` on the build tools (the packages themselves have
+  no runtime dependencies).
+- **Waiting on you:** pull requests open a week or more, open issues, and a
+  note when nothing has been released for 60 days.
+- **Reach:** downloads per registry, pub.dev likes, GitHub stars and forks, and
+  issues or pull requests from other people that week.
+
+The title says "all clear" or how many problems it found, so a green week is a
+one-line read. To see a report without opening an issue, run the workflow by
+hand from the Actions tab with **dry run** ticked: the report appears in the
+run's summary.
+
+What it can't see: the portfolio site (its repository is private, and the
+workflow's token reads only this one) and its CMS figures, and whether a
+registry's credentials are about to lapse (npm's trusted publisher, the Maven
+token and signing key aren't readable from a workflow).

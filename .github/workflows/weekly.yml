@@ -1,0 +1,395 @@
+name: weekly
+# A weekly health report as a GitHub issue: the tests on every runtime, every
+# registry's published package against the conformance suite, version
+# agreement, dependency advisories, things waiting on the owner, and reach.
+# It reads public data only, writes nothing but the report issue, and never
+# publishes. Run it by hand with "dry run" to see the report without an issue.
+on:
+  schedule:
+    - cron: "0 3 * * 1" # Mondays, 03:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Write the report to the run summary only, without opening an issue"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly
+  cancel-in-progress: false
+
+jobs:
+  tests:
+    uses: ./.github/workflows/ci.yml
+
+  registries:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.read.outputs.tag }}
+      json: ${{ steps.read.outputs.json }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: read
+        shell: bash
+        run: |
+          set -u
+          get() { curl -fsS --max-time 30 "$1" 2>/dev/null || true; }
+          tag=$(git tag --list '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -v -- '-' | head -1)
+          npm_v=$(npm view pubba version 2>/dev/null || true)
+          pypi_v=$(get https://pypi.org/pypi/pubba/json | jq -r '.info.version // empty')
+          pub_v=$(get https://pub.dev/api/packages/pubba | jq -r '.latest.version // empty')
+          packagist_v=$(get https://repo.packagist.org/p2/tharindu127/pubba.json | jq -r '.packages["tharindu127/pubba"][0].version // empty')
+          maven_v=$(get https://repo1.maven.org/maven2/com/tharinduathapaththu/pubba/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p')
+          json=$(jq -cn --arg tag "$tag" --arg npm "$npm_v" --arg pypi "$pypi_v" --arg pub "$pub_v" --arg packagist "$packagist_v" --arg maven "$maven_v" \
+            '{tag:$tag, registries:{npm:$npm, PyPI:$pypi, "pub.dev":$pub, Packagist:$packagist, "Maven Central":$maven, "Swift Package":$tag}}')
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "json=$json" >> "$GITHUB_OUTPUT"
+          echo "$json" | jq .
+
+  # Each published package, installed the way a user would, against the conformance suite from this repo.
+  published-npm:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          d=$(mktemp -d) && cd "$d"
+          echo '{"private":true,"type":"module"}' > package.json
+          npm install --no-audit --no-fund pubba@latest >/dev/null
+          echo "version=$(node -p 'require("./node_modules/pubba/package.json").version')" >> "$GITHUB_OUTPUT"
+          cp -R "$GITHUB_WORKSPACE/conformance" . && mkdir test && cp "$GITHUB_WORKSPACE/test/conformance.test.ts" test/
+          sed -i 's#"\.\./src/index\.ts"#"pubba"#; s#"\.\./src/events\.ts"#"pubba"#' conformance/harness.ts test/conformance.test.ts
+          if grep -q '"\.\./src' conformance/harness.ts test/conformance.test.ts; then echo "::error::the harness still imports the repo's source"; exit 1; fi
+          node --test --experimental-strip-types --no-warnings test/conformance.test.ts
+
+  published-pypi:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          d=$(mktemp -d) && cd "$d"
+          python -m venv venv
+          venv/bin/pip install --quiet --no-cache-dir pubba
+          echo "version=$(venv/bin/python -c 'import pubba; print(pubba.__version__)')" >> "$GITHUB_OUTPUT"
+          mkdir t && cp "$GITHUB_WORKSPACE"/packages/python/tests/*.py t/
+          # Only the installed package may be found, never the repo's copy.
+          sed -i 's#^sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))$##' t/test_conformance.py
+          sed -i "s#^ROOT = .*#ROOT = \"$GITHUB_WORKSPACE/conformance\"#" t/test_conformance.py
+          cd t && ../venv/bin/python -c 'import pubba, sys; assert "site-packages" in pubba.__file__, pubba.__file__'
+          ../venv/bin/python -m unittest -v test_conformance
+
+  published-pubdev:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=$(curl -fsS https://pub.dev/api/packages/pubba | jq -r .latest.version)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          d=$(mktemp -d) && cd "$d"
+          printf 'name: check\npublish_to: none\nenvironment:\n  sdk: ^3.2.0\ndependencies:\n  pubba: %s\ndev_dependencies:\n  test: any\n' "$v" > pubspec.yaml
+          mkdir test && cp "$GITHUB_WORKSPACE"/packages/dart/test/*.dart test/
+          sed -i "s#Directory('../../conformance')#Directory('$GITHUB_WORKSPACE/conformance')#" test/conformance_test.dart
+          dart pub get
+          dart pub deps --style=compact | grep "^- pubba $v"
+          dart test
+
+  published-packagist:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.3"
+          extensions: mbstring, json
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          meta=$(curl -fsS https://repo.packagist.org/p2/tharindu127/pubba.json)
+          echo "version=$(echo "$meta" | jq -r '.packages["tharindu127/pubba"][0].version')" >> "$GITHUB_OUTPUT"
+          d=$(mktemp -d) && cd "$d"
+          curl -fsSL "$(echo "$meta" | jq -r '.packages["tharindu127/pubba"][0].dist.url')" -o dist.zip
+          unzip -q dist.zip -d dist
+          src=$(ls -d "$d"/dist/*/packages/php/src)
+          mkdir -p check/tests && cp "$GITHUB_WORKSPACE"/packages/php/tests/{Harness,run}.php check/tests/
+          # shellcheck disable=SC2016 # the dollar signs are PHP's, not the shell's
+          printf '<?php\nspl_autoload_register(static function (string $c): void {\n    if (str_starts_with($c, "Pubba\\\\")) { $f = "%s/" . str_replace("\\\\", "/", substr($c, 6)) . ".php"; if (is_file($f)) require $f; }\n});\n' "$src" > check/autoload.php
+          php -r "require '$d/check/autoload.php'; \$f = realpath((new ReflectionClass('Pubba\Pubba'))->getFileName()); if (!str_starts_with(\$f, realpath('$d/dist'))) { fwrite(STDERR, 'pubba was loaded from ' . \$f . ', not the Packagist download' . PHP_EOL); exit(1); }"
+          PUBBA_CONFORMANCE="$GITHUB_WORKSPACE/conformance" php check/tests/run.php
+
+  published-maven:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.13"
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=$(curl -fsS https://repo1.maven.org/maven2/com/tharinduathapaththu/pubba/maven-metadata.xml | sed -n 's:.*<release>\(.*\)</release>.*:\1:p')
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          d=$(mktemp -d) && cd "$d"
+          echo 'rootProject.name = "check"' > settings.gradle.kts
+          cat > build.gradle.kts <<EOF
+          plugins { kotlin("jvm") version "2.2.21" }
+          repositories { mavenCentral() }
+          dependencies {
+              testImplementation("com.tharinduathapaththu:pubba:$v")
+              testImplementation(kotlin("test"))
+          }
+          tasks.test {
+              useJUnitPlatform()
+              systemProperty("pubba.conformance", "$GITHUB_WORKSPACE/conformance")
+              testLogging { events("passed", "failed"); showStandardStreams = true }
+          }
+          EOF
+          mkdir -p src && cp -R "$GITHUB_WORKSPACE/packages/kotlin/src/test" src/
+          k=src/test/kotlin/com/tharinduathapaththu/pubba
+          # The repo's tests use a few internal helpers; outside the module they need public copies,
+          # and Kotlin won't smart-cast a property declared in another module.
+          cat > $k/Shim.kt <<'EOF'
+          package com.tharinduathapaththu.pubba
+
+          @Suppress("UNCHECKED_CAST")
+          fun Any?.asObj(): Map<String, Any?>? = this as? Map<String, Any?>
+          fun Map<String, Any?>?.str(key: String): String? = this?.get(key) as? String
+          fun Map<String, Any?>?.strings(key: String): List<String>? = (this?.get(key) as? List<*>)?.filterIsInstance<String>()
+          EOF
+          sed -i 's/fb\["open." + ctx.entity.type\]/fb["open." + ctx.entity!!.type]/' $k/Harness.kt
+          gradle test --console=plain
+
+  published-swift:
+    runs-on: macos-latest
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+          v=$(git tag --list '[0-9]*.[0-9]*.[0-9]*' --sort=-v:refname | grep -v -- '-' | head -1)
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          # The same questions in the TypeScript reference and in the Swift Package resolved from GitHub at that tag.
+          node --experimental-strip-types --no-warnings --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            import { loadBundle } from "'"$GITHUB_WORKSPACE"'/src/index.ts";
+            for (const name of ["catalogue", "portfolio-fiction", "courses"]) {
+              const p = loadBundle(JSON.parse(readFileSync("'"$GITHUB_WORKSPACE"'/conformance/bundles/" + name + ".json", "utf8")));
+              const ids = [...p.graph.entities.keys()];
+              const trail = [ids[0], ids[Math.floor(ids.length / 2)]];
+              const r = p.intent(trail);
+              console.log(name, r.likely ?? "-", r.confidence.toFixed(4));
+              for (const s of p.next(trail, { limit: 3 })) console.log(" ", s.entity.id, s.score.toFixed(6), s.reason.intent ? s.reason.intent.boost.toFixed(2) : "-");
+              const m = p.match("anything like " + p.graph.entities.get(ids[1]).label);
+              console.log(" ", m.intent, m.entity ? m.entity.id : "-");
+            }' > expected.txt
+          d=$(mktemp -d) && mkdir -p "$d/Sources/check"
+          cat > "$d/Package.swift" <<EOF
+          // swift-tools-version:5.9
+          import PackageDescription
+          let package = Package(
+              name: "check",
+              platforms: [.macOS(.v13)],
+              dependencies: [.package(url: "https://github.com/${{ github.repository }}", exact: "$v")],
+              targets: [.executableTarget(name: "check", dependencies: [.product(name: "Pubba", package: "pubba")])]
+          )
+          EOF
+          # Swift dictionaries have no order, so the trail's ids come from the bundle's own list, as in the reference.
+          cat > "$d/Sources/check/main.swift" <<EOF
+          import Foundation
+          import Pubba
+          func ids(_ name: String) throws -> [String] {
+              let data = try Data(contentsOf: URL(fileURLWithPath: "$GITHUB_WORKSPACE/conformance/bundles/\(name).json"))
+              let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+              return (json["entities"] as! [[String: Any]]).map { \$0["id"] as! String }
+          }
+          for name in ["catalogue", "portfolio-fiction", "courses"] {
+              let p = try Pubba.load(try Data(contentsOf: URL(fileURLWithPath: "$GITHUB_WORKSPACE/conformance/bundles/\(name).json")))
+              let all = try ids(name)
+              let trail = [all[0], all[all.count / 2]]
+              let r = p.intent(trail)
+              print(name, r.likely ?? "-", String(format: "%.4f", r.confidence))
+              for s in p.next(trail, limit: 3) { print(" ", s.entity.id, String(format: "%.6f", s.score), s.reason.intent.map { String(format: "%.2f", \$0.boost) } ?? "-") }
+              let m = p.match("anything like " + p.get(all[1])!.label)
+              print(" ", m.intent, m.entity?.id ?? "-")
+          }
+          EOF
+          (cd "$d" && swift run -q check) > actual.txt
+          diff expected.txt actual.txt
+          echo "Swift Package $v gives the reference's answers:" && cat actual.txt
+
+  audit:
+    runs-on: ubuntu-latest
+    outputs:
+      high: ${{ steps.audit.outputs.high }}
+      total: ${{ steps.audit.outputs.total }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: audit
+        shell: bash
+        run: |
+          npm ci --no-audit --no-fund >/dev/null
+          npm audit --json > audit.json || true
+          echo "high=$(jq '(.metadata.vulnerabilities.high // 0) + (.metadata.vulnerabilities.critical // 0)' audit.json)" >> "$GITHUB_OUTPUT"
+          echo "total=$(jq '.metadata.vulnerabilities.total // 0' audit.json)" >> "$GITHUB_OUTPUT"
+          jq '.metadata.vulnerabilities' audit.json
+
+  report:
+    needs: [tests, registries, published-npm, published-pypi, published-pubdev, published-packagist, published-maven, published-swift, audit]
+    if: always()
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          DRY_RUN: ${{ inputs.dry_run || false }}
+        with:
+          script: |
+            const needs = JSON.parse(process.env.NEEDS);
+            const dry = process.env.DRY_RUN === "true";
+            const { owner, repo } = context.repo;
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const today = new Date().toISOString().slice(0, 10);
+            const problems = [];
+            const getJson = async (url) => {
+              try {
+                const r = await fetch(url, { signal: AbortSignal.timeout(30000) });
+                return r.ok ? await r.json() : null;
+              } catch {
+                return null;
+              }
+            };
+            const mark = (ok) => (ok ? "pass" : "**FAIL**");
+
+            // Health
+            const reg = JSON.parse(needs.registries.outputs.json || "{}");
+            const tag = needs.registries.outputs.tag || "?";
+            const checks = [
+              ["Tests, every runtime (CI)", needs.tests.result],
+              ["npm package vs conformance", needs["published-npm"].result, needs["published-npm"].outputs.version],
+              ["PyPI package vs conformance", needs["published-pypi"].result, needs["published-pypi"].outputs.version],
+              ["pub.dev package vs conformance", needs["published-pubdev"].result, needs["published-pubdev"].outputs.version],
+              ["Packagist package vs conformance", needs["published-packagist"].result, needs["published-packagist"].outputs.version],
+              ["Maven Central package vs conformance", needs["published-maven"].result, needs["published-maven"].outputs.version],
+              ["Swift Package vs the reference's answers", needs["published-swift"].result, needs["published-swift"].outputs.version],
+            ];
+            for (const [name, result] of checks) if (result !== "success") problems.push(`${name}: ${result}`);
+            let md = `## Health\n\n| Check | Version | Result |\n| --- | --- | --- |\n`;
+            md += checks.map(([name, result, v]) => `| ${name} | ${v || "-"} | ${mark(result === "success")}${result === "success" ? "" : ` (${result})`} |`).join("\n") + "\n\n";
+
+            // Versions
+            const registries = reg.registries || {};
+            const behind = Object.entries(registries).filter(([, v]) => v !== tag);
+            for (const [name, v] of behind) problems.push(`${name} shows ${v || "nothing"}, the latest tag is ${tag}`);
+            md += `## Versions\n\nLatest tag: **${tag}**.\n\n| Registry | Latest published |\n| --- | --- |\n`;
+            md += Object.entries(registries).map(([name, v]) => `| ${name} | ${v === tag ? v : `**${v || "not found"}**`} |`).join("\n") + "\n\n";
+
+            // Advisories
+            const high = Number(needs.audit.outputs.high || 0), total = Number(needs.audit.outputs.total || 0);
+            if (needs.audit.result !== "success") problems.push(`Dependency audit: ${needs.audit.result}`);
+            else if (high > 0) problems.push(`${high} high or critical advisories in the build dependencies`);
+            md += `## Advisories\n\npubba's packages have no runtime dependencies. In the build tools (npm audit): ${needs.audit.result === "success" ? `${total} advisories, ${high} high or critical.` : "the audit didn't run."}\n\n`;
+
+            // Waiting on you
+            const waiting = [];
+            const prs = await github.paginate(github.rest.pulls.list, { owner, repo, state: "open", per_page: 100 });
+            for (const pr of prs) {
+              const days = Math.floor((Date.now() - Date.parse(pr.created_at)) / 86400000);
+              if (days >= 7) waiting.push(`Pull request #${pr.number} by ${pr.user.login} has been open ${days} days: ${pr.title}`);
+            }
+            const issues = (await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: "open", per_page: 100 }))
+              .filter((i) => !i.pull_request && !(i.labels || []).some((l) => (l.name || l) === "weekly-report"));
+            for (const i of issues) waiting.push(`Issue #${i.number} by ${i.user.login} is open: ${i.title}`);
+            const npmTime = await getJson("https://registry.npmjs.org/pubba");
+            const lastPublish = npmTime?.time?.[tag];
+            if (lastPublish) {
+              const days = Math.floor((Date.now() - Date.parse(lastPublish)) / 86400000);
+              if (days >= 60) waiting.push(`No release for ${days} days (${tag}). Releases also keep the npm trusted publisher in use.`);
+            }
+            md += `## Waiting on you\n\n${waiting.length ? waiting.map((w) => `- ${w}`).join("\n") : "Nothing."}\n\n`;
+
+            // Reach
+            const npmWeek = await getJson("https://api.npmjs.org/downloads/point/last-week/pubba");
+            const pypi = await getJson("https://pypistats.org/api/packages/pubba/recent");
+            const pub = await getJson("https://pub.dev/api/packages/pubba/score");
+            const packagist = await getJson("https://packagist.org/packages/tharindu127/pubba.json");
+            const repoInfo = (await github.rest.repos.get({ owner, repo })).data;
+            const all = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: "all", since: new Date(Date.now() - 7 * 86400000).toISOString(), per_page: 100 });
+            const outside = all.filter((i) => i.user.login !== owner && i.user.type !== "Bot" && Date.parse(i.created_at) > Date.now() - 7 * 86400000);
+            const n = (x) => (x === undefined || x === null ? "not available" : x);
+            md += `## Reach\n\n| Measure | Value |\n| --- | --- |\n`;
+            md += `| npm downloads, last 7 days | ${n(npmWeek?.downloads)} |\n`;
+            md += `| PyPI downloads, last 7 days | ${n(pypi?.data?.last_week)} |\n`;
+            md += `| pub.dev downloads, last 30 days | ${n(pub?.downloadCount30Days)} |\n`;
+            md += `| pub.dev likes | ${n(pub?.likeCount)} |\n`;
+            md += `| Packagist installs, total | ${n(packagist?.package?.downloads?.total)} |\n`;
+            md += `| GitHub stars / forks | ${repoInfo.stargazers_count} / ${repoInfo.forks_count} |\n`;
+            md += `| New issues or pull requests from other people, last 7 days | ${outside.length} |\n\n`;
+            md += `Downloads count every install, including CI, mirrors and your own builds, so they show trends rather than users.\n\n`;
+            for (const i of outside) md += `- #${i.number} by ${i.user.login}: ${i.title}\n`;
+
+            const head = problems.length
+              ? `**${problems.length} problem${problems.length === 1 ? "" : "s"}:**\n\n${problems.map((p) => `- ${p}`).join("\n")}\n\n`
+              : `**All clear.** Every runtime passes, every registry has ${tag} and it passes the conformance suite.\n\n`;
+            const body = `${head}${md}---\n[This run](${runUrl}). Read-only: this report never changes code or publishes anything.\n`;
+            const title = `Weekly check ${today}: ${problems.length ? `${problems.length} problem${problems.length === 1 ? "" : "s"}` : "all clear"}`;
+
+            await core.summary.addRaw(`# ${title}\n\n${body}`).write();
+            if (dry) {
+              core.info("Dry run: the report is in the run summary; no issue opened.");
+              return;
+            }
+            await github.rest.issues.createLabel({ owner, repo, name: "weekly-report", color: "0e8a16", description: "The weekly health report" }).catch(() => {});
+            const old = await github.paginate(github.rest.issues.listForRepo, { owner, repo, state: "open", labels: "weekly-report", per_page: 100 });
+            const created = await github.rest.issues.create({ owner, repo, title, body, labels: ["weekly-report"] });
+            for (const i of old) await github.rest.issues.update({ owner, repo, issue_number: i.number, state: "closed", state_reason: "completed" });
+            core.info(`Opened ${created.data.html_url}`);
